@@ -4,12 +4,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 
-public class Database extends SQLiteOpenHelper {
+public class Database extends SQLiteOpenHelper implements Serializable {
 
     private static final String DATABASE_NAME = "englishNotification.db";
     private static final int DATABASE_VERSION = 1;
@@ -75,6 +79,7 @@ public class Database extends SQLiteOpenHelper {
         db.close();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public ArrayList<ItemData> getAll(){
         SQLiteDatabase db = getReadableDatabase();
 
@@ -88,6 +93,12 @@ public class Database extends SQLiteOpenHelper {
             listData.add(itemData);
         }
         db.close();
+        listData.sort(new Comparator<ItemData>() {
+            @Override
+            public int compare(ItemData o1, ItemData o2) {
+                return o1.id <= o2.id ? 1 : -1;
+            }
+        });
         return listData;
     }
 }

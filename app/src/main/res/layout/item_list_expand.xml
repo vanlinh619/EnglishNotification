@@ -17,7 +17,7 @@
         android:layout_marginTop="5dp"
         android:layout_marginRight="10dp"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"></TextView>
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/tx_id"
@@ -29,7 +29,7 @@
         android:textSize="10sp"
         android:layout_marginLeft="10dp"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"></TextView>
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/tx_english"
@@ -42,7 +42,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="5dp"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"></TextView>
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/tx_vietnamese"
@@ -55,7 +55,7 @@
         android:layout_marginRight="5dp"
         android:layout_marginBottom="5dp"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"></TextView>
+        android:layout_height="wrap_content"/>
 
     <ImageView
         android:id="@+id/im_update"
@@ -65,7 +65,7 @@
         app:layout_constraintBottom_toBottomOf="@id/tx_english"
         android:layout_marginRight="10dp"
         android:layout_width="20dp"
-        android:layout_height="20dp"></ImageView>
+        android:layout_height="20dp"/>
 
     <ImageView
         android:id="@+id/im_delete"
@@ -75,7 +75,7 @@
         android:layout_marginRight="10dp"
         app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tx_vietnamese"></ImageView>
+        app:layout_constraintTop_toTopOf="@id/tx_vietnamese"/>
 
     <ImageView
         android:background="#8FA8A8A8"
@@ -83,6 +83,6 @@
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
         android:layout_width="match_parent"
-        android:layout_height="1dp"></ImageView>
+        android:layout_height="1dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

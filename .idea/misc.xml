@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/activity_main.xml" value="0.24818840579710144" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/dialog_add_word.xml" value="0.24818840579710144" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/item_list.xml" value="0.175" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/item_list_expand.xml" value="0.175" />
         <entry key="..\:/SAVE FILE/AndroidApp/EnglishNotification/app/src/main/res/layout/activity_main.xml" value="0.1793478260869565" />
         <entry key="..\:/SAVE FILE/AndroidApp/EnglishNotification/app/src/main/res/layout/item_list.xml" value="0.1793478260869565" />
         <entry key="..\:/SAVE FILE/AndroidApp/EnglishNotification/app/src/main/res/layout/item_list_expand.xml" value="0.1793478260869565" />
