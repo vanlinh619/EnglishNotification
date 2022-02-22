@@ -10,8 +10,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 
 public class Database extends SQLiteOpenHelper implements Serializable {
 
@@ -99,6 +101,23 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                 return o1.id <= o2.id ? 1 : -1;
             }
         });
+        return listData;
+    }
+
+    public ArrayList<ItemData> getDataForNotification(){
+        SQLiteDatabase db = getReadableDatabase();
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String date = simpleDateFormat.format(new Date());
+        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_DATE, date);
+        Cursor cursor = db.rawQuery(query, null);
+        ArrayList<ItemData> listData = new ArrayList<>();
+        while (cursor.moveToNext()){
+            ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getString(3));
+            listData.add(itemData);
+        }
+        db.close();
         return listData;
     }
 }
