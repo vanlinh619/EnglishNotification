@@ -18,7 +18,9 @@
 
     <EditText
         android:id="@+id/ed_english"
-        android:hint="english"
+        android:hint="English"
+        android:drawableLeft="@drawable/icon_english"
+        android:background="@drawable/border_edittext"
         app:layout_constraintTop_toBottomOf="@+id/tx_add_new_word"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -30,7 +32,9 @@
 
     <EditText
         android:id="@+id/ed_vietnamese"
-        android:hint="vietnamese"
+        android:hint="Vietnamese"
+        android:background="@drawable/border_edittext"
+        android:drawableLeft="@drawable/icon_vietnamese"
         app:layout_constraintTop_toBottomOf="@+id/ed_english"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

@@ -120,4 +120,15 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         db.close();
         return listData;
     }
+
+    public ItemData getNewItem(){
+        SQLiteDatabase db = getReadableDatabase();
+        String query = String.format("SELECT * FROM %s ORDER BY %s DESC LIMIT 1", TABLE_WORD, WORD_ID);
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToNext();
+        ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
+                cursor.getString(2), cursor.getString(3));
+        db.close();
+        return itemData;
+    }
 }

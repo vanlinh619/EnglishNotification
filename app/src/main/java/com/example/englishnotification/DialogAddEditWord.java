@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -62,7 +63,7 @@ public class DialogAddEditWord extends DialogFragment {
 
         if(itemData != null){
             btAdd.setText("Update");
-            txTitle.setText("Update word");
+            txTitle.setText("Edit Word");
             edEnglish.setText(itemData.english);
             edVietnamese.setText(itemData.vietnamese);
             btAdd.setOnClickListener(new View.OnClickListener() {
@@ -78,8 +79,18 @@ public class DialogAddEditWord extends DialogFragment {
                         itemData.english = english;
                         itemData.vietnamese = vietnamese;
                         mainActivity.database.updateData(itemData);
-                        mainActivity.reloadList(mainActivity.database);
+                        for (ItemData item: mainActivity.listData){
+                            if(item.id == itemData.id){
+                                item.english = itemData.english;
+                                item.vietnamese = itemData.vietnamese;
+                                item.date = itemData.date;
+                                break;
+                            }
+                        }
+                        mainActivity.reloadList();
                         dismiss();
+                    } else {
+                        Toast.makeText(mainActivity, "Please fill in all the inputs", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -95,9 +106,13 @@ public class DialogAddEditWord extends DialogFragment {
                         String date = format.format(new Date());
                         ItemData itemData = new ItemData(0, date, english, vietnamese);
                         mainActivity.database.addData(itemData);
-                        mainActivity.reloadList(mainActivity.database);
+                        ItemData item = mainActivity.database.getNewItem();
+                        mainActivity.listData.add(0, item);
+                        mainActivity.reloadList();
                         mainActivity.startAlarm(mainActivity.database.getDataForNotification());
                         dismiss();
+                    } else {
+                        Toast.makeText(mainActivity, "Please fill in all the inputs", Toast.LENGTH_SHORT).show();
                     }
                 }
             });

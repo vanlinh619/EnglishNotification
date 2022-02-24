@@ -1,22 +1,31 @@
 package com.example.englishnotification;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,8 +38,12 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     private ItemListAdapter adapter;
     private RecyclerView rcListWord;
-    private ImageView imAdd;
+    private ImageView imAdd, imSearch;
+    private EditText edSearch;
+    private TextView txTitle;
+    private ConstraintLayout ctMainLayout;
     public Database database;
+    public ArrayList<ItemData> listData;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -41,9 +54,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         setView();
 
         database = new Database(this);
-        ArrayList<ItemData> list = database.getAll();
+        listData = database.getAll();
 
-        adapter = new ItemListAdapter(list, MainActivity.this);
+        adapter = new ItemListAdapter(listData, MainActivity.this);
         rcListWord.setAdapter(adapter);
         rcListWord.setLayoutManager(new LinearLayoutManager(this));
 
@@ -53,26 +66,86 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 FragmentManager fm = getSupportFragmentManager();
                 DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
+            }
+        });
 
-                /*Notification notification = new Notification(MainActivity.this);
-                Random random = new Random();
-                int i1 = random.nextInt(80 - 65) + 65;
-                NotificationCompat.Builder nb = notification.getChannelNotification("english" + i1, "vietnamese" + i1);
-                notification.getManager().notify(i1, nb.build());*/
+        imSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                expandButtonSearch();
+            }
+        });
+
+        edSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                ArrayList<ItemData> list = new ArrayList<>();
+                for (ItemData itemData: listData){
+                    String english = itemData.english.toLowerCase();
+                    String vietnamese = itemData.vietnamese.toLowerCase();
+
+                    if(english.indexOf(s.toString().toLowerCase()) != -1 ||
+                            vietnamese.indexOf(s.toString().toLowerCase()) != -1){
+                        list.add(itemData);
+                    }
+                }
+                adapter = new ItemListAdapter(list, MainActivity.this);
+                rcListWord.setAdapter(adapter);
+            }
+        });
+
+        ctMainLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shrinkButtonSearch();
             }
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public void reloadList(Database database){
-        ArrayList<ItemData> list = database.getAll();
-        adapter = new ItemListAdapter(list, MainActivity.this);
+    private void expandButtonSearch() {
+        imSearch.setVisibility(View.GONE);
+        txTitle.setVisibility(View.GONE);
+        imAdd.setVisibility(View.GONE);
+        edSearch.setVisibility(View.VISIBLE);
+    }
+
+    public void shrinkButtonSearch() {
+        imSearch.setVisibility(View.VISIBLE);
+        txTitle.setVisibility(View.VISIBLE);
+        imAdd.setVisibility(View.VISIBLE);
+        edSearch.setVisibility(View.GONE);
+        hideKeyboard(this, edSearch);
+        edSearch.setText("");
+    }
+
+    public void hideKeyboard(Context context, View view) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public void reloadList(){
+        adapter = new ItemListAdapter(listData, MainActivity.this);
         rcListWord.setAdapter(adapter);
+        shrinkButtonSearch();
     }
 
     private void setView() {
         rcListWord = findViewById(R.id.rc_list_item);
         imAdd = findViewById(R.id.im_add_new_word);
+        edSearch = findViewById(R.id.ed_search);
+        txTitle = findViewById(R.id.tx_title);
+        imSearch = findViewById(R.id.im_search);
+        ctMainLayout = findViewById(R.id.ct_main_layout);
     }
 
     public void startAlarm(ArrayList<ItemData> list) {

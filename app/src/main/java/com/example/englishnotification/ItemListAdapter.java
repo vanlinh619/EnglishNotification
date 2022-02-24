@@ -96,7 +96,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 mainActivity.database.deleteData(listData.get(position).id);
-                                mainActivity.reloadList(mainActivity.database);
+                                mainActivity.listData.remove(position);
+                                mainActivity.reloadList();
                                 dialog.dismiss();
                             }
                         })
