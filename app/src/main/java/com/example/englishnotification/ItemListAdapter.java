@@ -24,7 +24,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -54,7 +56,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
     @Override
     public void onBindViewHolder(ItemListAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        if(viewHolder != null && !viewHolder.txId.getText().toString().equals(listData.get(position).id + "")){
+        if (viewHolder != null && !viewHolder.txId.getText().toString().equals(listData.get(position).id + "")) {
             shrinkView(holder);
         }
 
@@ -73,12 +75,12 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(viewHolder != null && !viewHolder.equals(holder) ){
+                if (viewHolder != null && !viewHolder.equals(holder)) {
                     shrinkView(viewHolder);
                 }
-                if(holder.ctItemShrink.getVisibility() == View.VISIBLE){
+                if (holder.ctItemShrink.getVisibility() == View.VISIBLE) {
                     expandView(holder);
-                }else {
+                } else {
                     shrinkView(holder);
                 }
                 viewHolder = holder;
@@ -147,11 +149,40 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                                 new OnSuccessListener() {
                                     @Override
                                     public void onSuccess(Object o) {
-                                        new AlertDialog.Builder(mainActivity)
-                                                .setTitle(itemData.english)
-                                                .setMessage(o.toString())
-                                                .setNegativeButton("Cancel", null)
-                                                .show();
+                                        if (o.toString().toLowerCase().equals(itemData.vietnamese.toLowerCase())) {
+                                            new AlertDialog.Builder(mainActivity)
+                                                    .setTitle(itemData.english)
+                                                    .setMessage(o.toString())
+                                                    .setNegativeButton("Close", null)
+                                                    .show();
+                                        } else {
+                                            new AlertDialog.Builder(mainActivity)
+                                                    .setTitle(itemData.english)
+                                                    .setMessage(o.toString())
+                                                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                                        @RequiresApi(api = Build.VERSION_CODES.N)
+                                                        @Override
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+                                                            String date = format.format(new Date());
+                                                            itemData.date = date;
+                                                            itemData.vietnamese = o.toString();
+                                                            mainActivity.database.updateData(itemData);
+                                                            for (ItemData item: mainActivity.listData){
+                                                                if(item.id == itemData.id){
+                                                                    item.english = itemData.english;
+                                                                    item.vietnamese = itemData.vietnamese;
+                                                                    item.date = itemData.date;
+                                                                    break;
+                                                                }
+                                                            }
+                                                            mainActivity.reloadList();
+                                                            dialog.dismiss();
+                                                        }
+                                                    })
+                                                    .setNegativeButton("Close", null)
+                                                    .show();
+                                        }
                                     }
                                 })
                         .addOnFailureListener(
@@ -164,14 +195,25 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                                 });
             }
         });
+
+        holder.imNotification.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(itemData.notification == 0){
+                    holder.imNotification.setImageResource(R.drawable.notification_blue);
+                } else {
+                    holder.imNotification.setImageResource(R.drawable.notification);
+                }
+            }
+        });
     }
 
-    private void expandView(ItemListAdapter.ViewHolder holder){
+    private void expandView(ItemListAdapter.ViewHolder holder) {
         holder.ctItemShrink.setVisibility(View.GONE);
         holder.ctItemExpand.setVisibility(View.VISIBLE);
     }
 
-    public void shrinkView(ItemListAdapter.ViewHolder holder){
+    public void shrinkView(ItemListAdapter.ViewHolder holder) {
         holder.ctItemExpand.setVisibility(View.GONE);
         holder.ctItemShrink.setVisibility(View.VISIBLE);
     }
@@ -202,6 +244,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public ImageView imTranslate;
         public ImageView imSpeak;
 
+        public ImageView imNotification;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -223,6 +267,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
             imTranslate = itemView.findViewById(R.id.im_translate);
             imSpeak = itemView.findViewById(R.id.im_speak);
+
+            imNotification = itemView.findViewById(R.id.im_notification);
         }
     }
 }

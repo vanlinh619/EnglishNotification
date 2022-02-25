@@ -28,6 +28,7 @@ public class DialogAddEditWord extends DialogFragment {
     private Button btAdd;
     private Button btCancel;
     private TextView txTitle;
+    private MainActivity mainActivity;
 
     public static DialogAddEditWord newInstance(MainActivity mainActivity) {
         DialogAddEditWord frag = new DialogAddEditWord();
@@ -58,7 +59,7 @@ public class DialogAddEditWord extends DialogFragment {
         setView(view);
 
         Bundle bundle = getArguments();
-        MainActivity mainActivity = (MainActivity) bundle.getSerializable("mainActivity");
+        mainActivity = (MainActivity) bundle.getSerializable("mainActivity");
         ItemData itemData = (ItemData) bundle.getSerializable("itemData");
 
         if(itemData != null){
@@ -72,7 +73,7 @@ public class DialogAddEditWord extends DialogFragment {
                 public void onClick(View v) {
                     String english = edEnglish.getText().toString().trim();
                     String vietnamese = edVietnamese.getText().toString().trim();
-                    if(!english.equals("") && !vietnamese.equals("")){
+                    if(!english.equals("") && !wordExists(english)){
                         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                         String date = format.format(new Date());
                         itemData.date = date;
@@ -90,7 +91,11 @@ public class DialogAddEditWord extends DialogFragment {
                         mainActivity.reloadList();
                         dismiss();
                     } else {
-                        Toast.makeText(mainActivity, "Please fill in all the inputs", Toast.LENGTH_SHORT).show();
+                        if(english.equals("")){
+                            Toast.makeText(mainActivity, "Please fill english text!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(mainActivity, "This word already exists!", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });
@@ -101,10 +106,10 @@ public class DialogAddEditWord extends DialogFragment {
                 public void onClick(View v) {
                     String english = edEnglish.getText().toString().trim();
                     String vietnamese = edVietnamese.getText().toString().trim();
-                    if(!english.equals("") && !vietnamese.equals("")){
+                    if(!english.equals("") && !wordExists(english)){
                         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                         String date = format.format(new Date());
-                        ItemData itemData = new ItemData(0, date, english, vietnamese);
+                        ItemData itemData = new ItemData(0, date, english, vietnamese, 0);
                         mainActivity.database.addData(itemData);
                         ItemData item = mainActivity.database.getNewItem();
                         mainActivity.listData.add(0, item);
@@ -112,7 +117,11 @@ public class DialogAddEditWord extends DialogFragment {
                         mainActivity.startAlarm(mainActivity.database.getDataForNotification());
                         dismiss();
                     } else {
-                        Toast.makeText(mainActivity, "Please fill in all the inputs", Toast.LENGTH_SHORT).show();
+                        if(english.equals("")){
+                            Toast.makeText(mainActivity, "Please fill english text!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(mainActivity, "This word already exists!", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });
@@ -125,6 +134,15 @@ public class DialogAddEditWord extends DialogFragment {
                 dismiss();
             }
         });
+    }
+
+    private boolean wordExists(String english){
+        for (ItemData itemData: mainActivity.listData){
+            if(itemData.english.toLowerCase().equals(english.toLowerCase())){
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setView(View view) {

@@ -10,6 +10,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ct_item_shrink"
+        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -84,7 +85,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ct_item_expand"
-        android:visibility="gone"
+
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -120,12 +121,12 @@
             app:layout_constraintTop_toBottomOf="@id/tx_id_expand"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintBottom_toTopOf="@id/tx_vietnamese_expand"
-            app:layout_constraintRight_toLeftOf="@+id/im_translate"
+            app:layout_constraintRight_toLeftOf="@+id/im_notification"
             android:text="english"
             android:textStyle="bold"
             android:textSize="20sp"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"/>
@@ -135,10 +136,10 @@
             app:layout_constraintTop_toBottomOf="@id/tx_english_expand"
             app:layout_constraintLeft_toLeftOf="@id/tx_english_expand"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/im_speak"
+            app:layout_constraintRight_toLeftOf="@+id/im_notification"
             android:text="vietnamese"
             android:textSize="20sp"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="10dp"
             android:layout_marginBottom="15dp"
             android:layout_marginTop="10dp"
             android:layout_width="0dp"
@@ -180,6 +181,16 @@
             app:layout_constraintRight_toLeftOf="@+id/im_update"
             app:layout_constraintTop_toTopOf="@id/tx_vietnamese_expand"
             app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese_expand"
+            android:layout_marginRight="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+        <ImageView
+            android:id="@+id/im_notification"
+            android:src="@drawable/notification"
+            app:layout_constraintRight_toLeftOf="@+id/im_translate"
+            app:layout_constraintTop_toTopOf="@id/tx_english_expand"
+            app:layout_constraintBottom_toBottomOf="@id/tx_english_expand"
             android:layout_marginRight="10dp"
             android:layout_width="30dp"
             android:layout_height="30dp"/>
