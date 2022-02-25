@@ -6,11 +6,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
+import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -18,8 +20,13 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Objects;
 
 public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> implements Serializable {
 
@@ -51,15 +58,17 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             shrinkView(holder);
         }
 
-        holder.txEnglish.setText(listData.get(position).english);
-        holder.txVietnamese.setText(listData.get(position).vietnamese);
-        holder.txDate.setText(listData.get(position).date);
-        holder.txId.setText(listData.get(position).id + "");
+        ItemData itemData = listData.get(position);
 
-        holder.txEnglishExpand.setText(listData.get(position).english);
-        holder.txVietnameseExpand.setText(listData.get(position).vietnamese);
-        holder.txDateExpand.setText(listData.get(position).date);
-        holder.txIdExpand.setText(listData.get(position).id + "");
+        holder.txEnglish.setText(itemData.english);
+        holder.txVietnamese.setText(itemData.vietnamese);
+        holder.txDate.setText(itemData.date);
+        holder.txId.setText(itemData.id + "");
+
+        holder.txEnglishExpand.setText(itemData.english);
+        holder.txVietnameseExpand.setText(itemData.vietnamese);
+        holder.txDateExpand.setText(itemData.date);
+        holder.txIdExpand.setText(itemData.id + "");
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,7 +98,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog alertDialog = new AlertDialog.Builder(mainActivity)
+                new AlertDialog.Builder(mainActivity)
                         .setTitle("Delete!")
                         .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -103,6 +112,56 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                         })
                         .setNegativeButton("Cancel", null)
                         .show();
+            }
+        });
+
+        holder.imSpeak.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainActivity.textToSpeechEnglish = new TextToSpeech(mainActivity, new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int status) {
+                        if (status == TextToSpeech.SUCCESS) {
+                            mainActivity.textToSpeechEnglish.setLanguage(Locale.ENGLISH);
+                            mainActivity.textToSpeechEnglish.speak(itemData.english, TextToSpeech.QUEUE_ADD, null);
+                        }
+                    }
+                });
+
+                mainActivity.textToSpeechVietnamese = new TextToSpeech(mainActivity, new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int status) {
+                        if (status == TextToSpeech.SUCCESS) {
+                            mainActivity.textToSpeechVietnamese.speak(itemData.vietnamese, TextToSpeech.QUEUE_ADD, null);
+                        }
+                    }
+                });
+            }
+        });
+
+        holder.imTranslate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainActivity.translator.translate(itemData.english)
+                        .addOnSuccessListener(
+                                new OnSuccessListener() {
+                                    @Override
+                                    public void onSuccess(Object o) {
+                                        new AlertDialog.Builder(mainActivity)
+                                                .setTitle(itemData.english)
+                                                .setMessage(o.toString())
+                                                .setNegativeButton("Cancel", null)
+                                                .show();
+                                    }
+                                })
+                        .addOnFailureListener(
+                                new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        // Error.
+                                        Toast.makeText(mainActivity, "Please wait while app download file language!", Toast.LENGTH_LONG).show();
+                                    }
+                                });
             }
         });
     }
@@ -140,6 +199,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public ImageView imUpdate;
         public ImageView imDelete;
 
+        public ImageView imTranslate;
+        public ImageView imSpeak;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -158,6 +220,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
             imDelete = itemView.findViewById(R.id.im_delete);
             imUpdate = itemView.findViewById(R.id.im_update);
+
+            imTranslate = itemView.findViewById(R.id.im_translate);
+            imSpeak = itemView.findViewById(R.id.im_speak);
         }
     }
 }

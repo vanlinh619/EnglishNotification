@@ -120,7 +120,7 @@
             app:layout_constraintTop_toBottomOf="@id/tx_id_expand"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintBottom_toTopOf="@id/tx_vietnamese_expand"
-            app:layout_constraintRight_toLeftOf="@+id/im_update"
+            app:layout_constraintRight_toLeftOf="@+id/im_translate"
             android:text="english"
             android:textStyle="bold"
             android:textSize="20sp"
@@ -135,7 +135,7 @@
             app:layout_constraintTop_toBottomOf="@id/tx_english_expand"
             app:layout_constraintLeft_toLeftOf="@id/tx_english_expand"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/im_delete"
+            app:layout_constraintRight_toLeftOf="@+id/im_speak"
             android:text="vietnamese"
             android:textSize="20sp"
             android:layout_marginRight="5dp"
@@ -163,6 +163,26 @@
             app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese_expand"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/tx_vietnamese_expand"/>
+
+        <ImageView
+            android:id="@+id/im_translate"
+            android:src="@drawable/translate"
+            app:layout_constraintRight_toLeftOf="@+id/im_update"
+            app:layout_constraintTop_toTopOf="@id/tx_english_expand"
+            app:layout_constraintBottom_toBottomOf="@id/tx_english_expand"
+            android:layout_marginRight="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+        <ImageView
+            android:id="@+id/im_speak"
+            android:src="@drawable/radio"
+            app:layout_constraintRight_toLeftOf="@+id/im_update"
+            app:layout_constraintTop_toTopOf="@id/tx_vietnamese_expand"
+            app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese_expand"
+            android:layout_marginRight="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -15,8 +15,10 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
@@ -26,12 +28,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.common.model.DownloadConditions;
+import com.google.mlkit.nl.translate.TranslateLanguage;
+import com.google.mlkit.nl.translate.Translation;
+import com.google.mlkit.nl.translate.Translator;
+import com.google.mlkit.nl.translate.TranslatorOptions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements Serializable {
@@ -44,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private ConstraintLayout ctMainLayout;
     public Database database;
     public ArrayList<ItemData> listData;
+    public TextToSpeech textToSpeechEnglish;
+    public TextToSpeech textToSpeechVietnamese;
+    public Translator translator;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -52,6 +67,34 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         setContentView(R.layout.activity_main);
 
         setView();
+
+        // Create an English-German translator:
+        TranslatorOptions options =
+                new TranslatorOptions.Builder()
+                        .setSourceLanguage(TranslateLanguage.ENGLISH)
+                        .setTargetLanguage(TranslateLanguage.VIETNAMESE)
+                        .build();
+        translator = Translation.getClient(options);
+
+        DownloadConditions conditions = new DownloadConditions.Builder()
+                .requireWifi()
+                .build();
+        translator.downloadModelIfNeeded(conditions)
+                .addOnSuccessListener(new OnSuccessListener() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        // Model downloaded successfully. Okay to start translating.
+                        // (Set a flag, unhide the translation UI, etc.)
+                    }
+                })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Model couldn’t be downloaded or other internal error.
+                                Toast.makeText(MainActivity.this, "Model couldn’t be downloaded or other internal error.", Toast.LENGTH_LONG).show();
+                            }
+                        });
 
         database = new Database(this);
         listData = database.getAll();
@@ -90,12 +133,12 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void afterTextChanged(Editable s) {
                 ArrayList<ItemData> list = new ArrayList<>();
-                for (ItemData itemData: listData){
+                for (ItemData itemData : listData) {
                     String english = itemData.english.toLowerCase();
                     String vietnamese = itemData.vietnamese.toLowerCase();
 
-                    if(english.indexOf(s.toString().toLowerCase()) != -1 ||
-                            vietnamese.indexOf(s.toString().toLowerCase()) != -1){
+                    if (english.indexOf(s.toString().toLowerCase()) != -1 ||
+                            vietnamese.indexOf(s.toString().toLowerCase()) != -1) {
                         list.add(itemData);
                     }
                 }
@@ -128,12 +171,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         edSearch.setText("");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
     public void hideKeyboard(Context context, View view) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    public void reloadList(){
+    public void reloadList() {
         adapter = new ItemListAdapter(listData, MainActivity.this);
         rcListWord.setAdapter(adapter);
         shrinkButtonSearch();
@@ -150,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public void startAlarm(ArrayList<ItemData> list) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        for (int i = 0; i < list.size(); i++){
+        for (int i = 0; i < list.size(); i++) {
             ItemData itemData = list.get(i);
 
             Intent intent = new Intent(this, AlarmReceiver.class);

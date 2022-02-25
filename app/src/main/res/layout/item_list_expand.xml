@@ -60,6 +60,16 @@
         android:layout_height="wrap_content"/>
 
     <ImageView
+        android:id="@+id/im_speak"
+        android:src="@android:drawable/ic_menu_edit"
+        app:layout_constraintRight_toLeftOf="@+id/im_update"
+        app:layout_constraintTop_toTopOf="@id/tx_english"
+        app:layout_constraintBottom_toBottomOf="@id/tx_english"
+        android:layout_marginRight="10dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"/>
+
+    <ImageView
         android:id="@+id/im_update"
         android:src="@android:drawable/ic_menu_edit"
         app:layout_constraintRight_toRightOf="parent"
