@@ -148,19 +148,21 @@
         <ImageView
             android:id="@+id/im_update"
             android:src="@drawable/edit1"
+            android:background="@drawable/image_button_click"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/tx_english_expand"
             app:layout_constraintBottom_toBottomOf="@id/tx_english_expand"
             android:layout_marginRight="10dp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
 
         <ImageView
             android:id="@+id/im_delete"
             android:src="@drawable/delete1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginRight="10dp"
+            android:background="@drawable/image_button_click"
             app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese_expand"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@id/tx_vietnamese_expand"/>
@@ -168,42 +170,42 @@
         <ImageView
             android:id="@+id/im_translate"
             android:src="@drawable/translate"
+            android:background="@drawable/image_button_click"
             app:layout_constraintRight_toLeftOf="@+id/im_update"
             app:layout_constraintTop_toTopOf="@id/tx_english_expand"
             app:layout_constraintBottom_toBottomOf="@id/tx_english_expand"
-            android:layout_marginRight="10dp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
 
         <ImageView
             android:id="@+id/im_speak"
             android:src="@drawable/volume"
+            android:background="@drawable/image_button_click"
             app:layout_constraintRight_toLeftOf="@+id/im_update"
             app:layout_constraintTop_toTopOf="@id/tx_vietnamese_expand"
             app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese_expand"
-            android:layout_marginRight="10dp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
 
         <ImageView
             android:id="@+id/im_notification"
             android:src="@drawable/notification"
+            android:background="@drawable/image_button_click"
             app:layout_constraintRight_toLeftOf="@+id/im_translate"
             app:layout_constraintTop_toTopOf="@id/tx_english_expand"
             app:layout_constraintBottom_toBottomOf="@id/tx_english_expand"
-            android:layout_marginRight="10dp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
 
         <ImageView
             android:id="@+id/im_notification_auto_random"
             android:src="@drawable/bot_blue"
+            android:background="@drawable/image_button_click"
             app:layout_constraintRight_toLeftOf="@+id/im_translate"
             app:layout_constraintTop_toTopOf="@id/tx_vietnamese_expand"
             app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese_expand"
-            android:layout_marginRight="10dp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

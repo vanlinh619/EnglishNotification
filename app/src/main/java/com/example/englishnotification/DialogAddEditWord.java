@@ -114,7 +114,6 @@ public class DialogAddEditWord extends DialogFragment {
                         ItemData item = mainActivity.database.getNewItem();
                         mainActivity.listData.add(0, item);
                         mainActivity.reloadList();
-                        mainActivity.startAlarm(mainActivity.database.getDataForNotification());
                         dismiss();
                     } else {
                         if(english.equals("")){

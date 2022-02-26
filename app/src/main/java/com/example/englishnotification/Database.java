@@ -28,6 +28,11 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     private static final String WORD_NOTIFICATION = "notification";
     private static final String WORD_AUTO = "auto";
 
+    private static final String TABLE_CONFIG = "config";
+    private static final String CONFIG_ID = "id";
+    private static final String CONFIG_AUTO_NOTIFY = "autonotify";
+
+
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -44,15 +49,54 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER)",
                         TABLE_WORD, WORD_ID, WORD_DATE, WORD_ENGLISH, WORD_VIETNAMESE, WORD_NOTIFICATION, WORD_AUTO);
 
+        String createTableConfig =
+                String.format("CREATE TABLE IF NOT EXISTS %s(" +
+                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "%s INTEGER)",
+                        TABLE_CONFIG, CONFIG_ID, CONFIG_AUTO_NOTIFY);
+
         db.execSQL(createTableProject);
+        db.execSQL(createTableConfig);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         String dropTable = String.format("DROP TABLE IF EXISTS %s", TABLE_WORD);
+        String dropTableConfig = String.format("DROP TABLE IF EXISTS %s", TABLE_CONFIG);
         db.execSQL(dropTable);
+        db.execSQL(dropTableConfig);
 
         onCreate(db);
+    }
+
+    public Config getConfig(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = String.format("SELECT * FROM %s", TABLE_CONFIG);
+        Cursor cursor = db.rawQuery(query, null);
+        Config config = null;
+        while (cursor.moveToNext()){
+            config = new Config(cursor.getInt(0), cursor.getInt(1));
+        }
+        if(config == null){
+            config = new Config(0, 0);
+            addDefaultConfig();
+        }
+        return config;
+    }
+
+    private void addDefaultConfig() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = String.format("INSERT INTO %s VALUES(null, %s)", TABLE_CONFIG, 0);
+        db.execSQL(query);
+        db.close();
+    }
+
+    public void updateConfig(Config config){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = String.format("UPDATE %s SET %s = %s WHERE %s = %s", TABLE_CONFIG,
+                CONFIG_AUTO_NOTIFY, config.autoNotify, CONFIG_ID, config.id);
+        db.execSQL(query);
+        db.close();
     }
 
     public void addData(ItemData data){

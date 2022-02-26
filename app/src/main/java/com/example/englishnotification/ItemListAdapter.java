@@ -79,10 +79,15 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             holder.imNotification.setImageResource(R.drawable.notification_blue);
         }
 
-        if(itemData.auto == 0){
-            holder.imAutoNotification.setImageResource(R.drawable.bot);
+        if(mainActivity.config.autoNotify == 0){
+            holder.imAutoNotification.setVisibility(View.GONE);
         } else {
-            holder.imAutoNotification.setImageResource(R.drawable.bot_blue);
+            holder.imAutoNotification.setVisibility(View.VISIBLE);
+            if(itemData.auto == 0){
+                holder.imAutoNotification.setImageResource(R.drawable.bot);
+            } else {
+                holder.imAutoNotification.setImageResource(R.drawable.bot_blue);
+            }
         }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -229,9 +234,25 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                 if(itemData.notification == 0){
                     holder.imNotification.setImageResource(R.drawable.notification_blue);
                     itemData.notification = 1;
+                    mainActivity.setRepeatAlarm(itemData);
                 } else {
                     holder.imNotification.setImageResource(R.drawable.notification);
                     itemData.notification = 0;
+                    mainActivity.destroyRepeatAlarm(itemData);
+                }
+                mainActivity.database.updateData(itemData);
+            }
+        });
+
+        holder.imAutoNotification.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(itemData.auto == 0){
+                    holder.imAutoNotification.setImageResource(R.drawable.bot_blue);
+                    itemData.auto = 1;
+                } else {
+                    holder.imAutoNotification.setImageResource(R.drawable.bot);
+                    itemData.auto = 0;
                 }
                 mainActivity.database.updateData(itemData);
             }
