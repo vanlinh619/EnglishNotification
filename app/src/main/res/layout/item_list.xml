@@ -177,7 +177,7 @@
 
         <ImageView
             android:id="@+id/im_speak"
-            android:src="@drawable/radio"
+            android:src="@drawable/volume"
             app:layout_constraintRight_toLeftOf="@+id/im_update"
             app:layout_constraintTop_toTopOf="@id/tx_vietnamese_expand"
             app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese_expand"
@@ -191,6 +191,16 @@
             app:layout_constraintRight_toLeftOf="@+id/im_translate"
             app:layout_constraintTop_toTopOf="@id/tx_english_expand"
             app:layout_constraintBottom_toBottomOf="@id/tx_english_expand"
+            android:layout_marginRight="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
+
+        <ImageView
+            android:id="@+id/im_notification_auto_random"
+            android:src="@drawable/bot_blue"
+            app:layout_constraintRight_toLeftOf="@+id/im_translate"
+            app:layout_constraintTop_toTopOf="@id/tx_vietnamese_expand"
+            app:layout_constraintBottom_toBottomOf="@id/tx_vietnamese_expand"
             android:layout_marginRight="10dp"
             android:layout_width="30dp"
             android:layout_height="30dp"/>

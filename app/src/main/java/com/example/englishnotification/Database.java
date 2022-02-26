@@ -26,6 +26,7 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     private static final String WORD_ENGLISH = "english";
     private static final String WORD_VIETNAMESE = "vietnamese";
     private static final String WORD_NOTIFICATION = "notification";
+    private static final String WORD_AUTO = "auto";
 
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -39,8 +40,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s TEXT, " +
                                 "%s TEXT, " +
                                 "%s TEXT, " +
+                                "%s INTEGER, " +
                                 "%s INTEGER)",
-                        TABLE_WORD, WORD_ID, WORD_DATE, WORD_ENGLISH, WORD_VIETNAMESE, WORD_NOTIFICATION);
+                        TABLE_WORD, WORD_ID, WORD_DATE, WORD_ENGLISH, WORD_VIETNAMESE, WORD_NOTIFICATION, WORD_AUTO);
 
         db.execSQL(createTableProject);
     }
@@ -56,8 +58,8 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     public void addData(ItemData data){
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', '%s', %s);",
-                TABLE_WORD, data.date, data.english, data.vietnamese, data.notification);
+        String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', '%s', %s, %s);",
+                TABLE_WORD, data.date, data.english, data.vietnamese, data.notification, data.auto);
 
         db.execSQL(query);
         db.close();
@@ -66,9 +68,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     public void updateData(ItemData data){
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = String.format("UPDATE %s SET %s = '%s', %s = '%s', %s = '%s', %s = %s WHERE %s = %s",
-                TABLE_WORD, WORD_DATE, data.date, WORD_ENGLISH, data.english, WORD_VIETNAMESE,
-                data.vietnamese, WORD_NOTIFICATION, data.notification, WORD_ID, data.id);
+        String query = String.format("UPDATE %s SET %s = '%s', %s = '%s', %s = '%s', %s = %s, %s = %s WHERE %s = %s",
+                TABLE_WORD, WORD_DATE, data.date, WORD_ENGLISH, data.english, WORD_VIETNAMESE, data.vietnamese,
+                WORD_NOTIFICATION, data.notification, WORD_AUTO, data.auto, WORD_ID, data.id);
 
         db.execSQL(query);
         db.close();
@@ -93,7 +95,8 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         ArrayList<ItemData> listData = new ArrayList<>();
         while (cursor.moveToNext()){
             ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2), cursor.getString(3), cursor.getInt(4));
+                    cursor.getString(2), cursor.getString(3), cursor.getInt(4),
+                    cursor.getInt(5));
             listData.add(itemData);
         }
         db.close();
@@ -116,7 +119,8 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         ArrayList<ItemData> listData = new ArrayList<>();
         while (cursor.moveToNext()){
             ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2), cursor.getString(3), cursor.getInt(4));
+                    cursor.getString(2), cursor.getString(3), cursor.getInt(4),
+                    cursor.getInt(5));
             listData.add(itemData);
         }
         db.close();
@@ -129,7 +133,8 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         Cursor cursor = db.rawQuery(query, null);
         cursor.moveToNext();
         ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
-                cursor.getString(2), cursor.getString(3), cursor.getInt(4));
+                cursor.getString(2), cursor.getString(3), cursor.getInt(4),
+                cursor.getInt(5));
         db.close();
         return itemData;
     }

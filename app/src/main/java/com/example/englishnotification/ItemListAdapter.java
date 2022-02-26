@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,6 +73,18 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.txDateExpand.setText(itemData.date);
         holder.txIdExpand.setText(itemData.id + "");
 
+        if(itemData.notification == 0){
+            holder.imNotification.setImageResource(R.drawable.notification);
+        } else {
+            holder.imNotification.setImageResource(R.drawable.notification_blue);
+        }
+
+        if(itemData.auto == 0){
+            holder.imAutoNotification.setImageResource(R.drawable.bot);
+        } else {
+            holder.imAutoNotification.setImageResource(R.drawable.bot_blue);
+        }
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,6 +133,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imSpeak.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                holder.imSpeak.setImageResource(R.drawable.volume_blue);
+                holder.imSpeak.setEnabled(false);
                 mainActivity.textToSpeechEnglish = new TextToSpeech(mainActivity, new TextToSpeech.OnInitListener() {
                     @Override
                     public void onInit(int status) {
@@ -138,6 +153,18 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                         }
                     }
                 });
+                CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        holder.imSpeak.setImageResource(R.drawable.volume);
+                        holder.imSpeak.setEnabled(true);
+                    }
+                }.start();
             }
         });
 
@@ -201,11 +228,15 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 if(itemData.notification == 0){
                     holder.imNotification.setImageResource(R.drawable.notification_blue);
+                    itemData.notification = 1;
                 } else {
                     holder.imNotification.setImageResource(R.drawable.notification);
+                    itemData.notification = 0;
                 }
+                mainActivity.database.updateData(itemData);
             }
         });
+
     }
 
     private void expandView(ItemListAdapter.ViewHolder holder) {
@@ -245,6 +276,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public ImageView imSpeak;
 
         public ImageView imNotification;
+        public ImageView imAutoNotification;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -269,6 +301,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             imSpeak = itemView.findViewById(R.id.im_speak);
 
             imNotification = itemView.findViewById(R.id.im_notification);
+            imAutoNotification = itemView.findViewById(R.id.im_notification_auto_random);
         }
     }
 }

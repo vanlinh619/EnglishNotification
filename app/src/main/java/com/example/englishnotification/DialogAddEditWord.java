@@ -109,7 +109,7 @@ public class DialogAddEditWord extends DialogFragment {
                     if(!english.equals("") && !wordExists(english)){
                         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                         String date = format.format(new Date());
-                        ItemData itemData = new ItemData(0, date, english, vietnamese, 0);
+                        ItemData itemData = new ItemData(0, date, english, vietnamese, 0, 1);
                         mainActivity.database.addData(itemData);
                         ItemData item = mainActivity.database.getNewItem();
                         mainActivity.listData.add(0, item);
