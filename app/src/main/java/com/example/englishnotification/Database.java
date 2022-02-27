@@ -156,10 +156,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     public ArrayList<ItemData> getDataForNotification(){
         SQLiteDatabase db = getReadableDatabase();
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        String date = simpleDateFormat.format(new Date());
-        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_DATE, date);
+        String query = String.format("SELECT * FROM %s WHERE %s = %s", TABLE_WORD, WORD_AUTO, 1);
         Cursor cursor = db.rawQuery(query, null);
+
         ArrayList<ItemData> listData = new ArrayList<>();
         while (cursor.moveToNext()){
             ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),

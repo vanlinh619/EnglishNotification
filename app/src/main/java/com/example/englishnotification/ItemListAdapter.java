@@ -258,6 +258,13 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             }
         });
 
+        holder.imExample.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
     }
 
     private void expandView(ItemListAdapter.ViewHolder holder) {
@@ -299,6 +306,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public ImageView imNotification;
         public ImageView imAutoNotification;
 
+        public ImageView imExample;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -323,6 +332,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
             imNotification = itemView.findViewById(R.id.im_notification);
             imAutoNotification = itemView.findViewById(R.id.im_notification_auto_random);
+
+            imExample = itemView.findViewById(R.id.im_example);
         }
     }
 }

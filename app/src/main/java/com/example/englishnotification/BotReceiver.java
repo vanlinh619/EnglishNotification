@@ -18,16 +18,16 @@ public class BotReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Database database = new Database(context);
-        ArrayList<ItemData> list = database.getAll();
+        ArrayList<ItemData> list = database.getDataForNotification();
         Random random = new Random();
         int id[] = {-1, -1, -1};
         ItemData itemData[] = new ItemData[3];
         for (int i = 0; i < 3; i++){
             id[i] = random.nextInt(list.size());
-            for (int j = i - 1; j >= 0; j--){
-                while (id[i] == id[j]){
-                    id[i] = random.nextInt(list.size());
-                    if(list.size() > 3){
+            if(list.size() >= 3) {
+                for (int j = i - 1; j >= 0; j--) {
+                    while (id[i] == id[j]) {
+                        id[i] = random.nextInt(list.size());
                         j = i - 1;
                     }
                 }

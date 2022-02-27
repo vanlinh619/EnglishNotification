@@ -106,6 +106,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
         //Config
         config = database.getConfig();
+        if(config.autoNotify == 0){
+            swAutoNotify.setChecked(false);
+        } else {
+            swAutoNotify.setChecked(true);
+        }
 
         adapter = new ItemListAdapter(listData, MainActivity.this);
         rcListWord.setAdapter(adapter);
@@ -167,8 +172,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
                     config.autoNotify = 1;
+                    setAutoNotify();
                 } else {
                     config.autoNotify = 0;
+                    destroyAutoNotify();
                 }
                 database.updateConfig(config);
                 reloadList();
@@ -214,6 +221,22 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         swAutoNotify = findViewById(R.id.sw_auto_notify);
     }
 
+    public void setAutoNotify(){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, BotReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, -1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 6 * 60 * 60 * 1000, 6 * 60 * 60 * 1000, pendingIntent);
+    }
+
+    public void destroyAutoNotify(){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, BotReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, -1, intent, PendingIntent.FLAG_NO_CREATE);
+        if (pendingIntent != null && alarmManager != null) {
+            alarmManager.cancel(pendingIntent);
+        }
+    }
+
     public void setRepeatAlarm(ItemData itemData) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
@@ -224,8 +247,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         bundle.putInt("id", itemData.id);
         intent.putExtra("bundle", bundle);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, itemData.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                SystemClock.elapsedRealtime(), 2000, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 60 * 60 * 1000, 60 * 60 * 1000, pendingIntent);
     }
 
     public void destroyRepeatAlarm(ItemData itemData){
