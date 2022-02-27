@@ -1,23 +1,73 @@
 package com.example.englishnotification;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 
-public class Example extends AsyncTask<String, String, String> {
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.DataNode;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
+import org.w3c.dom.NodeList;
 
-    private String url = "https://dictionary.cambridge.org/dictionary/english/";
+import java.io.IOException;
+
+public class Example extends AsyncTask<String, Void, String> {
+
+    private String url = "https://sentence.yourdictionary.com/";
+    private ExampleListener exampleListener;
+    private Context context;
+    private AlertDialog alertDialog;
+    private boolean example;
+
+    public Example(ExampleListener exampleListener, Context context) {
+        this.exampleListener = exampleListener;
+        this.context = context;
+        example = true;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        alertDialog = new AlertDialog.Builder(context)
+                .setTitle("Looking for examples...")
+                .setNegativeButton("Close", null)
+                .show();
+    }
 
     @Override
     protected String doInBackground(String... strings) {
-        return null;
+        String word = strings[0];
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            Document document = Jsoup.connect(url + word).get();
+            Elements elements = document.getElementsByClass("sentence-item__text");
+            exampleListener.translate(elements);
+        } catch (IOException e) {
+            e.printStackTrace();
+            example = false;
+        }
+        return stringBuilder.toString();
     }
 
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
+        alertDialog.cancel();
+        if (example == false) {
+            new AlertDialog.Builder(context)
+                    .setTitle("Couldn't find an example!")
+                    .setNegativeButton("Close", null)
+                    .show();
+        }
     }
 
-    @Override
-    protected void onProgressUpdate(String... values) {
-        super.onProgressUpdate(values);
+    public interface ExampleListener {
+        public void translate(Elements elements);
     }
 }

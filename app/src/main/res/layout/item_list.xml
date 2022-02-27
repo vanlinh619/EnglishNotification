@@ -10,7 +10,6 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ct_item_shrink"
-        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -85,7 +84,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ct_item_expand"
-
+        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

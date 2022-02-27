@@ -24,6 +24,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.jsoup.select.Elements;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -73,17 +75,17 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.txDateExpand.setText(itemData.date);
         holder.txIdExpand.setText(itemData.id + "");
 
-        if(itemData.notification == 0){
+        if (itemData.notification == 0) {
             holder.imNotification.setImageResource(R.drawable.notification);
         } else {
             holder.imNotification.setImageResource(R.drawable.notification_blue);
         }
 
-        if(mainActivity.config.autoNotify == 0){
+        if (mainActivity.config.autoNotify == 0) {
             holder.imAutoNotification.setVisibility(View.GONE);
         } else {
             holder.imAutoNotification.setVisibility(View.VISIBLE);
-            if(itemData.auto == 0){
+            if (itemData.auto == 0) {
                 holder.imAutoNotification.setImageResource(R.drawable.bot);
             } else {
                 holder.imAutoNotification.setImageResource(R.drawable.bot_blue);
@@ -200,8 +202,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                                                             itemData.date = date;
                                                             itemData.vietnamese = o.toString();
                                                             mainActivity.database.updateData(itemData);
-                                                            for (ItemData item: mainActivity.listData){
-                                                                if(item.id == itemData.id){
+                                                            for (ItemData item : mainActivity.listData) {
+                                                                if (item.id == itemData.id) {
                                                                     item.english = itemData.english;
                                                                     item.vietnamese = itemData.vietnamese;
                                                                     item.date = itemData.date;
@@ -231,7 +233,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemData.notification == 0){
+                if (itemData.notification == 0) {
                     holder.imNotification.setImageResource(R.drawable.notification_blue);
                     itemData.notification = 1;
                     mainActivity.setRepeatAlarm(itemData);
@@ -247,7 +249,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imAutoNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(itemData.auto == 0){
+                if (itemData.auto == 0) {
                     holder.imAutoNotification.setImageResource(R.drawable.bot_blue);
                     itemData.auto = 1;
                 } else {
@@ -261,10 +263,51 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imExample.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Example example = new Example(new Example.ExampleListener() {
+                    @Override
+                    public void translate(Elements elements) {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        DataLoop dataLoop = new DataLoop();
+                        translateElement(dataLoop, elements, stringBuilder, itemData.english);
+                    }
+                }, mainActivity);
+                example.execute(itemData.english);
             }
         });
 
+    }
+
+    public void translateElement(DataLoop dataLoop, Elements elements, StringBuilder stringBuilder, String english) {
+        if (dataLoop.i < 5 && dataLoop.i < elements.size()) {
+            String text = elements.get(dataLoop.i).text();
+            stringBuilder.append("- " + text + "\n");
+            mainActivity.translator.translate(text)
+                    .addOnSuccessListener(
+                            new OnSuccessListener() {
+                                @Override
+                                public void onSuccess(Object o) {
+                                    stringBuilder.append("- " + o.toString() + "\n");
+                                    stringBuilder.append("\n");
+                                    dataLoop.i++;
+                                    translateElement(dataLoop, elements, stringBuilder, english);
+                                }
+                            })
+                    .addOnFailureListener(
+                            new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Error.
+                                    Toast.makeText(mainActivity, "Please wait while app download file language!", Toast.LENGTH_LONG).show();
+                                }
+                            });
+        } else {
+            new AlertDialog.Builder(mainActivity)
+                    .setTitle(english)
+                    .setIcon(R.drawable.reference)
+                    .setMessage(stringBuilder.toString())
+                    .setNegativeButton("Close", null)
+                    .show();
+        }
     }
 
     private void expandView(ItemListAdapter.ViewHolder holder) {
@@ -334,6 +377,14 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             imAutoNotification = itemView.findViewById(R.id.im_notification_auto_random);
 
             imExample = itemView.findViewById(R.id.im_example);
+        }
+    }
+
+    public class DataLoop{
+        public int i;
+
+        public DataLoop() {
+            this.i = 0;
         }
     }
 }
