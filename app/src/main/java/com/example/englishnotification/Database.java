@@ -99,7 +99,11 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         db.close();
     }
 
-    public void addData(ItemData data){
+    public boolean addData(ItemData data){
+        if(getItemEnglish(data.english) != null) {
+            return false;
+        }
+
         SQLiteDatabase db = this.getWritableDatabase();
 
         String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', '%s', %s, %s);",
@@ -107,6 +111,7 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
         db.execSQL(query);
         db.close();
+        return true;
     }
 
     public void updateData(ItemData data){
@@ -118,6 +123,22 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
         db.execSQL(query);
         db.close();
+    }
+
+    public ItemData getItemEnglish(String english){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_ENGLISH, english);
+        Cursor cursor = db.rawQuery(query, null);
+        ItemData itemData = null;
+        while (cursor.moveToNext()){
+            itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getString(3), cursor.getInt(4),
+                    cursor.getInt(5));
+            break;
+        }
+        db.close();
+        return itemData;
     }
 
     public void deleteData(int id){
@@ -144,12 +165,7 @@ public class Database extends SQLiteOpenHelper implements Serializable {
             listData.add(itemData);
         }
         db.close();
-        listData.sort(new Comparator<ItemData>() {
-            @Override
-            public int compare(ItemData o1, ItemData o2) {
-                return o1.id <= o2.id ? 1 : -1;
-            }
-        });
+        MainActivity.sortList(listData);
         return listData;
     }
 
