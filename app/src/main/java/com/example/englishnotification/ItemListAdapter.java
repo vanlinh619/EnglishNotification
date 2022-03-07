@@ -38,12 +38,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
     private ArrayList<ItemData> listData;
     private ItemListAdapter.ViewHolder viewHolder;
     private MainActivity mainActivity;
-    private DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            dialog.dismiss();
-        }
-    };
+    private ArrayList<ItemDataExample> listExample;
 
     public ItemListAdapter(ArrayList<ItemData> listData, MainActivity mainActivity) {
         this.listData = listData;
@@ -68,12 +63,12 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.txEnglish.setText(itemData.english);
         holder.txVietnamese.setText(itemData.vietnamese);
         holder.txDate.setText(itemData.date);
-        holder.txId.setText(itemData.id + "");
+        holder.txId.setText((listData.size() - listData.indexOf(itemData)) + "");
 
         holder.txEnglishExpand.setText(itemData.english);
         holder.txVietnameseExpand.setText(itemData.vietnamese);
         holder.txDateExpand.setText(itemData.date);
-        holder.txIdExpand.setText(itemData.id + "");
+        holder.txIdExpand.setText((listData.size() - listData.indexOf(itemData)) + "");
 
         if (itemData.notification == 0) {
             holder.imNotification.setImageResource(R.drawable.notification);
@@ -178,7 +173,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainActivity.translator.translate(itemData.english)
+                mainActivity.translatorEnglish.translate(itemData.english)
                         .addOnSuccessListener(
                                 new OnSuccessListener() {
                                     @Override
@@ -266,9 +261,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                 Example example = new Example(new Example.ExampleListener() {
                     @Override
                     public void translate(Elements elements) {
-                        StringBuilder stringBuilder = new StringBuilder();
+                        listExample = new ArrayList<>();
                         DataLoop dataLoop = new DataLoop();
-                        translateElement(dataLoop, elements, stringBuilder, itemData.english);
+                        translateElement(dataLoop, elements, listExample, itemData.english);
                     }
                 }, mainActivity);
                 example.execute(itemData.english);
@@ -277,19 +272,19 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
     }
 
-    public void translateElement(DataLoop dataLoop, Elements elements, StringBuilder stringBuilder, String english) {
-        if (dataLoop.i < 5 && dataLoop.i < elements.size()) {
+    public void translateElement(DataLoop dataLoop, Elements elements, ArrayList<ItemDataExample> listExample, String english) {
+        if (dataLoop.i < 10 && dataLoop.i < elements.size()) {
             String text = elements.get(dataLoop.i).text();
-            stringBuilder.append("- " + text + "\n");
-            mainActivity.translator.translate(text)
+            ItemDataExample itemDataExample = new ItemDataExample(text);
+            mainActivity.translatorEnglish.translate(text)
                     .addOnSuccessListener(
                             new OnSuccessListener() {
                                 @Override
                                 public void onSuccess(Object o) {
-                                    stringBuilder.append("- " + o.toString() + "\n");
-                                    stringBuilder.append("\n");
+                                    itemDataExample.vietnamese = o.toString();
+                                    listExample.add(itemDataExample);
                                     dataLoop.i++;
-                                    translateElement(dataLoop, elements, stringBuilder, english);
+                                    translateElement(dataLoop, elements, listExample, english);
                                 }
                             })
                     .addOnFailureListener(
@@ -301,12 +296,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                                 }
                             });
         } else {
-            new AlertDialog.Builder(mainActivity)
-                    .setTitle(english)
-                    .setIcon(R.drawable.reference)
-                    .setMessage(stringBuilder.toString())
-                    .setNegativeButton("Close", null)
-                    .show();
+            FragmentManager fm = mainActivity.getSupportFragmentManager();
+            DialogExample dialogExample = (DialogExample) DialogExample.newInstance(mainActivity, listExample, english);
+            dialogExample.show(fm, "fragment_edit_name");
         }
     }
 
@@ -380,7 +372,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         }
     }
 
-    public class DataLoop{
+    public class DataLoop {
         public int i;
 
         public DataLoop() {

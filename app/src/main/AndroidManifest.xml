@@ -29,6 +29,7 @@
 
         <receiver android:name=".AlarmReceiver" />
         <receiver android:name=".BotReceiver" />
+        <receiver android:name=".NotificationReceiver" />
     </application>
 
 </manifest>

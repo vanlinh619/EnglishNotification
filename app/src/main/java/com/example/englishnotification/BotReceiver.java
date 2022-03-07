@@ -21,7 +21,6 @@ public class BotReceiver extends BroadcastReceiver {
         ArrayList<ItemData> list = database.getDataForNotification();
         Random random = new Random();
         int id[] = {-1, -1, -1};
-        ItemData itemData[] = new ItemData[3];
         for (int i = 0; i < 3; i++){
             id[i] = random.nextInt(list.size());
             if(list.size() >= 3) {
@@ -32,10 +31,14 @@ public class BotReceiver extends BroadcastReceiver {
                     }
                 }
             }
-            itemData[i] = list.get(id[i]);
+            ItemData itemData = list.get(id[i]);
+            Bundle bundle = new Bundle();
+            bundle.putString("english", itemData.english);
+            bundle.putString("vietnamese", itemData.vietnamese);
+            bundle.putInt("id", itemData.id);
             Notification notification = new Notification(context);
-            NotificationCompat.Builder nb = notification.getChannelNotification(itemData[i].english, itemData[i].vietnamese);
-            notification.getManager().notify(itemData[i].id, nb.build());
+            NotificationCompat.Builder nb = notification.getChannelNotification(bundle, Notification.BOT_SETUP_NOTIFY);
+            notification.getManager().notify(itemData.id, nb.build());
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -20,6 +21,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -66,20 +69,31 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements Serializable {
 
+    public static final int ENGLISH_ITEM = 0;
+    public static final int NOTIFY_ITEM = 1;
+    public static final int BOT_ITEM = 2;
+    public static final int FILTER_1 = 3;
+    public static final int FILTER_2 = 4;
+    public static final int FILTER_3 = 5;
+    public static final int ADD_WORD = 6;
+    public static final int TRANSLATE = 7;
+    private int englishSort = FILTER_1;
+    private int notifyFilter = FILTER_1;
+    private int botFilter = FILTER_1;
     private ItemListAdapter adapter;
     private RecyclerView rcListWord;
-    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport;
+    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate;
     private EditText edSearch;
-    private TextView txTitle;
-    private ConstraintLayout ctMainLayout, ctOption, ctHead;
+    private TextView txTitle, txEnglishSort, txNotifyFilter, txBotFilter;
+    private ConstraintLayout ctOption, ctHead;
     private Switch swAutoNotify;
     private final String fileName = "english.en";
     private final String dirName = "English";
     public Database database;
-    public ArrayList<ItemData> listData;
+    public ArrayList<ItemData> listData, listTmp;
     public TextToSpeech textToSpeechEnglish;
     public TextToSpeech textToSpeechVietnamese;
-    public Translator translator;
+    public Translator translatorEnglish, translatorVietnamese;
     public Config config;
     private static AlertDialog alertDialog;
 
@@ -92,17 +106,41 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         setView();
 
         // Create an English-German translator:
-        TranslatorOptions options =
+        TranslatorOptions optionsEnglish =
                 new TranslatorOptions.Builder()
                         .setSourceLanguage(TranslateLanguage.ENGLISH)
                         .setTargetLanguage(TranslateLanguage.VIETNAMESE)
                         .build();
-        translator = Translation.getClient(options);
+        TranslatorOptions optionsVietnamese =
+                new TranslatorOptions.Builder()
+                        .setSourceLanguage(TranslateLanguage.VIETNAMESE)
+                        .setTargetLanguage(TranslateLanguage.ENGLISH)
+                        .build();
+
+        translatorEnglish = Translation.getClient(optionsEnglish);
+        translatorVietnamese = Translation.getClient(optionsVietnamese);
 
         DownloadConditions conditions = new DownloadConditions.Builder()
                 .requireWifi()
                 .build();
-        translator.downloadModelIfNeeded(conditions)
+        translatorEnglish.downloadModelIfNeeded(conditions)
+                .addOnSuccessListener(new OnSuccessListener() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        // Model downloaded successfully. Okay to start translating.
+                        // (Set a flag, unhide the translation UI, etc.)
+                    }
+                })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Model couldn’t be downloaded or other internal error.
+                                Toast.makeText(MainActivity.this, "Model couldn’t be downloaded or other internal error.", Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+        translatorVietnamese.downloadModelIfNeeded(conditions)
                 .addOnSuccessListener(new OnSuccessListener() {
                     @Override
                     public void onSuccess(Object o) {
@@ -121,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
         database = new Database(this);
         listData = database.getAll();
+        listTmp = new ArrayList<>();
 
         //Config
         config = database.getConfig();
@@ -138,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getSupportFragmentManager();
-                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this);
+                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, ADD_WORD);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });
@@ -198,10 +237,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             public void onClick(View v) {
                 if (ctOption.getVisibility() == View.VISIBLE) {
                     ctOption.setVisibility(View.GONE);
-                    imExpandOption.setImageResource(R.drawable.right);
                 } else {
                     ctOption.setVisibility(View.VISIBLE);
-                    imExpandOption.setImageResource(R.drawable.left);
                 }
             }
         });
@@ -218,10 +255,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     case MotionEvent.ACTION_UP:
                         if (event.getX() - x0 > 100) {
                             ctOption.setVisibility(View.VISIBLE);
-                            imExpandOption.setImageResource(R.drawable.left);
                         } else if (event.getX() - x0 < -100) {
                             ctOption.setVisibility(View.GONE);
-                            imExpandOption.setImageResource(R.drawable.right);
                         } else {
                             shrinkButtonSearch();
                         }
@@ -316,6 +351,134 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 }
             }
         });
+
+        txEnglishSort.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeViewItemFilter(ENGLISH_ITEM);
+            }
+        });
+
+        txNotifyFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeViewItemFilter(NOTIFY_ITEM);
+            }
+        });
+
+        txBotFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeViewItemFilter(BOT_ITEM);
+            }
+        });
+
+        imTranslate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getSupportFragmentManager();
+                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, TRANSLATE);
+                dialogAddEditWord.show(fm, "fragment_edit_name");
+            }
+        });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @SuppressLint("ResourceAsColor")
+    public void changeViewItemFilter(int flags){
+        if(flags == ENGLISH_ITEM){
+            switch (englishSort) {
+                case FILTER_1:
+                    notifyFilter = FILTER_1;
+                    txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txNotifyFilter.setTextColor(R.color.black);
+                    botFilter = FILTER_1;
+                    txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txBotFilter.setTextColor(R.color.black);
+                    englishSort = FILTER_2;
+                    txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_up, 0);
+                    txEnglishSort.setTextColor(R.color.blue);
+                    refreshListData();
+                    sortByName(listData, 0);
+                    reloadListFilter();
+                    break;
+                case FILTER_2:
+                    englishSort = FILTER_3;
+                    txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_down, 0);
+                    sortByName(listData, 1);
+                    reloadListFilter();
+                    break;
+                case FILTER_3:
+                    englishSort = FILTER_1;
+                    txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txEnglishSort.setTextColor(R.color.black);
+                    sortList(listData);
+                    reloadListFilter();
+                    break;
+            }
+        } else if (flags == NOTIFY_ITEM){
+            switch (notifyFilter) {
+                case FILTER_1:
+                    englishSort = FILTER_1;
+                    txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txEnglishSort.setTextColor(R.color.black);
+                    botFilter = FILTER_1;
+                    txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txBotFilter.setTextColor(R.color.black);
+                    notifyFilter = FILTER_2;
+                    txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot_blue, 0);
+                    txNotifyFilter.setTextColor(R.color.blue);
+                    refreshListData();
+                    filterByNotify(1);
+                    reloadListFilter();
+                    break;
+                case FILTER_2:
+                    notifyFilter = FILTER_3;
+                    txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot, 0);
+                    txNotifyFilter.setTextColor(R.color.black);
+                    refreshListData();
+                    filterByNotify(0);
+                    reloadListFilter();
+                    break;
+                case FILTER_3:
+                    notifyFilter = FILTER_1;
+                    txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    refreshListData();
+                    reloadListFilter();
+                    break;
+            }
+        } else {
+            switch (botFilter) {
+                case FILTER_1:
+                    englishSort = FILTER_1;
+                    txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txEnglishSort.setTextColor(R.color.black);
+                    notifyFilter = FILTER_1;
+                    txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txNotifyFilter.setTextColor(R.color.black);
+                    botFilter = FILTER_2;
+                    txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot_blue, 0);
+                    txBotFilter.setTextColor(R.color.blue);
+                    refreshListData();
+                    filterByBot(1);
+                    reloadListFilter();
+                    break;
+                case FILTER_2:
+                    botFilter = FILTER_3;
+                    txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot, 0);
+                    txBotFilter.setTextColor(R.color.black);
+                    refreshListData();
+                    filterByBot(0);
+                    reloadListFilter();
+                    break;
+                case FILTER_3:
+                    botFilter = FILTER_1;
+                    txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    refreshListData();
+                    reloadListFilter();
+                    break;
+            }
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -326,6 +489,49 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 return o1.id <= o2.id ? 1 : -1;
             }
         });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void sortByName(ArrayList<ItemData> list, int flags){
+        list.sort(new Comparator<ItemData>() {
+            @Override
+            public int compare(ItemData o1, ItemData o2) {
+                if(flags == 0){
+                    return o1.english.compareTo(o2.english);
+                } else {
+                    return o2.english.compareTo(o1.english);
+                }
+            }
+        });
+    }
+
+    public void filterByNotify(int flags){
+        for (int i = listData.size() - 1; i >= 0; i--) {
+            ItemData itemData = listData.get(i);
+            if(itemData.notification != flags){
+                listTmp.add(itemData);
+                listData.remove(i);
+            }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void refreshListData(){
+        if(listTmp != null && listTmp.size() > 0){
+            listData.addAll(listTmp);
+            listTmp.clear();
+            sortList(listData);
+        }
+    }
+
+    public void filterByBot(int flags){
+        for (int i = listData.size() - 1; i >= 0; i--) {
+            ItemData itemData = listData.get(i);
+            if(itemData.auto != flags){
+                listTmp.add(itemData);
+                listData.remove(i);
+            }
+        }
     }
 
     public void showAlertDialog(Context context, String message) {
@@ -340,6 +546,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imSearch.setVisibility(View.GONE);
         txTitle.setVisibility(View.GONE);
         imAdd.setVisibility(View.GONE);
+        imTranslate.setVisibility(View.GONE);
         edSearch.setVisibility(View.VISIBLE);
     }
 
@@ -347,6 +554,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imSearch.setVisibility(View.VISIBLE);
         txTitle.setVisibility(View.VISIBLE);
         imAdd.setVisibility(View.VISIBLE);
+        imTranslate.setVisibility(View.VISIBLE);
         edSearch.setVisibility(View.GONE);
         hideKeyboard(this, edSearch);
         edSearch.setText("");
@@ -358,9 +566,28 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
+    public void updateViewNotify(int id, int flags){
+        for (ItemData itemData: listData){
+            if(id == itemData.id){
+                if(flags == Notification.PERSON_SETUP_NOTIFY){
+                    itemData.notification = 0;
+                } else {
+                    itemData.auto = 0;
+                }
+                reloadList();
+                break;
+            }
+        }
+    }
+
     public void reloadList() {
         adapter = new ItemListAdapter(listData, MainActivity.this);
         rcListWord.setAdapter(adapter);
+        shrinkButtonSearch();
+    }
+
+    public void reloadListFilter() {
+        adapter.notifyDataSetChanged();
         shrinkButtonSearch();
     }
 
@@ -370,13 +597,16 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         edSearch = findViewById(R.id.ed_search);
         txTitle = findViewById(R.id.tx_title);
         imSearch = findViewById(R.id.im_search);
-        ctMainLayout = findViewById(R.id.ct_main_layout);
         swAutoNotify = findViewById(R.id.sw_auto_notify);
         imExpandOption = findViewById(R.id.im_expand_option);
         ctOption = findViewById(R.id.ct_option);
         ctHead = findViewById(R.id.ct_header_title);
         imExport = findViewById(R.id.im_export);
         imImport = findViewById(R.id.im_import);
+        txEnglishSort = findViewById(R.id.tx_english_sort);
+        txNotifyFilter = findViewById(R.id.tx_notify_filter);
+        txBotFilter = findViewById(R.id.tx_bot_filter);
+        imTranslate = findViewById(R.id.im_translate_word);
     }
 
     public void setAutoNotify() {
@@ -416,4 +646,5 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             alarmManager.cancel(pendingIntent);
         }
     }
+
 }

@@ -125,6 +125,26 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         db.close();
     }
 
+    public void updateOffNotify(int id){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = String.format("UPDATE %s SET %s = %s WHERE %s = %s",
+                TABLE_WORD, WORD_NOTIFICATION, 0, WORD_ID, id);
+
+        db.execSQL(query);
+        db.close();
+    }
+
+    public void updateOffBotNotify(int id){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = String.format("UPDATE %s SET %s = %s WHERE %s = %s",
+                TABLE_WORD, WORD_AUTO, 0, WORD_ID, id);
+
+        db.execSQL(query);
+        db.close();
+    }
+
     public ItemData getItemEnglish(String english){
         SQLiteDatabase db = this.getReadableDatabase();
 
