@@ -3,6 +3,8 @@ package com.example.englishnotification;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +49,7 @@ public class DialogAddEditWord extends DialogFragment {
         Bundle arg = new Bundle();
         arg.putSerializable("mainActivity", mainActivity);
         arg.putSerializable("itemData", itemData);
+        arg.putSerializable("flags", -1);
         frag.setArguments(arg);
         return frag;
     }
@@ -67,7 +70,7 @@ public class DialogAddEditWord extends DialogFragment {
         ItemData itemData = (ItemData) bundle.getSerializable("itemData");
         int flags = (int) bundle.getSerializable("flags");
 
-        if(itemData != null){
+        if (itemData != null) {
             btAdd.setText("Update");
             txTitle.setText("Edit Word");
             edEnglish.setText(itemData.english);
@@ -78,15 +81,15 @@ public class DialogAddEditWord extends DialogFragment {
                 public void onClick(View v) {
                     String english = edEnglish.getText().toString().trim();
                     String vietnamese = edVietnamese.getText().toString().trim();
-                    if(!english.equals("") && !wordExists(english, itemData.id)){
+                    if (!english.equals("") && !wordExists(english, itemData.id)) {
                         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                         String date = format.format(new Date());
                         itemData.date = date;
                         itemData.english = english;
                         itemData.vietnamese = vietnamese;
                         mainActivity.database.updateData(itemData);
-                        for (ItemData item: mainActivity.listData){
-                            if(item.id == itemData.id){
+                        for (ItemData item : mainActivity.listData) {
+                            if (item.id == itemData.id) {
                                 item.english = itemData.english;
                                 item.vietnamese = itemData.vietnamese;
                                 item.date = itemData.date;
@@ -96,7 +99,7 @@ public class DialogAddEditWord extends DialogFragment {
                         mainActivity.reloadList();
                         dismiss();
                     } else {
-                        if(english.equals("")){
+                        if (english.equals("")) {
                             Toast.makeText(mainActivity, "Please fill english text!", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(mainActivity, "This word already exists!", Toast.LENGTH_SHORT).show();
@@ -104,61 +107,57 @@ public class DialogAddEditWord extends DialogFragment {
                     }
                 }
             });
-        } else if (flags == MainActivity.ADD_WORD){
+        } else if (flags == MainActivity.ADD_WORD) {
             btAdd.setOnClickListener(addWord());
         } else {
             txTitle.setText("Translate Word");
             btAdd.setText("Translate");
-            btAdd.setOnClickListener(new View.OnClickListener() {
+            edEnglish.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void onClick(View v) {
-                    String english = edEnglish.getText().toString().trim();
-                    String vietnamese = edVietnamese.getText().toString().trim();
-                    if(!english.equals("") && vietnamese.equals("")){
-                        mainActivity.translatorEnglish.translate(english)
-                                .addOnSuccessListener(
-                                        new OnSuccessListener() {
-                                            @Override
-                                            public void onSuccess(Object o) {
-                                                edVietnamese.setText(o.toString());
-                                                btAdd.setText("Add");
-                                                btAdd.setOnClickListener(addWord());
-                                            }
-                                        })
-                                .addOnFailureListener(
-                                        new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                // Error.
-                                                Toast.makeText(mainActivity, "Please wait while app download file language!", Toast.LENGTH_LONG).show();
-                                            }
-                                        });
-                    } else if (!vietnamese.equals("") && english.equals("")){
-                        mainActivity.translatorVietnamese.translate(vietnamese)
-                                .addOnSuccessListener(
-                                        new OnSuccessListener() {
-                                            @Override
-                                            public void onSuccess(Object o) {
-                                                edEnglish.setText(o.toString());
-                                                btAdd.setText("Add");
-                                                btAdd.setOnClickListener(addWord());
-                                            }
-                                        })
-                                .addOnFailureListener(
-                                        new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                // Error.
-                                                Toast.makeText(mainActivity, "Please wait while app download file language!", Toast.LENGTH_LONG).show();
-                                            }
-                                        });
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (!s.toString().equals("") && !edVietnamese.getText().toString().trim().equals("")) {
+                        btAdd.setText("Add");
+                        btAdd.setOnClickListener(addWord());
                     } else {
-                        Toast.makeText(mainActivity, "Please fill text!", Toast.LENGTH_SHORT).show();
+                        btAdd.setText("Translate");
+                        btAdd.setOnClickListener(translateWord());
                     }
                 }
             });
-        }
+            edVietnamese.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (!s.toString().equals("") && !edEnglish.getText().toString().trim().equals("")) {
+                        btAdd.setText("Add");
+                        btAdd.setOnClickListener(addWord());
+                    } else {
+                        btAdd.setText("Translate");
+                        btAdd.setOnClickListener(translateWord());
+                    }
+                }
+            });
+            btAdd.setOnClickListener(translateWord());
+        }
 
         btCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,14 +167,65 @@ public class DialogAddEditWord extends DialogFragment {
         });
     }
 
-    private View.OnClickListener addWord(){
+    private View.OnClickListener translateWord() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String english = edEnglish.getText().toString().trim();
+                String vietnamese = edVietnamese.getText().toString().trim();
+                if (!english.equals("") && vietnamese.equals("")) {
+                    mainActivity.translatorEnglish.translate(english)
+                            .addOnSuccessListener(
+                                    new OnSuccessListener() {
+                                        @Override
+                                        public void onSuccess(Object o) {
+                                            edVietnamese.setText(o.toString());
+                                            btAdd.setText("Add");
+                                            btAdd.setOnClickListener(addWord());
+                                        }
+                                    })
+                            .addOnFailureListener(
+                                    new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // Error.
+                                            Toast.makeText(mainActivity, "Please wait while app download file language!", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                } else if (!vietnamese.equals("") && english.equals("")) {
+                    mainActivity.translatorVietnamese.translate(vietnamese)
+                            .addOnSuccessListener(
+                                    new OnSuccessListener() {
+                                        @Override
+                                        public void onSuccess(Object o) {
+                                            edEnglish.setText(o.toString());
+                                            btAdd.setText("Add");
+                                            btAdd.setOnClickListener(addWord());
+                                        }
+                                    })
+                            .addOnFailureListener(
+                                    new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // Error.
+                                            Toast.makeText(mainActivity, "Please wait while app download file language!", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                } else if (english.equals("") && vietnamese.equals("")) {
+                    Toast.makeText(mainActivity, "Please fill text!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+    }
+
+    private View.OnClickListener addWord() {
         return new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 String english = edEnglish.getText().toString().trim();
                 String vietnamese = edVietnamese.getText().toString().trim();
-                if(!english.equals("") && !wordExists(english, -1)){
+                if (!english.equals("") && !wordExists(english, -1)) {
                     SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                     String date = format.format(new Date());
                     ItemData itemData = new ItemData(0, date, english, vietnamese, 0, 1);
@@ -185,19 +235,22 @@ public class DialogAddEditWord extends DialogFragment {
                     mainActivity.reloadList();
                     dismiss();
                 } else {
-                    if(english.equals("")){
+                    if (english.equals("")) {
                         Toast.makeText(mainActivity, "Please fill english text!", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(mainActivity, "This word already exists!", Toast.LENGTH_SHORT).show();
+                        dismiss();
+                        mainActivity.setTextForSearch(edEnglish.getText().toString().trim());
+                        mainActivity.showAlertDialog(mainActivity, "This word already exists!");
+                        mainActivity.expandButtonSearch();
                     }
                 }
             }
         };
     }
 
-    private boolean wordExists(String english, int id){
-        for (ItemData itemData: mainActivity.listData){
-            if(itemData.english.toLowerCase().equals(english.toLowerCase()) && id != itemData.id){
+    private boolean wordExists(String english, int id) {
+        for (ItemData itemData : mainActivity.listData) {
+            if (itemData.english.toLowerCase().equals(english.toLowerCase()) && id != itemData.id) {
                 return true;
             }
         }

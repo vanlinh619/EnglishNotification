@@ -273,27 +273,38 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
                 } else {
-                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Exporting...")
-                            .setNegativeButton("Close", null)
-                            .show();
-                    File dir = getExternalFilesDir(null);
-                    File file = new File(dir.getAbsolutePath(), fileName);
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                    try {
-                        FileOutputStream stream = new FileOutputStream(file);
-                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(stream);
-                        for (ItemData itemData : listData) {
-                            objectOutputStream.writeObject(itemData);
+                    showAlertDialog(MainActivity.this, "Exporting...");
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            File dir = getExternalFilesDir(null);
+                            File file = new File(dir.getAbsolutePath(), fileName);
+                            if (file.exists()) {
+                                file.delete();
+                            }
+                            try {
+                                FileOutputStream stream = new FileOutputStream(file);
+                                ObjectOutputStream objectOutputStream = new ObjectOutputStream(stream);
+                                for (ItemData itemData : listData) {
+                                    objectOutputStream.writeObject(itemData);
+                                }
+                                objectOutputStream.close();
+                                stream.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            alertDialog.cancel();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showAlertDialog(MainActivity.this, "Exported!");
+                                }
+                            });
                         }
-                        objectOutputStream.close();
-                        stream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    alertDialog.cancel();
+
+                    });
+                    thread.start();
                 }
             }
         });
@@ -305,49 +316,63 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
                 } else {
-                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Importing...")
-                            .setNegativeButton("Close", null)
-                            .show();
-                    File dir = getExternalFilesDir(null);
-                    File file = new File(dir.getAbsolutePath(), fileName);
-                    ArrayList<ItemData> list = new ArrayList<>();
-                    try {
-                        FileInputStream stream = new FileInputStream(file);
-                        ObjectInputStream objectInputStream = new ObjectInputStream(stream);
-                        while (true) {
-                            ItemData itemData = (ItemData) objectInputStream.readObject();
-                            if (itemData != null) {
-                                list.add(itemData);
-                            } else {
-                                break;
+                    showAlertDialog(MainActivity.this, "Importing...");
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            File dir = getExternalFilesDir(null);
+                            File file = new File(dir.getAbsolutePath(), fileName);
+                            ArrayList<ItemData> list = new ArrayList<>();
+                            try {
+                                FileInputStream stream = new FileInputStream(file);
+                                ObjectInputStream objectInputStream = new ObjectInputStream(stream);
+                                while (true) {
+                                    ItemData itemData = (ItemData) objectInputStream.readObject();
+                                    if (itemData != null) {
+                                        list.add(itemData);
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                                alertDialog.cancel();
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setTitle("Please move the file english.en to the download folder!")
+                                        .setNegativeButton("Close", null)
+                                        .show();
+                                return;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
                             }
-                        }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        alertDialog.cancel();
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("Please move the file english.en to the download folder!")
-                                .setNegativeButton("Close", null)
-                                .show();
-                        return;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    if (list.size() > 0) {
-                        for (int i = list.size() - 1; i >= 0; i--) {
-                            boolean added = database.addData(list.get(i));
-                            if (added){
-                                ItemData item = database.getNewItem();
-                                listData.add(item);
+                            if (list.size() > 0) {
+                                for (int i = list.size() - 1; i >= 0; i--) {
+                                    boolean added = database.addData(list.get(i));
+                                    if (added) {
+                                        ItemData item = database.getNewItem();
+                                        listData.add(item);
+                                    }
+                                }
+                                sortList(listData);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        reloadList();
+                                    }
+                                });
                             }
+                            alertDialog.cancel();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showAlertDialog(MainActivity.this, "Imported!");
+                                }
+                            });
                         }
-                        sortList(listData);
-                        reloadList();
-                    }
-                    alertDialog.cancel();
+                    });
+                    thread.start();
                 }
             }
         });
@@ -385,8 +410,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceAsColor")
-    public void changeViewItemFilter(int flags){
-        if(flags == ENGLISH_ITEM){
+    public void changeViewItemFilter(int flags) {
+        if (flags == ENGLISH_ITEM) {
             switch (englishSort) {
                 case FILTER_1:
                     notifyFilter = FILTER_1;
@@ -416,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     reloadListFilter();
                     break;
             }
-        } else if (flags == NOTIFY_ITEM){
+        } else if (flags == NOTIFY_ITEM) {
             switch (notifyFilter) {
                 case FILTER_1:
                     englishSort = FILTER_1;
@@ -492,11 +517,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void sortByName(ArrayList<ItemData> list, int flags){
+    public void sortByName(ArrayList<ItemData> list, int flags) {
         list.sort(new Comparator<ItemData>() {
             @Override
             public int compare(ItemData o1, ItemData o2) {
-                if(flags == 0){
+                if (flags == 0) {
                     return o1.english.compareTo(o2.english);
                 } else {
                     return o2.english.compareTo(o1.english);
@@ -505,10 +530,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
     }
 
-    public void filterByNotify(int flags){
+    public void filterByNotify(int flags) {
         for (int i = listData.size() - 1; i >= 0; i--) {
             ItemData itemData = listData.get(i);
-            if(itemData.notification != flags){
+            if (itemData.notification != flags) {
                 listTmp.add(itemData);
                 listData.remove(i);
             }
@@ -516,18 +541,18 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void refreshListData(){
-        if(listTmp != null && listTmp.size() > 0){
+    public void refreshListData() {
+        if (listTmp != null && listTmp.size() > 0) {
             listData.addAll(listTmp);
             listTmp.clear();
             sortList(listData);
         }
     }
 
-    public void filterByBot(int flags){
+    public void filterByBot(int flags) {
         for (int i = listData.size() - 1; i >= 0; i--) {
             ItemData itemData = listData.get(i);
-            if(itemData.auto != flags){
+            if (itemData.auto != flags) {
                 listTmp.add(itemData);
                 listData.remove(i);
             }
@@ -542,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 .show();
     }
 
-    private void expandButtonSearch() {
+    public void expandButtonSearch() {
         imSearch.setVisibility(View.GONE);
         txTitle.setVisibility(View.GONE);
         imAdd.setVisibility(View.GONE);
@@ -566,10 +591,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    public void updateViewNotify(int id, int flags){
-        for (ItemData itemData: listData){
-            if(id == itemData.id){
-                if(flags == Notification.PERSON_SETUP_NOTIFY){
+    public void updateViewNotify(int id, int flags) {
+        for (ItemData itemData : listData) {
+            if (id == itemData.id) {
+                if (flags == Notification.PERSON_SETUP_NOTIFY) {
                     itemData.notification = 0;
                 } else {
                     itemData.auto = 0;
@@ -647,4 +672,16 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
     }
 
+    public void setTextForSearch(String text) {
+        edSearch.setText(text);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(edSearch.getVisibility() == View.VISIBLE){
+            shrinkButtonSearch();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }

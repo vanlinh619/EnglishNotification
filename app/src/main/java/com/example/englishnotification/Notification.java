@@ -68,7 +68,7 @@ public class Notification extends ContextWrapper {
                 .setGroupSummary(true)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .addAction(R.drawable.notification_blue, strAction, notifyPendingIntent);
+                .addAction(R.drawable.icon_dot_blue, strAction, notifyPendingIntent);
 
     }
 }

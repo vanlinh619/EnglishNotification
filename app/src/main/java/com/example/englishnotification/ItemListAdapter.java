@@ -3,6 +3,8 @@ package com.example.englishnotification;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -270,6 +272,16 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             }
         });
 
+        holder.imCopy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipboardManager clipboard = (ClipboardManager) mainActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("EnglishNotification", itemData.english);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(mainActivity, "Copied: " + itemData.english, Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     public void translateElement(DataLoop dataLoop, Elements elements, ArrayList<ItemDataExample> listExample, String english) {
@@ -342,6 +354,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public ImageView imAutoNotification;
 
         public ImageView imExample;
+        public ImageView imCopy;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -369,6 +382,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             imAutoNotification = itemView.findViewById(R.id.im_notification_auto_random);
 
             imExample = itemView.findViewById(R.id.im_example);
+            imCopy = itemView.findViewById(R.id.im_copy);
         }
     }
 

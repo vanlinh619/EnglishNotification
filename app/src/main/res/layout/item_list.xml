@@ -213,6 +213,15 @@
             android:layout_width="40dp"
             android:layout_height="40dp"/>
 
+        <ImageView
+            android:id="@+id/im_copy"
+            android:src="@drawable/copy"
+            android:background="@drawable/image_button_click"
+            app:layout_constraintRight_toLeftOf="@+id/im_translate"
+            app:layout_constraintTop_toTopOf="@id/im_translate"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
