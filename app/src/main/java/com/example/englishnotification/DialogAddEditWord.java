@@ -1,6 +1,8 @@
 package com.example.englishnotification;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -35,21 +37,12 @@ public class DialogAddEditWord extends DialogFragment {
     private TextView txTitle;
     private MainActivity mainActivity;
 
-    public static DialogAddEditWord newInstance(MainActivity mainActivity, int flags) {
-        DialogAddEditWord frag = new DialogAddEditWord();
-        Bundle arg = new Bundle();
-        arg.putSerializable("mainActivity", mainActivity);
-        arg.putSerializable("flags", flags);
-        frag.setArguments(arg);
-        return frag;
-    }
-
-    public static DialogAddEditWord newInstance(MainActivity mainActivity, ItemData itemData) {
+    public static DialogAddEditWord newInstance(MainActivity mainActivity, ItemData itemData, int flags) {
         DialogAddEditWord frag = new DialogAddEditWord();
         Bundle arg = new Bundle();
         arg.putSerializable("mainActivity", mainActivity);
         arg.putSerializable("itemData", itemData);
-        arg.putSerializable("flags", -1);
+        arg.putSerializable("flags", flags);
         frag.setArguments(arg);
         return frag;
     }
@@ -70,7 +63,7 @@ public class DialogAddEditWord extends DialogFragment {
         ItemData itemData = (ItemData) bundle.getSerializable("itemData");
         int flags = (int) bundle.getSerializable("flags");
 
-        if (itemData != null) {
+        if (flags == MainActivity.UPDATE) {
             btAdd.setText("Update");
             txTitle.setText("Edit Word");
             edEnglish.setText(itemData.english);
@@ -109,7 +102,7 @@ public class DialogAddEditWord extends DialogFragment {
             });
         } else if (flags == MainActivity.ADD_WORD) {
             btAdd.setOnClickListener(addWord());
-        } else {
+        } else if (flags == MainActivity.TRANSLATE){
             txTitle.setText("Translate Word");
             btAdd.setText("Translate");
             edEnglish.addTextChangedListener(new TextWatcher() {
@@ -157,6 +150,42 @@ public class DialogAddEditWord extends DialogFragment {
                 }
             });
             btAdd.setOnClickListener(translateWord());
+        } else if (flags == MainActivity.GAME){
+            txTitle.setText("Check Old Word");
+            btAdd.setText("Check");
+            edEnglish.setText(itemData.english);
+            btAdd.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dismiss();
+                    if(edVietnamese.getText().toString().trim().toLowerCase().equals(itemData.vietnamese.toLowerCase())){
+                        new AlertDialog.Builder(mainActivity)
+                                .setTitle("Exact!")
+                                .setNegativeButton("Close", null)
+                                .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        mainActivity.showDialogCheckWord();
+                                    }
+                                })
+                                .show();
+                    } else {
+                        new AlertDialog.Builder(mainActivity)
+                                .setTitle("Incorrect!")
+                                .setMessage(itemData.vietnamese)
+                                .setNegativeButton("Close", null)
+                                .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                        mainActivity.showDialogCheckWord();
+                                    }
+                                })
+                                .show();
+                    }
+                }
+            });
         }
 
         btCancel.setOnClickListener(new View.OnClickListener() {

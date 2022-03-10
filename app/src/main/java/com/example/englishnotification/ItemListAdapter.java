@@ -109,7 +109,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 FragmentManager fm = mainActivity.getSupportFragmentManager();
                 DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord
-                        .newInstance(mainActivity, listData.get(position));
+                        .newInstance(mainActivity, listData.get(position), MainActivity.UPDATE);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });

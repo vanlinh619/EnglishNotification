@@ -7,10 +7,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -34,6 +36,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -77,16 +81,19 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public static final int FILTER_3 = 5;
     public static final int ADD_WORD = 6;
     public static final int TRANSLATE = 7;
+    public static final int GAME = 8;
+    public static final int UPDATE = 9;
     private int englishSort = FILTER_1;
     private int notifyFilter = FILTER_1;
     private int botFilter = FILTER_1;
     private ItemListAdapter adapter;
     private RecyclerView rcListWord;
-    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate;
+    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate, imGame;
     private EditText edSearch;
     private TextView txTitle, txEnglishSort, txNotifyFilter, txBotFilter;
     private ConstraintLayout ctOption, ctHead;
     private Switch swAutoNotify;
+    private SwipeRefreshLayout srRefresh;
     private final String fileName = "english.en";
     private final String dirName = "English";
     public Database database;
@@ -97,11 +104,18 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public Config config;
     private static AlertDialog alertDialog;
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().setDecorFitsSystemWindows(false);
+        WindowInsetsController controller = getWindow().getInsetsController();
+        if (controller != null) {
+            controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+            controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
 
         setView();
 
@@ -177,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getSupportFragmentManager();
-                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, ADD_WORD);
+                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, null, ADD_WORD);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });
@@ -255,8 +269,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     case MotionEvent.ACTION_UP:
                         if (event.getX() - x0 > 100) {
                             ctOption.setVisibility(View.VISIBLE);
+                            txTitle.setText("");
                         } else if (event.getX() - x0 < -100) {
                             ctOption.setVisibility(View.GONE);
+                            txTitle.setText("English Notification");
                         } else {
                             shrinkButtonSearch();
                         }
@@ -402,10 +418,35 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getSupportFragmentManager();
-                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, TRANSLATE);
+                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, null, TRANSLATE);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });
+
+        imGame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialogCheckWord();
+            }
+        });
+
+        srRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                reloadList();
+                srRefresh.setRefreshing(false);
+            }
+        });
+
+    }
+
+    public void showDialogCheckWord(){
+        Random random = new Random();
+        int index = random.nextInt(listData.size());
+        ItemData itemData = listData.get(index);
+        FragmentManager fm = getSupportFragmentManager();
+        DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, itemData, GAME);
+        dialogAddEditWord.show(fm, "fragment_edit_name");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -522,9 +563,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public int compare(ItemData o1, ItemData o2) {
                 if (flags == 0) {
-                    return o1.english.compareTo(o2.english);
+                    return o1.english.toLowerCase().compareTo(o2.english.toLowerCase());
                 } else {
-                    return o2.english.compareTo(o1.english);
+                    return o2.english.toLowerCase().compareTo(o1.english.toLowerCase());
                 }
             }
         });
@@ -560,7 +601,6 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void showAlertDialog(Context context, String message) {
-        alertDialog = null;
         alertDialog = new AlertDialog.Builder(context)
                 .setTitle(message)
                 .setNegativeButton("Close", null)
@@ -632,6 +672,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         txNotifyFilter = findViewById(R.id.tx_notify_filter);
         txBotFilter = findViewById(R.id.tx_bot_filter);
         imTranslate = findViewById(R.id.im_translate_word);
+        imGame = findViewById(R.id.im_game);
+        srRefresh = findViewById(R.id.sr_refresh);
     }
 
     public void setAutoNotify() {
