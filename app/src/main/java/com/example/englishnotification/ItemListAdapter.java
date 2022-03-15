@@ -139,24 +139,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 holder.imSpeak.setImageResource(R.drawable.volume_blue);
                 holder.imSpeak.setEnabled(false);
-                mainActivity.textToSpeechEnglish = new TextToSpeech(mainActivity, new TextToSpeech.OnInitListener() {
-                    @Override
-                    public void onInit(int status) {
-                        if (status == TextToSpeech.SUCCESS) {
-                            mainActivity.textToSpeechEnglish.setLanguage(Locale.ENGLISH);
-                            mainActivity.textToSpeechEnglish.speak(itemData.english, TextToSpeech.QUEUE_ADD, null);
-                        }
-                    }
-                });
-
-                mainActivity.textToSpeechVietnamese = new TextToSpeech(mainActivity, new TextToSpeech.OnInitListener() {
-                    @Override
-                    public void onInit(int status) {
-                        if (status == TextToSpeech.SUCCESS) {
-                            mainActivity.textToSpeechVietnamese.speak(itemData.vietnamese, TextToSpeech.QUEUE_ADD, null);
-                        }
-                    }
-                });
+                mainActivity.speak(itemData.english, itemData.vietnamese);
                 CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
                     @Override
                     public void onTick(long millisUntilFinished) {

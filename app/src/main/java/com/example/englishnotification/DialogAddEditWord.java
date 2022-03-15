@@ -8,8 +8,11 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -158,32 +161,32 @@ public class DialogAddEditWord extends DialogFragment {
                 @Override
                 public void onClick(View v) {
                     dismiss();
+                    DialogInterface.OnClickListener listenerClose = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mainActivity.shrinkButtonSearch();
+                        }
+                    };
+                    DialogInterface.OnClickListener listenerContinue = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            mainActivity.showDialogCheckWord();
+                        }
+                    };
+                    mainActivity.setTextForSearch(edEnglish.getText().toString().trim());
+                    String title = "";
                     if(edVietnamese.getText().toString().trim().toLowerCase().equals(itemData.vietnamese.toLowerCase())){
-                        new AlertDialog.Builder(mainActivity)
-                                .setTitle("Exact!")
-                                .setNegativeButton("Close", null)
-                                .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                        mainActivity.showDialogCheckWord();
-                                    }
-                                })
-                                .show();
+                        title = "Exact!";
                     } else {
-                        new AlertDialog.Builder(mainActivity)
-                                .setTitle("Incorrect!")
-                                .setMessage(itemData.vietnamese)
-                                .setNegativeButton("Close", null)
-                                .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                        mainActivity.showDialogCheckWord();
-                                    }
-                                })
-                                .show();
+                        title = "Incorrect!";
                     }
+                    new AlertDialog.Builder(mainActivity)
+                            .setTitle(title)
+                            .setMessage(itemData.english + " : " + itemData.vietnamese)
+                            .setNegativeButton("Close", listenerClose)
+                            .setPositiveButton("Continue", listenerContinue)
+                            .show();
                 }
             });
         }
@@ -194,6 +197,32 @@ public class DialogAddEditWord extends DialogFragment {
                 dismiss();
             }
         });
+
+        edEnglish.setOnTouchListener(delete());
+        edVietnamese.setOnTouchListener(delete());
+    }
+
+    private View.OnTouchListener delete(){
+        return new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                EditText editText = (EditText) v;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (editText.getRight() - editText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        editText.setText("");
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
     }
 
     private View.OnClickListener translateWord() {
@@ -293,6 +322,5 @@ public class DialogAddEditWord extends DialogFragment {
         btCancel = view.findViewById(R.id.bt_cancel);
         txTitle = view.findViewById(R.id.tx_add_new_word);
     }
-
 
 }

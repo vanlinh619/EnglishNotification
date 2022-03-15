@@ -5,10 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.WindowCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,13 +20,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.StrictMode;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.text.Editable;
@@ -38,8 +30,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -64,10 +57,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -91,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate, imGame;
     private EditText edSearch;
     private TextView txTitle, txEnglishSort, txNotifyFilter, txBotFilter;
-    private ConstraintLayout ctOption, ctHead;
+    private ConstraintLayout ctOption, ctHead, ctHeaderButton;
     private Switch swAutoNotify;
     private SwipeRefreshLayout srRefresh;
     private final String fileName = "english.en";
@@ -433,11 +423,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         srRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                listData = database.getAll();
                 reloadList();
                 srRefresh.setRefreshing(false);
             }
         });
 
+        edSearch.setOnTouchListener(deleteText());
     }
 
     public void showDialogCheckWord(){
@@ -608,21 +600,31 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void expandButtonSearch() {
-        imSearch.setVisibility(View.GONE);
-        txTitle.setVisibility(View.GONE);
-        imAdd.setVisibility(View.GONE);
-        imTranslate.setVisibility(View.GONE);
+//        imSearch.setVisibility(View.GONE);
+//        txTitle.setVisibility(View.GONE);
+//        imAdd.setVisibility(View.GONE);
+//        imTranslate.setVisibility(View.GONE);
+        Animation animExpandLeftToRight = AnimationUtils.loadAnimation(this, R.anim.anim_expand_left_to_right);
+        Animation animShinkLeftToRight = AnimationUtils.loadAnimation(this, R.anim.anim_shink_left_to_right);
+        edSearch.setAnimation(animExpandLeftToRight);
+        ctHeaderButton.setAnimation(animShinkLeftToRight);
         edSearch.setVisibility(View.VISIBLE);
+        ctHeaderButton.setVisibility(View.GONE);
     }
 
     public void shrinkButtonSearch() {
-        imSearch.setVisibility(View.VISIBLE);
-        txTitle.setVisibility(View.VISIBLE);
-        imAdd.setVisibility(View.VISIBLE);
-        imTranslate.setVisibility(View.VISIBLE);
-        edSearch.setVisibility(View.GONE);
+//        imSearch.setVisibility(View.VISIBLE);
+//        txTitle.setVisibility(View.VISIBLE);
+//        imAdd.setVisibility(View.VISIBLE);
+//        imTranslate.setVisibility(View.VISIBLE);
         hideKeyboard(this, edSearch);
         edSearch.setText("");
+        Animation animShinkRightToLeft = AnimationUtils.loadAnimation(this, R.anim.anim_shink_right_to_left);
+        Animation animExpandRightToLeft = AnimationUtils.loadAnimation(this, R.anim.anim_expand_right_to_left);
+        edSearch.setAnimation(animShinkRightToLeft);
+        ctHeaderButton.setAnimation(animExpandRightToLeft);
+        edSearch.setVisibility(View.GONE);
+        ctHeaderButton.setVisibility(View.VISIBLE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
@@ -674,13 +676,14 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imTranslate = findViewById(R.id.im_translate_word);
         imGame = findViewById(R.id.im_game);
         srRefresh = findViewById(R.id.sr_refresh);
+        ctHeaderButton = findViewById(R.id.ct_header_button);
     }
 
     public void setAutoNotify() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, BotReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, -1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (6 * 60 * 60 * 1000), 6 * 60 * 60 * 1000, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (2 * 60 * 60 * 1000), 2 * 60 * 60 * 1000, pendingIntent);
     }
 
     public void destroyAutoNotify() {
@@ -702,7 +705,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         bundle.putInt("id", itemData.id);
         intent.putExtra("bundle", bundle);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, itemData.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (60 * 60 * 1000), 60 * 60 * 1000, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (2 * 60 * 60 * 1000), 2 * 60 * 60 * 1000, pendingIntent);
     }
 
     public void destroyRepeatAlarm(ItemData itemData) {
@@ -716,6 +719,50 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public void setTextForSearch(String text) {
         edSearch.setText(text);
+    }
+
+    public void speak(String english, String vietnamese){
+        textToSpeechEnglish = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    textToSpeechEnglish.setLanguage(Locale.ENGLISH);
+                    textToSpeechEnglish.speak(english, TextToSpeech.QUEUE_ADD, null);
+                }
+            }
+        });
+
+        textToSpeechVietnamese = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    textToSpeechVietnamese.speak(vietnamese, TextToSpeech.QUEUE_ADD, null);
+                }
+            }
+        });
+    }
+
+    public View.OnTouchListener deleteText(){
+        return new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                EditText editText = (EditText) v;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (editText.getRight() - editText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        shrinkButtonSearch();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
     }
 
     @Override
