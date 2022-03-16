@@ -600,6 +600,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void expandButtonSearch() {
+        if(edSearch.getVisibility() == View.VISIBLE){
+            return;
+        }
 //        imSearch.setVisibility(View.GONE);
 //        txTitle.setVisibility(View.GONE);
 //        imAdd.setVisibility(View.GONE);
@@ -613,6 +616,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void shrinkButtonSearch() {
+        if(edSearch.getVisibility() == View.GONE){
+            return;
+        }
 //        imSearch.setVisibility(View.VISIBLE);
 //        txTitle.setVisibility(View.VISIBLE);
 //        imAdd.setVisibility(View.VISIBLE);
