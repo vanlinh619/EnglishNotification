@@ -1,4 +1,4 @@
-package com.example.englishnotification;
+package com.example.englishnotification.handle;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,6 +8,9 @@ import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+
+import com.example.englishnotification.model.Database;
+import com.example.englishnotification.model.ItemData;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -16,7 +16,6 @@
 
         <TextView
             android:id="@+id/tx_date"
-            app:layout_constraintBottom_toTopOf="@+id/tx_english"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toRightOf="@id/tx_id"
             app:layout_constraintRight_toRightOf="parent"
@@ -91,7 +90,6 @@
 
         <TextView
             android:id="@+id/tx_date_expand"
-            app:layout_constraintBottom_toTopOf="@+id/tx_english_expand"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toRightOf="@id/tx_id_expand"
             app:layout_constraintRight_toRightOf="parent"
@@ -120,7 +118,7 @@
             app:layout_constraintTop_toBottomOf="@id/tx_id_expand"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintBottom_toTopOf="@id/tx_vietnamese_expand"
-            app:layout_constraintRight_toLeftOf="@+id/im_notification_auto_random"
+            app:layout_constraintRight_toLeftOf="@+id/im_copy"
             android:text="english"
             android:textStyle="bold"
             android:textSize="20sp"
@@ -135,7 +133,7 @@
             app:layout_constraintTop_toBottomOf="@id/tx_english_expand"
             app:layout_constraintLeft_toLeftOf="@id/tx_english_expand"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/im_notification_auto_random"
+            app:layout_constraintRight_toLeftOf="@+id/im_copy"
             android:text="vietnamese"
             android:textSize="20sp"
             android:layout_marginRight="10dp"

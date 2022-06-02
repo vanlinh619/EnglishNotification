@@ -1,7 +1,6 @@
-package com.example.englishnotification;
+package com.example.englishnotification.handle;
 
 import android.os.CountDownTimer;
-import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +10,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.englishnotification.MainActivity;
+import com.example.englishnotification.R;
+import com.example.englishnotification.model.ItemDataExample;
+
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class ItemListExampleAdapter extends RecyclerView.Adapter<ItemListExampleAdapter.ViewHolder> {
 

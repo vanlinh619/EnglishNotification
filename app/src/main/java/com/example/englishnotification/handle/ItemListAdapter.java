@@ -1,4 +1,4 @@
-package com.example.englishnotification;
+package com.example.englishnotification.handle;
 
 
 import android.annotation.SuppressLint;
@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.CountDownTimer;
-import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +22,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.englishnotification.DialogAddEditWord;
+import com.example.englishnotification.DialogExample;
+import com.example.englishnotification.MainActivity;
+import com.example.englishnotification.R;
+import com.example.englishnotification.model.ItemData;
+import com.example.englishnotification.model.ItemDataExample;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -32,8 +37,6 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
 
 public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> implements Serializable {
 

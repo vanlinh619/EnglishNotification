@@ -1,7 +1,6 @@
 package com.example.englishnotification;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,24 +10,20 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.englishnotification.model.ItemData;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 public class DialogAddEditWord extends DialogFragment {
@@ -286,7 +281,8 @@ public class DialogAddEditWord extends DialogFragment {
                 if (!english.equals("") && !wordExists(english, -1)) {
                     SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                     String date = format.format(new Date());
-                    ItemData itemData = new ItemData(0, date, english, vietnamese, 0, 1);
+                    ItemData itemData = new ItemData(0, date, english, vietnamese, 0, 1, 1, "",
+                            "", "", "", "", 0);
                     mainActivity.database.addData(itemData);
                     ItemData item = mainActivity.database.getNewItem();
                     mainActivity.listData.add(0, item);

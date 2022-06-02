@@ -1,4 +1,4 @@
-package com.example.englishnotification;
+package com.example.englishnotification.handle;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.example.englishnotification.model.Database;
 
 public class NotificationReceiver extends BroadcastReceiver {
     @Override

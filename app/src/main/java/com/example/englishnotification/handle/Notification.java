@@ -1,4 +1,4 @@
-package com.example.englishnotification;
+package com.example.englishnotification.handle;
 
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
@@ -7,11 +7,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.app.NotificationCompat;
+
+import com.example.englishnotification.MainActivity;
+import com.example.englishnotification.R;
 
 public class Notification extends ContextWrapper {
     public static final String channelID = "channelID";

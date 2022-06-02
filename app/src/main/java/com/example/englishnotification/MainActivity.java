@@ -40,6 +40,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.englishnotification.handle.AlarmReceiver;
+import com.example.englishnotification.handle.BotReceiver;
+import com.example.englishnotification.handle.ItemListAdapter;
+import com.example.englishnotification.handle.Notification;
+import com.example.englishnotification.model.Config;
+import com.example.englishnotification.model.Database;
+import com.example.englishnotification.model.ItemData;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.DownloadConditions;
@@ -85,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private Switch swAutoNotify;
     private SwipeRefreshLayout srRefresh;
     private final String fileName = "english.en";
-    private final String dirName = "English";
     public Database database;
     public ArrayList<ItemData> listData, listTmp;
     public TextToSpeech textToSpeechEnglish;

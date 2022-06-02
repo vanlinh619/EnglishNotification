@@ -1,4 +1,4 @@
-package com.example.englishnotification;
+package com.example.englishnotification.handle;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

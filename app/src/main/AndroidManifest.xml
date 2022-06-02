@@ -27,9 +27,9 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".AlarmReceiver" />
-        <receiver android:name=".BotReceiver" />
-        <receiver android:name=".NotificationReceiver" />
+        <receiver android:name=".handle.AlarmReceiver" />
+        <receiver android:name=".handle.BotReceiver" />
+        <receiver android:name=".handle.NotificationReceiver" />
     </application>
 
 </manifest>

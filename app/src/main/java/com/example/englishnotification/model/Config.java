@@ -1,4 +1,4 @@
-package com.example.englishnotification;
+package com.example.englishnotification.model;
 
 public class Config {
     public int id;

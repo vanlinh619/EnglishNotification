@@ -1,4 +1,4 @@
-package com.example.englishnotification;
+package com.example.englishnotification.model;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -6,14 +6,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import com.example.englishnotification.MainActivity;
+
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 
 public class Database extends SQLiteOpenHelper implements Serializable {
 
@@ -27,6 +25,13 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     private static final String WORD_VIETNAMESE = "vietnamese";
     private static final String WORD_NOTIFICATION = "notification";
     private static final String WORD_AUTO = "auto";
+    private static final String WORD_GAME = "game";
+    private static final String WORD_TAGS = "tags";
+    private static final String WORD_TYPES = "types";
+    private static final String WORD_RELATED_WORDS = "relatedWords";
+    private static final String WORD_SYNONYMS = "synonyms";
+    private static final String WORD_ANTONYMS = "antonyms";
+    private static final String WORD_FORGET = "forget";
 
     private static final String TABLE_CONFIG = "config";
     private static final String CONFIG_ID = "id";
@@ -46,8 +51,16 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s TEXT, " +
                                 "%s TEXT, " +
                                 "%s INTEGER, " +
+                                "%s INTEGER, " +
+                                "%s INTEGER, " +
+                                "%s TEXT, " +
+                                "%s TEXT, " +
+                                "%s TEXT, " +
+                                "%s TEXT, " +
+                                "%s TEXT, " +
                                 "%s INTEGER)",
-                        TABLE_WORD, WORD_ID, WORD_DATE, WORD_ENGLISH, WORD_VIETNAMESE, WORD_NOTIFICATION, WORD_AUTO);
+                        TABLE_WORD, WORD_ID, WORD_DATE, WORD_ENGLISH, WORD_VIETNAMESE, WORD_NOTIFICATION, WORD_AUTO,
+                        WORD_GAME, WORD_TAGS, WORD_TYPES, WORD_RELATED_WORDS, WORD_SYNONYMS, WORD_ANTONYMS, WORD_FORGET);
 
         String createTableConfig =
                 String.format("CREATE TABLE IF NOT EXISTS %s(" +
@@ -106,8 +119,10 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', '%s', %s, %s);",
-                TABLE_WORD, data.date, data.english, data.vietnamese, data.notification, data.auto);
+        String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', '%s', %s, %s, %s, '%s', " +
+                        "'%s', '%s', '%s', '%s', %s);",
+                TABLE_WORD, data.date, data.english, data.vietnamese, data.notification, data.auto, data.game,
+                data.tags, data.types, data.relatedWords, data.synonyms, data.antonyms, data.forget);
 
         db.execSQL(query);
         db.close();
@@ -117,9 +132,12 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     public void updateData(ItemData data){
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = String.format("UPDATE %s SET %s = '%s', %s = '%s', %s = '%s', %s = %s, %s = %s WHERE %s = %s",
+        String query = String.format("UPDATE %s SET %s = '%s', %s = '%s', %s = '%s', %s = %s, %s = %s, %s = %s, " +
+                        "%s = '%s', %s = '%s', %s = '%s', %s = '%s', %s = '%s', %s = %s WHERE %s = %s",
                 TABLE_WORD, WORD_DATE, data.date, WORD_ENGLISH, data.english, WORD_VIETNAMESE, data.vietnamese,
-                WORD_NOTIFICATION, data.notification, WORD_AUTO, data.auto, WORD_ID, data.id);
+                WORD_NOTIFICATION, data.notification, WORD_AUTO, data.auto, WORD_GAME, data.game,
+                WORD_TAGS, data.tags, WORD_TYPES, data.types, WORD_RELATED_WORDS, data.relatedWords, WORD_SYNONYMS,
+                data.synonyms, WORD_ANTONYMS, data.antonyms, WORD_FORGET, data.forget, WORD_ID, data.id);
 
         db.execSQL(query);
         db.close();
@@ -154,7 +172,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         while (cursor.moveToNext()){
             itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
                     cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                    cursor.getInt(5));
+                    cursor.getInt(5), cursor.getInt(6), cursor.getString(7),
+                    cursor.getString(8), cursor.getString(9), cursor.getString(10),
+                    cursor.getString(11), cursor.getInt(12));
             break;
         }
         db.close();
@@ -181,7 +201,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         while (cursor.moveToNext()){
             ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
                     cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                    cursor.getInt(5));
+                    cursor.getInt(5), cursor.getInt(6), cursor.getString(7),
+                    cursor.getString(8), cursor.getString(9), cursor.getString(10),
+                    cursor.getString(11), cursor.getInt(12));
             listData.add(itemData);
         }
         db.close();
@@ -199,7 +221,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         while (cursor.moveToNext()){
             ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
                     cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                    cursor.getInt(5));
+                    cursor.getInt(5), cursor.getInt(6), cursor.getString(7),
+                    cursor.getString(8), cursor.getString(9), cursor.getString(10),
+                    cursor.getString(11), cursor.getInt(12));
             listData.add(itemData);
         }
         db.close();
@@ -213,7 +237,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         cursor.moveToNext();
         ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
                 cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                cursor.getInt(5));
+                cursor.getInt(5), cursor.getInt(6), cursor.getString(7),
+                cursor.getString(8), cursor.getString(9), cursor.getString(10),
+                cursor.getString(11), cursor.getInt(12));
         db.close();
         return itemData;
     }
