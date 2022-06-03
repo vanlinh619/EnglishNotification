@@ -1,4 +1,4 @@
-package com.example.englishnotification.model;
+package com.example.englishnotification.model.database;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -9,6 +9,9 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 
 import com.example.englishnotification.MainActivity;
+import com.example.englishnotification.model.Config;
+import com.example.englishnotification.model.Type;
+import com.example.englishnotification.model.Word;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,21 +25,41 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     private static final String WORD_ID = "id";
     private static final String WORD_DATE = "date";
     private static final String WORD_ENGLISH = "english";
-    private static final String WORD_VIETNAMESE = "vietnamese";
     private static final String WORD_NOTIFICATION = "notification";
     private static final String WORD_AUTO = "auto";
     private static final String WORD_GAME = "game";
-    private static final String WORD_TAGS = "tags";
-    private static final String WORD_TYPES = "types";
-    private static final String WORD_RELATED_WORDS = "relatedWords";
-    private static final String WORD_SYNONYMS = "synonyms";
-    private static final String WORD_ANTONYMS = "antonyms";
     private static final String WORD_FORGET = "forget";
 
     private static final String TABLE_CONFIG = "config";
     private static final String CONFIG_ID = "id";
-    private static final String CONFIG_AUTO_NOTIFY = "autonotify";
+    private static final String CONFIG_AUTO_NOTIFY = "auto_notify";
 
+    private static final String TABLE_TAG = "tag";
+    private static final String TAG_ID = "id";
+    private static final String TAG_NAME = "name";
+
+    private static final String TABLE_TAG_WORD = "tag_word";
+    private static final String TAG_WORD_ID = "id";
+    private static final String TAG_WORD_TAG_ID = "tag_id";
+    private static final String TAG_WORD_WORD_ID = "word_id";
+
+    private static final String TABLE_WORD_WORD = "word_word";
+    private static final String WORD_WORD_ID = "id";
+    private static final String WORD_WORD_WORD_ID = "word_id";
+    private static final String WORD_WORD_WORD_RELATION_ID = "word_relation_id";
+    private static final String WORD_WORD_TYPE_RELATION = "type_relation";
+
+    private static final String TABLE_MEAN = "mean";
+    private static final String MEAN_ID = "id";
+    private static final String MEAN_TYPE = "mean_type";
+    private static final String MEAN_MEAN = "mean_word";
+
+    private static final String TABLE_MEAN_WORD = "mean_word";
+    private static final String MEAN_WORD_ID = "id";
+    private static final String MEAN_WORD_TYPE_ID = "type_id";
+    private static final String MEAN_WORD_WORD_ID = "word_id";
+
+    public DataType dataType;
 
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -49,18 +72,12 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
                                 "%s TEXT, " +
                                 "%s TEXT, " +
-                                "%s TEXT, " +
                                 "%s INTEGER, " +
                                 "%s INTEGER, " +
                                 "%s INTEGER, " +
-                                "%s TEXT, " +
-                                "%s TEXT, " +
-                                "%s TEXT, " +
-                                "%s TEXT, " +
-                                "%s TEXT, " +
                                 "%s INTEGER)",
-                        TABLE_WORD, WORD_ID, WORD_DATE, WORD_ENGLISH, WORD_VIETNAMESE, WORD_NOTIFICATION, WORD_AUTO,
-                        WORD_GAME, WORD_TAGS, WORD_TYPES, WORD_RELATED_WORDS, WORD_SYNONYMS, WORD_ANTONYMS, WORD_FORGET);
+                        TABLE_WORD, WORD_ID, WORD_DATE, WORD_ENGLISH, WORD_NOTIFICATION, WORD_AUTO,
+                        WORD_GAME, WORD_FORGET);
 
         String createTableConfig =
                 String.format("CREATE TABLE IF NOT EXISTS %s(" +
@@ -68,8 +85,52 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER)",
                         TABLE_CONFIG, CONFIG_ID, CONFIG_AUTO_NOTIFY);
 
+        String createTableTag =
+                String.format("CREATE TABLE IF NOT EXISTS %s(" +
+                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "%s TEXT)",
+                        TABLE_TAG, TAG_ID, TAG_NAME);
+
+
+
+        String createTableTagWord =
+                String.format("CREATE TABLE IF NOT EXISTS %s(" +
+                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "%s INTEGER, " +
+                                "%s INTEGER)",
+                        TABLE_TAG_WORD, TAG_WORD_ID, TAG_WORD_TAG_ID, TAG_WORD_WORD_ID);
+
+        String createTableMean =
+                String.format("CREATE TABLE IF NOT EXISTS %s(" +
+                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "%s INTEGER, " +
+                                "%s TEXT)",
+                        TABLE_MEAN, MEAN_ID, MEAN_TYPE, MEAN_MEAN);
+
+        String createTableMeanWord =
+                String.format("CREATE TABLE IF NOT EXISTS %s(" +
+                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "%s INTEGER, " +
+                                "%s INTEGER)",
+                        TABLE_MEAN_WORD, MEAN_WORD_ID, MEAN_WORD_TYPE_ID, MEAN_WORD_WORD_ID);
+
+        String createTableWordWord =
+                String.format("CREATE TABLE IF NOT EXISTS %s(" +
+                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                                "%s INTEGER, " +
+                                "%s INTEGER, " +
+                                "%s INTEGER)",
+                        TABLE_WORD_WORD, WORD_WORD_ID, WORD_WORD_WORD_ID, WORD_WORD_WORD_RELATION_ID, WORD_WORD_TYPE_RELATION);
+
+        dataType.createTable(db);
+
         db.execSQL(createTableProject);
         db.execSQL(createTableConfig);
+        db.execSQL(createTableTag);
+        db.execSQL(createTableTagWord);
+        db.execSQL(createTableMean);
+        db.execSQL(createTableMeanWord);
+        db.execSQL(createTableWordWord);
     }
 
     @Override
@@ -112,32 +173,29 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         db.close();
     }
 
-    public boolean addData(ItemData data){
+    public boolean addNewWord(Word data){
         if(getItemEnglish(data.english) != null) {
             return false;
         }
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', '%s', %s, %s, %s, '%s', " +
-                        "'%s', '%s', '%s', '%s', %s);",
-                TABLE_WORD, data.date, data.english, data.vietnamese, data.notification, data.auto, data.game,
-                data.tags, data.types, data.relatedWords, data.synonyms, data.antonyms, data.forget);
+        String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', %s, %s, %s, %s);",
+                TABLE_WORD, data.date, data.english, data.notification, data.auto, data.game,
+                data.forget);
 
         db.execSQL(query);
         db.close();
         return true;
     }
 
-    public void updateData(ItemData data){
+    public void updateWord(Word data){
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String query = String.format("UPDATE %s SET %s = '%s', %s = '%s', %s = '%s', %s = %s, %s = %s, %s = %s, " +
-                        "%s = '%s', %s = '%s', %s = '%s', %s = '%s', %s = '%s', %s = %s WHERE %s = %s",
-                TABLE_WORD, WORD_DATE, data.date, WORD_ENGLISH, data.english, WORD_VIETNAMESE, data.vietnamese,
-                WORD_NOTIFICATION, data.notification, WORD_AUTO, data.auto, WORD_GAME, data.game,
-                WORD_TAGS, data.tags, WORD_TYPES, data.types, WORD_RELATED_WORDS, data.relatedWords, WORD_SYNONYMS,
-                data.synonyms, WORD_ANTONYMS, data.antonyms, WORD_FORGET, data.forget, WORD_ID, data.id);
+        String query = String.format("UPDATE %s SET %s = '%s', %s = '%s', %s = %s, %s = %s, " +
+                        "%s = %s, %s = %s WHERE %s = %s",
+                TABLE_WORD, WORD_DATE, data.date, WORD_ENGLISH, data.english, WORD_NOTIFICATION, data.notification,
+                WORD_AUTO, data.auto, WORD_GAME, data.game, WORD_FORGET, data.forget, WORD_ID, data.id);
 
         db.execSQL(query);
         db.close();
@@ -163,22 +221,20 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         db.close();
     }
 
-    public ItemData getItemEnglish(String english){
+    public Word getItemEnglish(String english){
         SQLiteDatabase db = this.getReadableDatabase();
 
         String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_ENGLISH, english);
         Cursor cursor = db.rawQuery(query, null);
-        ItemData itemData = null;
+        Word word = null;
         while (cursor.moveToNext()){
-            itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                    cursor.getInt(5), cursor.getInt(6), cursor.getString(7),
-                    cursor.getString(8), cursor.getString(9), cursor.getString(10),
-                    cursor.getString(11), cursor.getInt(12));
+            word = new Word(cursor.getInt(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
+                    cursor.getInt(5), cursor.getInt(6));
             break;
         }
         db.close();
-        return itemData;
+        return word;
     }
 
     public void deleteData(int id){
@@ -191,56 +247,58 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public ArrayList<ItemData> getAll(){
+    public ArrayList<Word> getAll(){
         SQLiteDatabase db = getReadableDatabase();
 
         String query = "SELECT * FROM " + TABLE_WORD;
         Cursor cursor = db.rawQuery(query, null);
 
-        ArrayList<ItemData> listData = new ArrayList<>();
+        ArrayList<Word> listData = new ArrayList<>();
         while (cursor.moveToNext()){
-            ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                    cursor.getInt(5), cursor.getInt(6), cursor.getString(7),
-                    cursor.getString(8), cursor.getString(9), cursor.getString(10),
-                    cursor.getString(11), cursor.getInt(12));
-            listData.add(itemData);
+            Word word = new Word(cursor.getInt(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
+                    cursor.getInt(5), cursor.getInt(6));
+            listData.add(word);
         }
         db.close();
         MainActivity.sortList(listData);
         return listData;
     }
 
-    public ArrayList<ItemData> getDataForNotification(){
+    public ArrayList<Word> getDataForNotification(){
         SQLiteDatabase db = getReadableDatabase();
 
         String query = String.format("SELECT * FROM %s WHERE %s = %s", TABLE_WORD, WORD_AUTO, 1);
         Cursor cursor = db.rawQuery(query, null);
 
-        ArrayList<ItemData> listData = new ArrayList<>();
+        ArrayList<Word> listData = new ArrayList<>();
         while (cursor.moveToNext()){
-            ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                    cursor.getInt(5), cursor.getInt(6), cursor.getString(7),
-                    cursor.getString(8), cursor.getString(9), cursor.getString(10),
-                    cursor.getString(11), cursor.getInt(12));
-            listData.add(itemData);
+            Word word = new Word(cursor.getInt(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
+                    cursor.getInt(5), cursor.getInt(6));
+            listData.add(word);
         }
         db.close();
         return listData;
     }
 
-    public ItemData getNewItem(){
+    public Word getNewWord(){
         SQLiteDatabase db = getReadableDatabase();
         String query = String.format("SELECT * FROM %s ORDER BY %s DESC LIMIT 1", TABLE_WORD, WORD_ID);
         Cursor cursor = db.rawQuery(query, null);
         cursor.moveToNext();
-        ItemData itemData = new ItemData(cursor.getInt(0), cursor.getString(1),
-                cursor.getString(2), cursor.getString(3), cursor.getInt(4),
-                cursor.getInt(5), cursor.getInt(6), cursor.getString(7),
-                cursor.getString(8), cursor.getString(9), cursor.getString(10),
-                cursor.getString(11), cursor.getInt(12));
+        Word word = new Word(cursor.getInt(0), cursor.getString(1),
+                cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
+                cursor.getInt(5), cursor.getInt(6));
         db.close();
-        return itemData;
+        return word;
+    }
+
+    public void addNewType(Type type) {
+        dataType.addNewType(type, this);
+    }
+
+    public ArrayList<Type> getAllType(){
+        return dataType.getAll(this);
     }
 }

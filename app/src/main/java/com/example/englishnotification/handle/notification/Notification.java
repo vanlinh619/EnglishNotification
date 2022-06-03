@@ -1,4 +1,4 @@
-package com.example.englishnotification.handle;
+package com.example.englishnotification.handle.notification;
 
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.R;
+import com.example.englishnotification.handle.notification.NotificationReceiver;
 
 public class Notification extends ContextWrapper {
     public static final String channelID = "channelID";

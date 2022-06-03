@@ -1,4 +1,4 @@
-package com.example.englishnotification.handle;
+package com.example.englishnotification.handle.CustomList;
 
 
 import android.annotation.SuppressLint;
@@ -26,7 +26,8 @@ import com.example.englishnotification.DialogAddEditWord;
 import com.example.englishnotification.DialogExample;
 import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.R;
-import com.example.englishnotification.model.ItemData;
+import com.example.englishnotification.handle.Example;
+import com.example.englishnotification.model.Word;
 import com.example.englishnotification.model.ItemDataExample;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -34,18 +35,16 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import org.jsoup.select.Elements;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> implements Serializable {
 
-    private ArrayList<ItemData> listData;
+    private ArrayList<Word> listData;
     private ItemListAdapter.ViewHolder viewHolder;
     private MainActivity mainActivity;
     private ArrayList<ItemDataExample> listExample;
 
-    public ItemListAdapter(ArrayList<ItemData> listData, MainActivity mainActivity) {
+    public ItemListAdapter(ArrayList<Word> listData, MainActivity mainActivity) {
         this.listData = listData;
         this.mainActivity = mainActivity;
     }
@@ -63,19 +62,19 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             shrinkView(holder);
         }
 
-        ItemData itemData = listData.get(position);
+        Word word = listData.get(position);
 
-        holder.txEnglish.setText(itemData.english);
-        holder.txVietnamese.setText(itemData.vietnamese);
-        holder.txDate.setText(itemData.date);
-        holder.txId.setText((listData.size() - listData.indexOf(itemData)) + "");
+        holder.txEnglish.setText(word.english);
+        //holder.txVietnamese.setText(word.vietnamese);
+        holder.txDate.setText(word.date);
+        holder.txId.setText((listData.size() - listData.indexOf(word)) + "");
 
-        holder.txEnglishExpand.setText(itemData.english);
-        holder.txVietnameseExpand.setText(itemData.vietnamese);
-        holder.txDateExpand.setText(itemData.date);
-        holder.txIdExpand.setText((listData.size() - listData.indexOf(itemData)) + "");
+        holder.txEnglishExpand.setText(word.english);
+        //holder.txVietnameseExpand.setText(word.vietnamese);
+        holder.txDateExpand.setText(word.date);
+        holder.txIdExpand.setText((listData.size() - listData.indexOf(word)) + "");
 
-        if (itemData.notification == 0) {
+        if (word.notification == 0) {
             holder.imNotification.setImageResource(R.drawable.notification);
         } else {
             holder.imNotification.setImageResource(R.drawable.notification_blue);
@@ -85,7 +84,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             holder.imAutoNotification.setVisibility(View.GONE);
         } else {
             holder.imAutoNotification.setVisibility(View.VISIBLE);
-            if (itemData.auto == 0) {
+            if (word.auto == 0) {
                 holder.imAutoNotification.setImageResource(R.drawable.bot);
             } else {
                 holder.imAutoNotification.setImageResource(R.drawable.bot_blue);
@@ -112,7 +111,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 FragmentManager fm = mainActivity.getSupportFragmentManager();
                 DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord
-                        .newInstance(mainActivity, listData.get(position), MainActivity.UPDATE);
+                        .newInstance(mainActivity, listData.get(position), DialogAddEditWord.UPDATE);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });
@@ -142,7 +141,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 holder.imSpeak.setImageResource(R.drawable.volume_blue);
                 holder.imSpeak.setEnabled(false);
-                mainActivity.speak(itemData.english, itemData.vietnamese);
+                //mainActivity.speak(word.english, word.vietnamese);
                 CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
@@ -161,45 +160,45 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainActivity.translatorEnglish.translate(itemData.english)
+                mainActivity.translatorEnglish.translate(word.english)
                         .addOnSuccessListener(
                                 new OnSuccessListener() {
                                     @Override
                                     public void onSuccess(Object o) {
-                                        if (o.toString().toLowerCase().equals(itemData.vietnamese.toLowerCase())) {
-                                            new AlertDialog.Builder(mainActivity)
-                                                    .setTitle(itemData.english)
-                                                    .setMessage(o.toString())
-                                                    .setNegativeButton("Close", null)
-                                                    .show();
-                                        } else {
-                                            new AlertDialog.Builder(mainActivity)
-                                                    .setTitle(itemData.english)
-                                                    .setMessage(o.toString())
-                                                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                                                        @RequiresApi(api = Build.VERSION_CODES.N)
-                                                        @Override
-                                                        public void onClick(DialogInterface dialog, int which) {
-                                                            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-                                                            String date = format.format(new Date());
-                                                            itemData.date = date;
-                                                            itemData.vietnamese = o.toString();
-                                                            mainActivity.database.updateData(itemData);
-                                                            for (ItemData item : mainActivity.listData) {
-                                                                if (item.id == itemData.id) {
-                                                                    item.english = itemData.english;
-                                                                    item.vietnamese = itemData.vietnamese;
-                                                                    item.date = itemData.date;
-                                                                    break;
-                                                                }
-                                                            }
-                                                            mainActivity.reloadList();
-                                                            dialog.dismiss();
-                                                        }
-                                                    })
-                                                    .setNegativeButton("Close", null)
-                                                    .show();
-                                        }
+//                                        if (o.toString().toLowerCase().equals(word.vietnamese.toLowerCase())) {
+//                                            new AlertDialog.Builder(mainActivity)
+//                                                    .setTitle(word.english)
+//                                                    .setMessage(o.toString())
+//                                                    .setNegativeButton("Close", null)
+//                                                    .show();
+//                                        } else {
+//                                            new AlertDialog.Builder(mainActivity)
+//                                                    .setTitle(word.english)
+//                                                    .setMessage(o.toString())
+//                                                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+//                                                        @RequiresApi(api = Build.VERSION_CODES.N)
+//                                                        @Override
+//                                                        public void onClick(DialogInterface dialog, int which) {
+//                                                            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+//                                                            String date = format.format(new Date());
+//                                                            word.date = date;
+//                                                            word.vietnamese = o.toString();
+//                                                            mainActivity.database.updateWord(word);
+//                                                            for (Word item : mainActivity.listData) {
+//                                                                if (item.id == word.id) {
+//                                                                    item.english = word.english;
+//                                                                    item.vietnamese = word.vietnamese;
+//                                                                    item.date = word.date;
+//                                                                    break;
+//                                                                }
+//                                                            }
+//                                                            mainActivity.reloadList();
+//                                                            dialog.dismiss();
+//                                                        }
+//                                                    })
+//                                                    .setNegativeButton("Close", null)
+//                                                    .show();
+//                                        }
                                     }
                                 })
                         .addOnFailureListener(
@@ -216,30 +215,30 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (itemData.notification == 0) {
+                if (word.notification == 0) {
                     holder.imNotification.setImageResource(R.drawable.notification_blue);
-                    itemData.notification = 1;
-                    mainActivity.setRepeatAlarm(itemData);
+                    word.notification = 1;
+                    mainActivity.setRepeatAlarm(word);
                 } else {
                     holder.imNotification.setImageResource(R.drawable.notification);
-                    itemData.notification = 0;
-                    mainActivity.destroyRepeatAlarm(itemData);
+                    word.notification = 0;
+                    mainActivity.destroyRepeatAlarm(word);
                 }
-                mainActivity.database.updateData(itemData);
+                mainActivity.database.updateWord(word);
             }
         });
 
         holder.imAutoNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (itemData.auto == 0) {
+                if (word.auto == 0) {
                     holder.imAutoNotification.setImageResource(R.drawable.bot_blue);
-                    itemData.auto = 1;
+                    word.auto = 1;
                 } else {
                     holder.imAutoNotification.setImageResource(R.drawable.bot);
-                    itemData.auto = 0;
+                    word.auto = 0;
                 }
-                mainActivity.database.updateData(itemData);
+                mainActivity.database.updateWord(word);
             }
         });
 
@@ -251,10 +250,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                     public void translate(Elements elements) {
                         listExample = new ArrayList<>();
                         DataLoop dataLoop = new DataLoop();
-                        translateElement(dataLoop, elements, listExample, itemData.english);
+                        translateElement(dataLoop, elements, listExample, word.english);
                     }
                 }, mainActivity);
-                example.execute(itemData.english);
+                example.execute(word.english);
             }
         });
 
@@ -262,9 +261,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             @Override
             public void onClick(View v) {
                 ClipboardManager clipboard = (ClipboardManager) mainActivity.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("EnglishNotification", itemData.english);
+                ClipData clip = ClipData.newPlainText("EnglishNotification", word.english);
                 clipboard.setPrimaryClip(clip);
-                Toast.makeText(mainActivity, "Copied: " + itemData.english, Toast.LENGTH_SHORT).show();
+                Toast.makeText(mainActivity, "Copied: " + word.english, Toast.LENGTH_SHORT).show();
             }
         });
 

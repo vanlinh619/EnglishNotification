@@ -40,13 +40,14 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.englishnotification.handle.AlarmReceiver;
-import com.example.englishnotification.handle.BotReceiver;
-import com.example.englishnotification.handle.ItemListAdapter;
-import com.example.englishnotification.handle.Notification;
+import com.example.englishnotification.handle.notification.AlarmReceiver;
+import com.example.englishnotification.handle.notification.BotReceiver;
+import com.example.englishnotification.handle.CustomList.ItemListAdapter;
+import com.example.englishnotification.handle.notification.Notification;
 import com.example.englishnotification.model.Config;
-import com.example.englishnotification.model.Database;
-import com.example.englishnotification.model.ItemData;
+import com.example.englishnotification.model.database.Database;
+import com.example.englishnotification.model.Type;
+import com.example.englishnotification.model.Word;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.common.model.DownloadConditions;
@@ -76,16 +77,12 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public static final int FILTER_1 = 3;
     public static final int FILTER_2 = 4;
     public static final int FILTER_3 = 5;
-    public static final int ADD_WORD = 6;
-    public static final int TRANSLATE = 7;
-    public static final int GAME = 8;
-    public static final int UPDATE = 9;
     private int englishSort = FILTER_1;
     private int notifyFilter = FILTER_1;
     private int botFilter = FILTER_1;
     private ItemListAdapter adapter;
     private RecyclerView rcListWord;
-    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate, imGame;
+    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate, imGame, imAddType;
     private EditText edSearch;
     private TextView txTitle, txEnglishSort, txNotifyFilter, txBotFilter;
     private ConstraintLayout ctOption, ctHead, ctHeaderButton;
@@ -93,7 +90,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private SwipeRefreshLayout srRefresh;
     private final String fileName = "english.en";
     public Database database;
-    public ArrayList<ItemData> listData, listTmp;
+    public ArrayList<Word> listData, listTmp;
+    public ArrayList<Type> types;
     public TextToSpeech textToSpeechEnglish;
     public TextToSpeech textToSpeechVietnamese;
     public Translator translatorEnglish, translatorVietnamese;
@@ -169,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
         database = new Database(this);
         listData = database.getAll();
+        types = database.getAllType();
         listTmp = new ArrayList<>();
 
         //Config
@@ -186,9 +185,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fm = getSupportFragmentManager();
-                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, null, ADD_WORD);
-                dialogAddEditWord.show(fm, "fragment_edit_name");
+                Intent intent = new Intent(MainActivity.this, HandleWordActivity.class);
+                intent.putExtra("types", types);
+                startActivity(intent);
             }
         });
 
@@ -212,15 +211,15 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
             @Override
             public void afterTextChanged(Editable s) {
-                ArrayList<ItemData> list = new ArrayList<>();
-                for (ItemData itemData : listData) {
-                    String english = itemData.english.toLowerCase();
-                    String vietnamese = itemData.vietnamese.toLowerCase();
+                ArrayList<Word> list = new ArrayList<>();
+                for (Word word : listData) {
+                    String english = word.english.toLowerCase();
+//                    String vietnamese = word.vietnamese.toLowerCase();
 
-                    if (english.indexOf(s.toString().toLowerCase()) != -1 ||
-                            vietnamese.indexOf(s.toString().toLowerCase()) != -1) {
-                        list.add(itemData);
-                    }
+//                    if (english.indexOf(s.toString().toLowerCase()) != -1 ||
+//                            vietnamese.indexOf(s.toString().toLowerCase()) != -1) {
+//                        list.add(word);
+//                    }
                 }
                 adapter = new ItemListAdapter(list, MainActivity.this);
                 rcListWord.setAdapter(adapter);
@@ -298,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                             try {
                                 FileOutputStream stream = new FileOutputStream(file);
                                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(stream);
-                                for (ItemData itemData : listData) {
+                                for (Word itemData : listData) {
                                     objectOutputStream.writeObject(itemData);
                                 }
                                 objectOutputStream.close();
@@ -334,14 +333,14 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         public void run() {
                             File dir = getExternalFilesDir(null);
                             File file = new File(dir.getAbsolutePath(), fileName);
-                            ArrayList<ItemData> list = new ArrayList<>();
+                            ArrayList<Word> list = new ArrayList<>();
                             try {
                                 FileInputStream stream = new FileInputStream(file);
                                 ObjectInputStream objectInputStream = new ObjectInputStream(stream);
                                 while (true) {
-                                    ItemData itemData = (ItemData) objectInputStream.readObject();
-                                    if (itemData != null) {
-                                        list.add(itemData);
+                                    Word word = (Word) objectInputStream.readObject();
+                                    if (word != null) {
+                                        list.add(word);
                                     } else {
                                         break;
                                     }
@@ -361,9 +360,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                             }
                             if (list.size() > 0) {
                                 for (int i = list.size() - 1; i >= 0; i--) {
-                                    boolean added = database.addData(list.get(i));
+                                    boolean added = database.addNewWord(list.get(i));
                                     if (added) {
-                                        ItemData item = database.getNewItem();
+                                        Word item = database.getNewWord();
                                         listData.add(item);
                                     }
                                 }
@@ -414,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getSupportFragmentManager();
-                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, null, TRANSLATE);
+                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, (Word) null, DialogAddEditWord.TRANSLATE);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });
@@ -423,6 +422,15 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void onClick(View v) {
                 showDialogCheckWord();
+            }
+        });
+
+        imAddType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getSupportFragmentManager();
+                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, (Type) null, DialogAddEditWord.ADD_TYPE);
+                dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });
 
@@ -441,9 +449,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public void showDialogCheckWord(){
         Random random = new Random();
         int index = random.nextInt(listData.size());
-        ItemData itemData = listData.get(index);
+        Word word = listData.get(index);
         FragmentManager fm = getSupportFragmentManager();
-        DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, itemData, GAME);
+        DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, word, DialogAddEditWord.GAME);
         dialogAddEditWord.show(fm, "fragment_edit_name");
     }
 
@@ -546,20 +554,20 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public static void sortList(ArrayList<ItemData> list) {
-        list.sort(new Comparator<ItemData>() {
+    public static void sortList(ArrayList<Word> list) {
+        list.sort(new Comparator<Word>() {
             @Override
-            public int compare(ItemData o1, ItemData o2) {
+            public int compare(Word o1, Word o2) {
                 return o1.id <= o2.id ? 1 : -1;
             }
         });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void sortByName(ArrayList<ItemData> list, int flags) {
-        list.sort(new Comparator<ItemData>() {
+    public void sortByName(ArrayList<Word> list, int flags) {
+        list.sort(new Comparator<Word>() {
             @Override
-            public int compare(ItemData o1, ItemData o2) {
+            public int compare(Word o1, Word o2) {
                 if (flags == 0) {
                     return o1.english.toLowerCase().compareTo(o2.english.toLowerCase());
                 } else {
@@ -571,9 +579,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public void filterByNotify(int flags) {
         for (int i = listData.size() - 1; i >= 0; i--) {
-            ItemData itemData = listData.get(i);
-            if (itemData.notification != flags) {
-                listTmp.add(itemData);
+            Word word = listData.get(i);
+            if (word.notification != flags) {
+                listTmp.add(word);
                 listData.remove(i);
             }
         }
@@ -590,9 +598,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public void filterByBot(int flags) {
         for (int i = listData.size() - 1; i >= 0; i--) {
-            ItemData itemData = listData.get(i);
-            if (itemData.auto != flags) {
-                listTmp.add(itemData);
+            Word word = listData.get(i);
+            if (word.auto != flags) {
+                listTmp.add(word);
                 listData.remove(i);
             }
         }
@@ -646,12 +654,12 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void updateViewNotify(int id, int flags) {
-        for (ItemData itemData : listData) {
-            if (id == itemData.id) {
+        for (Word word : listData) {
+            if (id == word.id) {
                 if (flags == Notification.PERSON_SETUP_NOTIFY) {
-                    itemData.notification = 0;
+                    word.notification = 0;
                 } else {
-                    itemData.auto = 0;
+                    word.auto = 0;
                 }
                 reloadList();
                 break;
@@ -689,6 +697,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imGame = findViewById(R.id.im_game);
         srRefresh = findViewById(R.id.sr_refresh);
         ctHeaderButton = findViewById(R.id.ct_header_button);
+        imAddType = findViewById(R.id.im_add_type);
     }
 
     public void setAutoNotify() {
@@ -707,23 +716,23 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
     }
 
-    public void setRepeatAlarm(ItemData itemData) {
+    public void setRepeatAlarm(Word word) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         Intent intent = new Intent(this, AlarmReceiver.class);
         Bundle bundle = new Bundle();
-        bundle.putString("english", itemData.english);
-        bundle.putString("vietnamese", itemData.vietnamese);
-        bundle.putInt("id", itemData.id);
+        bundle.putString("english", word.english);
+//        bundle.putString("vietnamese", word.vietnamese);
+        bundle.putInt("id", word.id);
         intent.putExtra("bundle", bundle);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, itemData.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, word.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (2 * 60 * 60 * 1000), 2 * 60 * 60 * 1000, pendingIntent);
     }
 
-    public void destroyRepeatAlarm(ItemData itemData) {
+    public void destroyRepeatAlarm(Word word) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, itemData.id, intent, PendingIntent.FLAG_NO_CREATE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, word.id, intent, PendingIntent.FLAG_NO_CREATE);
         if (pendingIntent != null && alarmManager != null) {
             alarmManager.cancel(pendingIntent);
         }

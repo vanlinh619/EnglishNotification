@@ -1,4 +1,4 @@
-package com.example.englishnotification.handle;
+package com.example.englishnotification.handle.notification;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

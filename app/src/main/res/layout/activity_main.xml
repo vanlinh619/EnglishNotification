@@ -12,7 +12,6 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:background="#FAFAFA"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/sr_refresh"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -59,6 +58,17 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/im_export"
             app:layout_constraintTop_toTopOf="@id/im_export" />
+
+        <ImageView
+            android:id="@+id/im_add_type"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/image_button_click"
+            android:src="@drawable/console"
+            app:layout_constraintBottom_toBottomOf="@id/im_import"
+            app:layout_constraintLeft_toLeftOf="@+id/im_game"
+            app:layout_constraintRight_toRightOf="@id/im_game"
+            app:layout_constraintTop_toTopOf="@id/im_import" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

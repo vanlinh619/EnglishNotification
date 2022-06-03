@@ -1,4 +1,4 @@
-package com.example.englishnotification.handle;
+package com.example.englishnotification.handle.CustomList;
 
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;

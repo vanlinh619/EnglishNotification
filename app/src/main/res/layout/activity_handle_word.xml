@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HandleWordActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/im_back"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/image_button_click"
+                android:src="@drawable/translate"/>
+
+            <TextView
+                android:id="@+id/tx_title"
+                android:text="Word"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-black"
+                app:layout_constraintTop_toTopOf="@+id/im_back"
+                app:layout_constraintLeft_toRightOf="@+id/im_back"
+                app:layout_constraintBottom_toBottomOf="@+id/im_back"
+                app:layout_constraintRight_toLeftOf="@+id/im_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <ImageView
+                android:id="@+id/im_clear"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/image_button_click"
+                android:src="@drawable/translate"/>
+
+            <ImageView
+                app:layout_constraintLeft_toLeftOf="parent"
+                android:background="#B9ACACAC"
+                app:layout_constraintTop_toBottomOf="@+id/tx_title"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"/>
+
+            <EditText
+                android:id="@+id/ed_english"
+                android:hint="English"
+                android:drawableLeft="@drawable/icon_english"
+                android:drawableRight="@drawable/icon_delete"
+                android:background="@drawable/border_edittext"
+                app:layout_constraintTop_toBottomOf="@+id/im_back"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="50dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rc_mean"
+                app:layout_constraintTop_toBottomOf="@+id/ed_english"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <HorizontalScrollView
+                android:id="@+id/hs_position"
+                app:layout_constraintTop_toBottomOf="@+id/rc_mean"
+                android:layout_marginTop="10dp"
+                android:scrollbars="none"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/cg_type"
+                    app:singleLine="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </HorizontalScrollView>
+
+
+
+            <ImageView
+                android:id="@+id/im_handle"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/image_button_click"
+                android:src="@drawable/translate"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hs_position"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginBottom="20dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

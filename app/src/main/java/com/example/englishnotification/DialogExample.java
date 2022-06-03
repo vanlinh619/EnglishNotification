@@ -12,7 +12,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.englishnotification.handle.ItemListExampleAdapter;
+import com.example.englishnotification.handle.CustomList.ItemListExampleAdapter;
 import com.example.englishnotification.model.ItemDataExample;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.example.englishnotification.handle;
+package com.example.englishnotification.handle.notification;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,8 +9,8 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-import com.example.englishnotification.model.Database;
-import com.example.englishnotification.model.ItemData;
+import com.example.englishnotification.model.database.Database;
+import com.example.englishnotification.model.Word;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,7 +21,7 @@ public class BotReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Database database = new Database(context);
-        ArrayList<ItemData> list = database.getDataForNotification();
+        ArrayList<Word> list = database.getDataForNotification();
         Random random = new Random();
         int id[] = {-1, -1, -1};
         for (int i = 0; i < 3; i++){
@@ -34,14 +34,14 @@ public class BotReceiver extends BroadcastReceiver {
                     }
                 }
             }
-            ItemData itemData = list.get(id[i]);
+            Word word = list.get(id[i]);
             Bundle bundle = new Bundle();
-            bundle.putString("english", itemData.english);
-            bundle.putString("vietnamese", itemData.vietnamese);
-            bundle.putInt("id", itemData.id);
+            bundle.putString("english", word.english);
+            //bundle.putString("vietnamese", word.vietnamese);
+            bundle.putInt("id", word.id);
             Notification notification = new Notification(context);
             NotificationCompat.Builder nb = notification.getChannelNotification(bundle, Notification.BOT_SETUP_NOTIFY);
-            notification.getManager().notify(itemData.id, nb.build());
+            notification.getManager().notify(word.id, nb.build());
         }
     }
 }

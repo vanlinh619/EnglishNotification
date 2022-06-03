@@ -19,7 +19,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 
-import com.example.englishnotification.model.ItemData;
+import com.example.englishnotification.model.Type;
+import com.example.englishnotification.model.Word;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -28,6 +29,12 @@ import java.util.Date;
 
 public class DialogAddEditWord extends DialogFragment {
 
+    public static final int ADD_WORD = 6;
+    public static final int TRANSLATE = 7;
+    public static final int GAME = 8;
+    public static final int UPDATE = 9;
+    public static final int ADD_TYPE = 10;
+
     private EditText edEnglish;
     private EditText edVietnamese;
     private Button btAdd;
@@ -35,11 +42,21 @@ public class DialogAddEditWord extends DialogFragment {
     private TextView txTitle;
     private MainActivity mainActivity;
 
-    public static DialogAddEditWord newInstance(MainActivity mainActivity, ItemData itemData, int flags) {
+    public static DialogAddEditWord newInstance(MainActivity mainActivity, Word word, int flags) {
         DialogAddEditWord frag = new DialogAddEditWord();
         Bundle arg = new Bundle();
         arg.putSerializable("mainActivity", mainActivity);
-        arg.putSerializable("itemData", itemData);
+        arg.putSerializable("itemData", word);
+        arg.putSerializable("flags", flags);
+        frag.setArguments(arg);
+        return frag;
+    }
+
+    public static DialogAddEditWord newInstance(MainActivity mainActivity, Type type, int flags) {
+        DialogAddEditWord frag = new DialogAddEditWord();
+        Bundle arg = new Bundle();
+        arg.putSerializable("mainActivity", mainActivity);
+        arg.putSerializable("type", type);
         arg.putSerializable("flags", flags);
         frag.setArguments(arg);
         return frag;
@@ -58,32 +75,32 @@ public class DialogAddEditWord extends DialogFragment {
 
         Bundle bundle = getArguments();
         mainActivity = (MainActivity) bundle.getSerializable("mainActivity");
-        ItemData itemData = (ItemData) bundle.getSerializable("itemData");
+        Word word = (Word) bundle.getSerializable("itemData");
         int flags = (int) bundle.getSerializable("flags");
 
-        if (flags == MainActivity.UPDATE) {
+        if (flags == UPDATE) {
             btAdd.setText("Update");
             txTitle.setText("Edit Word");
-            edEnglish.setText(itemData.english);
-            edVietnamese.setText(itemData.vietnamese);
+            edEnglish.setText(word.english);
+//            edVietnamese.setText(word.vietnamese);
             btAdd.setOnClickListener(new View.OnClickListener() {
                 @RequiresApi(api = Build.VERSION_CODES.N)
                 @Override
                 public void onClick(View v) {
                     String english = edEnglish.getText().toString().trim();
                     String vietnamese = edVietnamese.getText().toString().trim();
-                    if (!english.equals("") && !wordExists(english, itemData.id)) {
+                    if (!english.equals("") && !wordExists(english, word.id)) {
                         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                         String date = format.format(new Date());
-                        itemData.date = date;
-                        itemData.english = english;
-                        itemData.vietnamese = vietnamese;
-                        mainActivity.database.updateData(itemData);
-                        for (ItemData item : mainActivity.listData) {
-                            if (item.id == itemData.id) {
-                                item.english = itemData.english;
-                                item.vietnamese = itemData.vietnamese;
-                                item.date = itemData.date;
+                        word.date = date;
+                        word.english = english;
+//                        word.vietnamese = vietnamese;
+                        mainActivity.database.updateWord(word);
+                        for (Word item : mainActivity.listData) {
+                            if (item.id == word.id) {
+                                item.english = word.english;
+//                                item.vietnamese = word.vietnamese;
+                                item.date = word.date;
                                 break;
                             }
                         }
@@ -98,9 +115,9 @@ public class DialogAddEditWord extends DialogFragment {
                     }
                 }
             });
-        } else if (flags == MainActivity.ADD_WORD) {
+        } else if (flags == ADD_WORD) {
             btAdd.setOnClickListener(addWord());
-        } else if (flags == MainActivity.TRANSLATE){
+        } else if (flags == TRANSLATE){
             txTitle.setText("Translate Word");
             btAdd.setText("Translate");
             edEnglish.addTextChangedListener(new TextWatcher() {
@@ -148,10 +165,10 @@ public class DialogAddEditWord extends DialogFragment {
                 }
             });
             btAdd.setOnClickListener(translateWord());
-        } else if (flags == MainActivity.GAME){
+        } else if (flags == GAME){
             txTitle.setText("Check Old Word");
             btAdd.setText("Check");
-            edEnglish.setText(itemData.english);
+            edEnglish.setText(word.english);
             btAdd.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -171,17 +188,32 @@ public class DialogAddEditWord extends DialogFragment {
                     };
                     mainActivity.setTextForSearch(edEnglish.getText().toString().trim());
                     String title = "";
-                    if(edVietnamese.getText().toString().trim().toLowerCase().equals(itemData.vietnamese.toLowerCase())){
-                        title = "Exact!";
-                    } else {
-                        title = "Incorrect!";
-                    }
+//                    if(edVietnamese.getText().toString().trim().toLowerCase().equals(word.vietnamese.toLowerCase())){
+//                        title = "Exact!";
+//                    } else {
+//                        title = "Incorrect!";
+//                    }
                     new AlertDialog.Builder(mainActivity)
                             .setTitle(title)
-                            .setMessage(itemData.english + " : " + itemData.vietnamese)
+//                            .setMessage(word.english + " : " + word.vietnamese)
                             .setNegativeButton("Close", listenerClose)
                             .setPositiveButton("Continue", listenerContinue)
                             .show();
+                }
+            });
+        } else if (flags == ADD_TYPE){
+            txTitle.setText("Add Type");
+            edVietnamese.setVisibility(View.GONE);
+            edEnglish.setHint("Type");
+            btAdd.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String english = edEnglish.getText().toString().trim();
+                    if (!english.equals("")) {
+                        mainActivity.database.addNewType(new Type(0, english));
+                        Toast.makeText(mainActivity, "Added!", Toast.LENGTH_SHORT).show();
+                        dismiss();
+                    }
                 }
             });
         }
@@ -281,10 +313,9 @@ public class DialogAddEditWord extends DialogFragment {
                 if (!english.equals("") && !wordExists(english, -1)) {
                     SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
                     String date = format.format(new Date());
-                    ItemData itemData = new ItemData(0, date, english, vietnamese, 0, 1, 1, "",
-                            "", "", "", "", 0);
-                    mainActivity.database.addData(itemData);
-                    ItemData item = mainActivity.database.getNewItem();
+                    Word word = new Word(0, date, english, 0, 1, 1, 0);
+                    mainActivity.database.addNewWord(word);
+                    Word item = mainActivity.database.getNewWord();
                     mainActivity.listData.add(0, item);
                     mainActivity.reloadList();
                     dismiss();
@@ -303,8 +334,8 @@ public class DialogAddEditWord extends DialogFragment {
     }
 
     private boolean wordExists(String english, int id) {
-        for (ItemData itemData : mainActivity.listData) {
-            if (itemData.english.toLowerCase().equals(english.toLowerCase()) && id != itemData.id) {
+        for (Word word : mainActivity.listData) {
+            if (word.english.toLowerCase().equals(english.toLowerCase()) && id != word.id) {
                 return true;
             }
         }
