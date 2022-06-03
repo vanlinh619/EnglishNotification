@@ -21,7 +21,7 @@ public class DialogExample extends DialogFragment {
     private RecyclerView rcListExample;
     private TextView txTitle;
     private MainActivity mainActivity;
-    private ArrayList<ItemDataExample> listData;
+    private ArrayList<ItemDataExample> listWord;
 
     public static DialogExample newInstance(MainActivity mainActivity) {
         DialogExample frag = new DialogExample();
@@ -31,11 +31,11 @@ public class DialogExample extends DialogFragment {
         return frag;
     }
 
-    public static DialogExample newInstance(MainActivity mainActivity, ArrayList<ItemDataExample> listData, String title) {
+    public static DialogExample newInstance(MainActivity mainActivity, ArrayList<ItemDataExample> listWord, String title) {
         DialogExample frag = new DialogExample();
         Bundle arg = new Bundle();
         arg.putSerializable("mainActivity", mainActivity);
-        arg.putSerializable("listData", listData);
+        arg.putSerializable("listWord", listWord);
         arg.putSerializable("title", title);
         frag.setArguments(arg);
         return frag;
@@ -53,10 +53,10 @@ public class DialogExample extends DialogFragment {
 
         Bundle bundle = getArguments();
         mainActivity = (MainActivity) bundle.getSerializable("mainActivity");
-        listData = (ArrayList<ItemDataExample>) bundle.getSerializable("listData");
+        listWord = (ArrayList<ItemDataExample>) bundle.getSerializable("listWord");
         txTitle.setText((String) bundle.getSerializable("title"));
 
-        ItemListExampleAdapter itemListExampleAdapter = new ItemListExampleAdapter(listData ,mainActivity);
+        ItemListExampleAdapter itemListExampleAdapter = new ItemListExampleAdapter(listWord ,mainActivity);
         rcListExample.setAdapter(itemListExampleAdapter);
         rcListExample.setLayoutManager(new LinearLayoutManager(mainActivity));
     }

@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi;
 
 import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.model.Config;
+import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.Word;
 
@@ -49,17 +50,10 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     private static final String WORD_WORD_WORD_RELATION_ID = "word_relation_id";
     private static final String WORD_WORD_TYPE_RELATION = "type_relation";
 
-    private static final String TABLE_MEAN = "mean";
-    private static final String MEAN_ID = "id";
-    private static final String MEAN_TYPE = "mean_type";
-    private static final String MEAN_MEAN = "mean_word";
-
     private static final String TABLE_MEAN_WORD = "mean_word";
     private static final String MEAN_WORD_ID = "id";
     private static final String MEAN_WORD_TYPE_ID = "type_id";
     private static final String MEAN_WORD_WORD_ID = "word_id";
-
-    public DataType dataType;
 
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -91,21 +85,12 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s TEXT)",
                         TABLE_TAG, TAG_ID, TAG_NAME);
 
-
-
         String createTableTagWord =
                 String.format("CREATE TABLE IF NOT EXISTS %s(" +
                                 "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
                                 "%s INTEGER, " +
                                 "%s INTEGER)",
                         TABLE_TAG_WORD, TAG_WORD_ID, TAG_WORD_TAG_ID, TAG_WORD_WORD_ID);
-
-        String createTableMean =
-                String.format("CREATE TABLE IF NOT EXISTS %s(" +
-                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                "%s INTEGER, " +
-                                "%s TEXT)",
-                        TABLE_MEAN, MEAN_ID, MEAN_TYPE, MEAN_MEAN);
 
         String createTableMeanWord =
                 String.format("CREATE TABLE IF NOT EXISTS %s(" +
@@ -122,13 +107,13 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER)",
                         TABLE_WORD_WORD, WORD_WORD_ID, WORD_WORD_WORD_ID, WORD_WORD_WORD_RELATION_ID, WORD_WORD_TYPE_RELATION);
 
-        dataType.createTable(db);
+        DataType.createTable(db);
+        DataMean.createTable(db);
 
         db.execSQL(createTableProject);
         db.execSQL(createTableConfig);
         db.execSQL(createTableTag);
         db.execSQL(createTableTagWord);
-        db.execSQL(createTableMean);
         db.execSQL(createTableMeanWord);
         db.execSQL(createTableWordWord);
     }
@@ -253,16 +238,16 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         String query = "SELECT * FROM " + TABLE_WORD;
         Cursor cursor = db.rawQuery(query, null);
 
-        ArrayList<Word> listData = new ArrayList<>();
+        ArrayList<Word> listWord = new ArrayList<>();
         while (cursor.moveToNext()){
             Word word = new Word(cursor.getInt(0), cursor.getString(1),
                     cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
                     cursor.getInt(5), cursor.getInt(6));
-            listData.add(word);
+            listWord.add(word);
         }
         db.close();
-        MainActivity.sortList(listData);
-        return listData;
+        MainActivity.sortList(listWord);
+        return listWord;
     }
 
     public ArrayList<Word> getDataForNotification(){
@@ -271,15 +256,15 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         String query = String.format("SELECT * FROM %s WHERE %s = %s", TABLE_WORD, WORD_AUTO, 1);
         Cursor cursor = db.rawQuery(query, null);
 
-        ArrayList<Word> listData = new ArrayList<>();
+        ArrayList<Word> listWord = new ArrayList<>();
         while (cursor.moveToNext()){
             Word word = new Word(cursor.getInt(0), cursor.getString(1),
                     cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
                     cursor.getInt(5), cursor.getInt(6));
-            listData.add(word);
+            listWord.add(word);
         }
         db.close();
-        return listData;
+        return listWord;
     }
 
     public Word getNewWord(){
@@ -295,10 +280,14 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     }
 
     public void addNewType(Type type) {
-        dataType.addNewType(type, this);
+        DataType.addNewType(type, this);
     }
 
     public ArrayList<Type> getAllType(){
-        return dataType.getAll(this);
+        return DataType.getAll(this);
+    }
+
+    public void addMeans(ArrayList<Mean> means){
+        DataMean.addMeans(means, this);
     }
 }

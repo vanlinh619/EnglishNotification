@@ -9,4 +9,10 @@ public class Mean {
         this.id = id;
         this.meanWord = meanWord;
     }
+
+    public Mean(int id, Type type, String meanWord) {
+        this.id = id;
+        this.type = type;
+        this.meanWord = meanWord;
+    }
 }

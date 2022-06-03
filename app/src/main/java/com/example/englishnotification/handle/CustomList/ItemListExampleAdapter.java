@@ -18,11 +18,11 @@ import java.util.ArrayList;
 
 public class ItemListExampleAdapter extends RecyclerView.Adapter<ItemListExampleAdapter.ViewHolder> {
 
-    ArrayList<ItemDataExample> listData;
+    ArrayList<ItemDataExample> listWord;
     MainActivity mainActivity;
 
-    public ItemListExampleAdapter(ArrayList<ItemDataExample> listData, MainActivity mainActivity) {
-        this.listData = listData;
+    public ItemListExampleAdapter(ArrayList<ItemDataExample> listWord, MainActivity mainActivity) {
+        this.listWord = listWord;
         this.mainActivity = mainActivity;
     }
 
@@ -35,7 +35,7 @@ public class ItemListExampleAdapter extends RecyclerView.Adapter<ItemListExample
 
     @Override
     public void onBindViewHolder(@NonNull ItemListExampleAdapter.ViewHolder holder, int position) {
-        ItemDataExample itemDataExample = listData.get(position);
+        ItemDataExample itemDataExample = listWord.get(position);
         holder.txId.setText(position + "");
         holder.txVietnamese.setText(itemDataExample.vietnamese);
         holder.txEnglish.setText(itemDataExample.english);
@@ -63,7 +63,7 @@ public class ItemListExampleAdapter extends RecyclerView.Adapter<ItemListExample
 
     @Override
     public int getItemCount() {
-        return listData.size();
+        return listWord.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

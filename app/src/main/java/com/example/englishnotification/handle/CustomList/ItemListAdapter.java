@@ -39,13 +39,13 @@ import java.util.ArrayList;
 
 public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> implements Serializable {
 
-    private ArrayList<Word> listData;
+    private ArrayList<Word> listWord;
     private ItemListAdapter.ViewHolder viewHolder;
     private MainActivity mainActivity;
     private ArrayList<ItemDataExample> listExample;
 
-    public ItemListAdapter(ArrayList<Word> listData, MainActivity mainActivity) {
-        this.listData = listData;
+    public ItemListAdapter(ArrayList<Word> listWord, MainActivity mainActivity) {
+        this.listWord = listWord;
         this.mainActivity = mainActivity;
     }
 
@@ -58,21 +58,21 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
     @Override
     public void onBindViewHolder(ItemListAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        if (viewHolder != null && !viewHolder.txId.getText().toString().equals(listData.get(position).id + "")) {
+        if (viewHolder != null && !viewHolder.txId.getText().toString().equals(listWord.get(position).id + "")) {
             shrinkView(holder);
         }
 
-        Word word = listData.get(position);
+        Word word = listWord.get(position);
 
         holder.txEnglish.setText(word.english);
         //holder.txVietnamese.setText(word.vietnamese);
         holder.txDate.setText(word.date);
-        holder.txId.setText((listData.size() - listData.indexOf(word)) + "");
+        holder.txId.setText((listWord.size() - listWord.indexOf(word)) + "");
 
         holder.txEnglishExpand.setText(word.english);
         //holder.txVietnameseExpand.setText(word.vietnamese);
         holder.txDateExpand.setText(word.date);
-        holder.txIdExpand.setText((listData.size() - listData.indexOf(word)) + "");
+        holder.txIdExpand.setText((listWord.size() - listWord.indexOf(word)) + "");
 
         if (word.notification == 0) {
             holder.imNotification.setImageResource(R.drawable.notification);
@@ -111,7 +111,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 FragmentManager fm = mainActivity.getSupportFragmentManager();
                 DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord
-                        .newInstance(mainActivity, listData.get(position), DialogAddEditWord.UPDATE);
+                        .newInstance(mainActivity, listWord.get(position), DialogAddEditWord.UPDATE);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });
@@ -125,8 +125,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                             @RequiresApi(api = Build.VERSION_CODES.N)
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                mainActivity.database.deleteData(listData.get(position).id);
-                                mainActivity.listData.remove(position);
+                                mainActivity.database.deleteData(listWord.get(position).id);
+                                mainActivity.listWord.remove(position);
                                 mainActivity.reloadList();
                                 dialog.dismiss();
                             }
@@ -184,7 +184,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 //                                                            word.date = date;
 //                                                            word.vietnamese = o.toString();
 //                                                            mainActivity.database.updateWord(word);
-//                                                            for (Word item : mainActivity.listData) {
+//                                                            for (Word item : mainActivity.listWord) {
 //                                                                if (item.id == word.id) {
 //                                                                    item.english = word.english;
 //                                                                    item.vietnamese = word.vietnamese;
@@ -311,7 +311,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return listData.size();
+        return listWord.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -1,6 +1,8 @@
 package com.example.englishnotification.model;
 
-public class Config {
+import java.io.Serializable;
+
+public class Config implements Serializable {
     public int id;
     public int autoNotify;
 

@@ -96,7 +96,7 @@ public class DialogAddEditWord extends DialogFragment {
                         word.english = english;
 //                        word.vietnamese = vietnamese;
                         mainActivity.database.updateWord(word);
-                        for (Word item : mainActivity.listData) {
+                        for (Word item : mainActivity.listWord) {
                             if (item.id == word.id) {
                                 item.english = word.english;
 //                                item.vietnamese = word.vietnamese;
@@ -316,7 +316,7 @@ public class DialogAddEditWord extends DialogFragment {
                     Word word = new Word(0, date, english, 0, 1, 1, 0);
                     mainActivity.database.addNewWord(word);
                     Word item = mainActivity.database.getNewWord();
-                    mainActivity.listData.add(0, item);
+                    mainActivity.listWord.add(0, item);
                     mainActivity.reloadList();
                     dismiss();
                 } else {
@@ -334,7 +334,7 @@ public class DialogAddEditWord extends DialogFragment {
     }
 
     private boolean wordExists(String english, int id) {
-        for (Word word : mainActivity.listData) {
+        for (Word word : mainActivity.listWord) {
             if (word.english.toLowerCase().equals(english.toLowerCase()) && id != word.id) {
                 return true;
             }

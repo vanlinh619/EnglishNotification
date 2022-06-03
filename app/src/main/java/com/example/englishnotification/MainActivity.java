@@ -16,8 +16,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -80,23 +82,24 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private int englishSort = FILTER_1;
     private int notifyFilter = FILTER_1;
     private int botFilter = FILTER_1;
-    private ItemListAdapter adapter;
+    private static ItemListAdapter adapter;
     private RecyclerView rcListWord;
     private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate, imGame, imAddType;
-    private EditText edSearch;
+    private static EditText edSearch;
     private TextView txTitle, txEnglishSort, txNotifyFilter, txBotFilter;
-    private ConstraintLayout ctOption, ctHead, ctHeaderButton;
+    private static ConstraintLayout ctOption, ctHead, ctHeaderButton;
     private Switch swAutoNotify;
     private SwipeRefreshLayout srRefresh;
     private final String fileName = "english.en";
-    public Database database;
-    public ArrayList<Word> listData, listTmp;
-    public ArrayList<Type> types;
+    public static Database database;
+    public static ArrayList<Word> listWord, listTmp;
+    public static ArrayList<Type> types;
     public TextToSpeech textToSpeechEnglish;
     public TextToSpeech textToSpeechVietnamese;
     public Translator translatorEnglish, translatorVietnamese;
     public Config config;
     private static AlertDialog alertDialog;
+    public MainActivity mainActivity;
 
 
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -112,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
 
         setView();
+        mainActivity = this;
 
         // Create an English-German translator:
         TranslatorOptions optionsEnglish =
@@ -166,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         });
 
         database = new Database(this);
-        listData = database.getAll();
+        listWord = database.getAll();
         types = database.getAllType();
         listTmp = new ArrayList<>();
 
@@ -178,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             swAutoNotify.setChecked(true);
         }
 
-        adapter = new ItemListAdapter(listData, MainActivity.this);
+        adapter = new ItemListAdapter(listWord, MainActivity.this);
         rcListWord.setAdapter(adapter);
         rcListWord.setLayoutManager(new LinearLayoutManager(this));
 
@@ -186,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, HandleWordActivity.class);
-                intent.putExtra("types", types);
+                intent.putExtra("flag", HandleWordActivity.ADD);
                 startActivity(intent);
             }
         });
@@ -212,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void afterTextChanged(Editable s) {
                 ArrayList<Word> list = new ArrayList<>();
-                for (Word word : listData) {
+                for (Word word : listWord) {
                     String english = word.english.toLowerCase();
 //                    String vietnamese = word.vietnamese.toLowerCase();
 
@@ -297,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                             try {
                                 FileOutputStream stream = new FileOutputStream(file);
                                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(stream);
-                                for (Word itemData : listData) {
+                                for (Word itemData : listWord) {
                                     objectOutputStream.writeObject(itemData);
                                 }
                                 objectOutputStream.close();
@@ -363,10 +367,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                                     boolean added = database.addNewWord(list.get(i));
                                     if (added) {
                                         Word item = database.getNewWord();
-                                        listData.add(item);
+                                        listWord.add(item);
                                     }
                                 }
-                                sortList(listData);
+                                sortList(listWord);
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -437,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         srRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                listData = database.getAll();
+                listWord = database.getAll();
                 reloadList();
                 srRefresh.setRefreshing(false);
             }
@@ -448,8 +452,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public void showDialogCheckWord(){
         Random random = new Random();
-        int index = random.nextInt(listData.size());
-        Word word = listData.get(index);
+        int index = random.nextInt(listWord.size());
+        Word word = listWord.get(index);
         FragmentManager fm = getSupportFragmentManager();
         DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, word, DialogAddEditWord.GAME);
         dialogAddEditWord.show(fm, "fragment_edit_name");
@@ -470,21 +474,21 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     englishSort = FILTER_2;
                     txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_up, 0);
                     txEnglishSort.setTextColor(R.color.blue);
-                    refreshListData();
-                    sortByName(listData, 0);
+                    refreshlistWord();
+                    sortByName(listWord, 0);
                     reloadListFilter();
                     break;
                 case FILTER_2:
                     englishSort = FILTER_3;
                     txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_down, 0);
-                    sortByName(listData, 1);
+                    sortByName(listWord, 1);
                     reloadListFilter();
                     break;
                 case FILTER_3:
                     englishSort = FILTER_1;
                     txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                     txEnglishSort.setTextColor(R.color.black);
-                    sortList(listData);
+                    sortList(listWord);
                     reloadListFilter();
                     break;
             }
@@ -500,7 +504,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     notifyFilter = FILTER_2;
                     txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot_blue, 0);
                     txNotifyFilter.setTextColor(R.color.blue);
-                    refreshListData();
+                    refreshlistWord();
                     filterByNotify(1);
                     reloadListFilter();
                     break;
@@ -508,14 +512,14 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     notifyFilter = FILTER_3;
                     txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot, 0);
                     txNotifyFilter.setTextColor(R.color.black);
-                    refreshListData();
+                    refreshlistWord();
                     filterByNotify(0);
                     reloadListFilter();
                     break;
                 case FILTER_3:
                     notifyFilter = FILTER_1;
                     txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                    refreshListData();
+                    refreshlistWord();
                     reloadListFilter();
                     break;
             }
@@ -531,7 +535,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     botFilter = FILTER_2;
                     txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot_blue, 0);
                     txBotFilter.setTextColor(R.color.blue);
-                    refreshListData();
+                    refreshlistWord();
                     filterByBot(1);
                     reloadListFilter();
                     break;
@@ -539,14 +543,14 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     botFilter = FILTER_3;
                     txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot, 0);
                     txBotFilter.setTextColor(R.color.black);
-                    refreshListData();
+                    refreshlistWord();
                     filterByBot(0);
                     reloadListFilter();
                     break;
                 case FILTER_3:
                     botFilter = FILTER_1;
                     txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                    refreshListData();
+                    refreshlistWord();
                     reloadListFilter();
                     break;
             }
@@ -578,30 +582,30 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void filterByNotify(int flags) {
-        for (int i = listData.size() - 1; i >= 0; i--) {
-            Word word = listData.get(i);
+        for (int i = listWord.size() - 1; i >= 0; i--) {
+            Word word = listWord.get(i);
             if (word.notification != flags) {
                 listTmp.add(word);
-                listData.remove(i);
+                listWord.remove(i);
             }
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void refreshListData() {
+    public void refreshlistWord() {
         if (listTmp != null && listTmp.size() > 0) {
-            listData.addAll(listTmp);
+            listWord.addAll(listTmp);
             listTmp.clear();
-            sortList(listData);
+            sortList(listWord);
         }
     }
 
     public void filterByBot(int flags) {
-        for (int i = listData.size() - 1; i >= 0; i--) {
-            Word word = listData.get(i);
+        for (int i = listWord.size() - 1; i >= 0; i--) {
+            Word word = listWord.get(i);
             if (word.auto != flags) {
                 listTmp.add(word);
-                listData.remove(i);
+                listWord.remove(i);
             }
         }
     }
@@ -613,7 +617,25 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 .show();
     }
 
-    public void expandButtonSearch() {
+    public static void showAlertDialog(Context context, String message, String text) {
+        alertDialog = new AlertDialog.Builder(context)
+                .setTitle(message)
+                .setNegativeButton("Close", null)
+                .setPositiveButton("Visit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(context instanceof Activity){
+                            Activity activity = (Activity) context;
+                            activity.finish();
+                            MainActivity.setTextForSearch(text);
+                            MainActivity.expandButtonSearch();
+                        }
+                    }
+                })
+                .show();
+    }
+
+    public static void expandButtonSearch() {
         if(edSearch.getVisibility() == View.VISIBLE){
             return;
         }
@@ -621,10 +643,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 //        txTitle.setVisibility(View.GONE);
 //        imAdd.setVisibility(View.GONE);
 //        imTranslate.setVisibility(View.GONE);
-        Animation animExpandLeftToRight = AnimationUtils.loadAnimation(this, R.anim.anim_expand_left_to_right);
-        Animation animShinkLeftToRight = AnimationUtils.loadAnimation(this, R.anim.anim_shink_left_to_right);
-        edSearch.setAnimation(animExpandLeftToRight);
-        ctHeaderButton.setAnimation(animShinkLeftToRight);
+//        Animation animExpandLeftToRight = AnimationUtils.loadAnimation(MainActivity.this, R.anim.anim_expand_left_to_right);
+//        Animation animShinkLeftToRight = AnimationUtils.loadAnimation(this, R.anim.anim_shink_left_to_right);
+//        edSearch.setAnimation(animExpandLeftToRight);
+//        ctHeaderButton.setAnimation(animShinkLeftToRight);
         edSearch.setVisibility(View.VISIBLE);
         ctHeaderButton.setVisibility(View.GONE);
     }
@@ -639,10 +661,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 //        imTranslate.setVisibility(View.VISIBLE);
         hideKeyboard(this, edSearch);
         edSearch.setText("");
-        Animation animShinkRightToLeft = AnimationUtils.loadAnimation(this, R.anim.anim_shink_right_to_left);
-        Animation animExpandRightToLeft = AnimationUtils.loadAnimation(this, R.anim.anim_expand_right_to_left);
-        edSearch.setAnimation(animShinkRightToLeft);
-        ctHeaderButton.setAnimation(animExpandRightToLeft);
+//        Animation animShinkRightToLeft = AnimationUtils.loadAnimation(this, R.anim.anim_shink_right_to_left);
+//        Animation animExpandRightToLeft = AnimationUtils.loadAnimation(this, R.anim.anim_expand_right_to_left);
+//        edSearch.setAnimation(animShinkRightToLeft);
+//        ctHeaderButton.setAnimation(animExpandRightToLeft);
         edSearch.setVisibility(View.GONE);
         ctHeaderButton.setVisibility(View.VISIBLE);
     }
@@ -654,7 +676,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void updateViewNotify(int id, int flags) {
-        for (Word word : listData) {
+        for (Word word : listWord) {
             if (id == word.id) {
                 if (flags == Notification.PERSON_SETUP_NOTIFY) {
                     word.notification = 0;
@@ -668,9 +690,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void reloadList() {
-        adapter = new ItemListAdapter(listData, MainActivity.this);
+        adapter = new ItemListAdapter(listWord, MainActivity.this);
         rcListWord.setAdapter(adapter);
         shrinkButtonSearch();
+    }
+
+    public static void notifyItemInserted(int position) {
+        adapter.notifyItemInserted(position);
     }
 
     public void reloadListFilter() {
@@ -738,7 +764,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
     }
 
-    public void setTextForSearch(String text) {
+    public static void setTextForSearch(String text) {
         edSearch.setText(text);
     }
 
@@ -784,6 +810,15 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 return false;
             }
         };
+    }
+
+    public static boolean wordExists(String english, int id) {
+        for (Word word : listWord) {
+            if (word.english.toLowerCase().equals(english.toLowerCase()) && id != word.id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
