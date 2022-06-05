@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import com.example.englishnotification.MainActivity;
+import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.database.Database;
 import com.example.englishnotification.model.Word;
 
@@ -23,6 +24,8 @@ public class BotReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Database database = new Database(context);
         ArrayList<Word> list = database.getDataForNotification();
+        ArrayList<Mean> means = database.getAllMean();
+        MainActivity.addMeansToWord(list, means);
         Random random = new Random();
         int id[] = {-1, -1, -1};
         for (int i = 0; i < 3; i++){
@@ -38,8 +41,8 @@ public class BotReceiver extends BroadcastReceiver {
             Word word = list.get(id[i]);
             Bundle bundle = new Bundle();
             bundle.putString("english", word.english);
-            String means = MainActivity.meansToString(word);
-            bundle.putString("vietnamese", means);
+            String ms = MainActivity.meansToString(word);
+            bundle.putString("vietnamese", ms);
             bundle.putInt("id", word.id);
             Notification notification = new Notification(context);
             NotificationCompat.Builder nb = notification.getChannelNotification(bundle, Notification.BOT_SETUP_NOTIFY);

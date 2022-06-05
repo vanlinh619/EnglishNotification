@@ -458,14 +458,14 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         edSearch.setOnTouchListener(deleteText());
     }
 
-    private void addMeansToWord(ArrayList<Word> listWord, ArrayList<Mean> means) {
+    public static void addMeansToWord(ArrayList<Word> listWord, ArrayList<Mean> means) {
         for (Word word : listWord) {
             ArrayList<Mean> tMeans = getMeanByWordId(word.id, means);
             word.means = tMeans;
         }
     }
 
-    private ArrayList<Mean> getMeanByWordId(int id, ArrayList<Mean> means) {
+    private static ArrayList<Mean> getMeanByWordId(int id, ArrayList<Mean> means) {
         ArrayList<Mean> tMeans = new ArrayList<>();
         for (Mean mean : means) {
             if (mean.wordId == id) {
