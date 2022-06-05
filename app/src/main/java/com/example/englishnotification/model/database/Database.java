@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi;
 import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.model.Config;
 import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.Word;
 
@@ -25,10 +26,6 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     private static final String TABLE_CONFIG = "config";
     private static final String CONFIG_ID = "id";
     private static final String CONFIG_AUTO_NOTIFY = "auto_notify";
-
-    private static final String TABLE_TAG = "tag";
-    private static final String TAG_ID = "id";
-    private static final String TAG_NAME = "name";
 
     private static final String TABLE_TAG_WORD = "tag_word";
     private static final String TAG_WORD_ID = "id";
@@ -54,12 +51,6 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER)",
                         TABLE_CONFIG, CONFIG_ID, CONFIG_AUTO_NOTIFY);
 
-        String createTableTag =
-                String.format("CREATE TABLE IF NOT EXISTS %s(" +
-                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                "%s TEXT)",
-                        TABLE_TAG, TAG_ID, TAG_NAME);
-
         String createTableTagWord =
                 String.format("CREATE TABLE IF NOT EXISTS %s(" +
                                 "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -77,10 +68,10 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
         DataWord.createTable(db);
         DataType.createTable(db);
+        DataTag.createTableTag(db);
         DataMean.createTable(db);
 
         db.execSQL(createTableConfig);
-        db.execSQL(createTableTag);
         db.execSQL(createTableTagWord);
         db.execSQL(createTableWordWord);
     }
@@ -162,6 +153,18 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         DataType.addNewType(type, this);
     }
 
+    public Type getNewType(){
+        return DataType.getNewType(this);
+    }
+
+    public void updateType(Type type){
+        DataType.updateType(type, this);
+    }
+
+    public void deleteType(int id){
+        DataType.deleteType(id, this);
+    }
+
     public ArrayList<Type> getAllType(){
         return DataType.getAll(this);
     }
@@ -176,5 +179,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
     public void deleteMeans(int wordId){
         DataMean.deleteMeans(wordId, this);
+    }
+
+    public ArrayList<Tag> getAllTag(){
+        return DataTag.getAll(this);
     }
 }

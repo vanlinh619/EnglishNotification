@@ -33,6 +33,16 @@ public class DataType {
         db.close();
     }
 
+    public static Type getNewType(Database database){
+        SQLiteDatabase db = database.getReadableDatabase();
+        String query = String.format("SELECT * FROM %s ORDER BY %s DESC LIMIT 1", TABLE_TYPE, TYPE_ID);
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToNext();
+        Type type = new Type(cursor.getInt(0), cursor.getString(1));
+        db.close();
+        return type;
+    }
+
     public static ArrayList<Type> getAll(Database database){
         SQLiteDatabase db = database.getReadableDatabase();
 
@@ -46,5 +56,22 @@ public class DataType {
         }
         db.close();
         return types;
+    }
+
+    public static void updateType(Type type, Database database){
+        SQLiteDatabase db = database.getWritableDatabase();
+        String query = String.format("UPDATE %s SET %s = '%s' WHERE %s = %s", TABLE_TYPE, TYPE_NAME,
+                type.name, TYPE_ID, type.id);
+        db.execSQL(query);
+        db.close();
+    }
+
+    public static void deleteType(int id, Database database) {
+        SQLiteDatabase db = database.getWritableDatabase();
+
+        String query = String.format("DELETE FROM %s WHERE %s = %s", TABLE_TYPE, TYPE_ID, id);
+
+        db.execSQL(query);
+        db.close();
     }
 }

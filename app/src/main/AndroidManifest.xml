@@ -18,6 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EnglishNotification">
         <activity
+            android:name=".OptionActivity"
+            android:exported="false" />
+        <activity
             android:name=".HandleWordActivity"
             android:exported="false" />
         <activity

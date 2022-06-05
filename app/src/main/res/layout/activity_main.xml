@@ -61,11 +61,11 @@
             app:layout_constraintTop_toTopOf="@id/im_export" />
 
         <ImageView
-            android:id="@+id/im_add_type"
+            android:id="@+id/im_option"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/image_button_click"
-            android:src="@drawable/console"
+            android:src="@drawable/option"
             app:layout_constraintBottom_toBottomOf="@id/im_import"
             app:layout_constraintLeft_toLeftOf="@+id/im_game"
             app:layout_constraintRight_toRightOf="@id/im_game"
@@ -82,76 +82,62 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/ct_header_button"
-            android:background="#00FFFFFF"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
+        <ImageView
+            android:id="@+id/im_add_new_word"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/image_button_click"
+            android:src="@drawable/add"
+            app:layout_constraintBottom_toBottomOf="@+id/tx_title"
+            app:layout_constraintLeft_toRightOf="@+id/tx_title"
+            app:layout_constraintRight_toLeftOf="@+id/im_translate_word"
+            app:layout_constraintTop_toTopOf="@+id/tx_title" />
+
+        <ImageView
+            android:id="@+id/im_translate_word"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/image_button_click"
+            android:src="@drawable/translate"
+            app:layout_constraintBottom_toBottomOf="@+id/tx_title"
+            app:layout_constraintLeft_toRightOf="@+id/im_add_new_word"
             app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="28dp"
-            android:paddingTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="0dp">
+            app:layout_constraintTop_toTopOf="@+id/tx_title" />
 
-            <ImageView
-                android:id="@+id/im_add_new_word"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/image_button_click"
-                android:src="@drawable/add"
-                app:layout_constraintBottom_toBottomOf="@+id/tx_title"
-                app:layout_constraintLeft_toRightOf="@+id/tx_title"
-                app:layout_constraintRight_toLeftOf="@+id/im_translate_word"
-                app:layout_constraintTop_toTopOf="@+id/tx_title" />
+        <ImageView
+            android:id="@+id/im_search"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/image_button_click"
+            android:src="@drawable/search"
+            app:layout_constraintBottom_toBottomOf="@+id/tx_title"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/tx_title"
+            app:layout_constraintTop_toTopOf="@+id/tx_title" />
 
-            <ImageView
-                android:id="@+id/im_translate_word"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/image_button_click"
-                android:src="@drawable/translate"
-                app:layout_constraintBottom_toBottomOf="@+id/tx_title"
-                app:layout_constraintLeft_toRightOf="@+id/im_add_new_word"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tx_title" />
-
-            <ImageView
-                android:id="@+id/im_search"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/image_button_click"
-                android:src="@drawable/search"
-                app:layout_constraintBottom_toBottomOf="@+id/tx_title"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/tx_title"
-                app:layout_constraintTop_toTopOf="@+id/tx_title" />
-
-            <TextView
-                android:id="@+id/tx_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="English Notification"
-                android:textAlignment="center"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintLeft_toRightOf="@+id/im_search"
-                app:layout_constraintRight_toLeftOf="@+id/im_add_new_word"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tx_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="English Notification"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintLeft_toRightOf="@+id/im_search"
+            app:layout_constraintRight_toLeftOf="@+id/im_add_new_word"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/ed_search"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:drawableRight="@drawable/icon_delete"
             android:layout_marginLeft="15dp"
             android:layout_marginTop="15dp"
             android:layout_marginRight="15dp"
             android:background="@drawable/border_edittext"
             android:drawableLeft="@drawable/icon_edittext_search"
+            android:drawableRight="@drawable/icon_delete"
             android:hint="Search"
             android:visibility="gone"
             app:layout_constraintLeft_toLeftOf="parent"

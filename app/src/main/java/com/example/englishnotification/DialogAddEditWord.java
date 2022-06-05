@@ -1,7 +1,9 @@
 package com.example.englishnotification;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -17,9 +19,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.englishnotification.model.Type;
+import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.Word;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -57,6 +61,14 @@ public class DialogAddEditWord extends DialogFragment {
         Bundle arg = new Bundle();
         arg.putSerializable("mainActivity", mainActivity);
         arg.putSerializable("type", type);
+        arg.putSerializable("flags", flags);
+        frag.setArguments(arg);
+        return frag;
+    }
+
+    public static DialogAddEditWord newInstance(int flags) {
+        DialogAddEditWord frag = new DialogAddEditWord();
+        Bundle arg = new Bundle();
         arg.putSerializable("flags", flags);
         frag.setArguments(arg);
         return frag;
@@ -205,14 +217,28 @@ public class DialogAddEditWord extends DialogFragment {
             txTitle.setText("Add Type");
             edVietnamese.setVisibility(View.GONE);
             edEnglish.setHint("Type");
+            edEnglish.setCompoundDrawables(null, null, null, null);
             btAdd.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String english = edEnglish.getText().toString().trim();
-                    if (!english.equals("")) {
-                        mainActivity.database.addNewType(new Type(0, english));
-                        Toast.makeText(mainActivity, "Added!", Toast.LENGTH_SHORT).show();
+                    String type = edEnglish.getText().toString().trim();
+                    if (!type.equals("") && !MainActivity.typeExists(type, UtilContent.NON)) {
+                        MainActivity.database.addNewType(new Type(0, type));
+                        Type t = MainActivity.database.getNewType();
+                        MainActivity.types.add(t);
+                        Activity activity = getActivity();
+                        if (activity instanceof OptionActivity){
+                            OptionActivity optionActivity = (OptionActivity) activity;
+                            optionActivity.createNewChip();
+                        }
+                        Toast.makeText(getContext(), type + " Added!", Toast.LENGTH_SHORT).show();
                         dismiss();
+                    } else {
+                        if (type.equals("")){
+                            Toast.makeText(getContext(), "Please fill text!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Type already exist!", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });
@@ -225,8 +251,8 @@ public class DialogAddEditWord extends DialogFragment {
             }
         });
 
-        edEnglish.setOnTouchListener(delete());
-        edVietnamese.setOnTouchListener(delete());
+//        edEnglish.setOnTouchListener(delete());
+//        edVietnamese.setOnTouchListener(delete());
     }
 
     private View.OnTouchListener delete(){

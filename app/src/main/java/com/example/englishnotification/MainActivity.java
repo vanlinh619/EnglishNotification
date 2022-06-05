@@ -49,6 +49,7 @@ import com.example.englishnotification.handle.CustomList.ItemListAdapter;
 import com.example.englishnotification.handle.notification.Notification;
 import com.example.englishnotification.model.Config;
 import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.database.Database;
 import com.example.englishnotification.model.Type;
@@ -86,16 +87,17 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private int botFilter = FILTER_1;
     private static ItemListAdapter adapter;
     private RecyclerView rcListWord;
-    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate, imGame, imAddType;
+    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate, imGame, imOption;
     private static EditText edSearch;
     private TextView txTitle, txEnglishSort, txNotifyFilter, txBotFilter;
-    private static ConstraintLayout ctOption, ctHead, ctHeaderButton;
+    private static ConstraintLayout ctOption, ctHead;
     private Switch swAutoNotify;
     private SwipeRefreshLayout srRefresh;
     private final String fileName = "english.en";
     public static Database database;
     public static ArrayList<Word> listWord, listTmp;
     public static ArrayList<Type> types;
+    public static ArrayList<Tag> tags;
     private static ArrayList<Mean> means;
     public TextToSpeech textToSpeechEnglish;
     public TextToSpeech textToSpeechVietnamese;
@@ -175,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         database = new Database(this);
         listWord = database.getAll();
         types = database.getAllType();
+        tags = database.getAllTag();
         means = database.getAllMean();
         addMeansToWord(listWord, means);
 
@@ -435,12 +438,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             }
         });
 
-        imAddType.setOnClickListener(new View.OnClickListener() {
+        imOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fm = getSupportFragmentManager();
-                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, (Type) null, DialogAddEditWord.ADD_TYPE);
-                dialogAddEditWord.show(fm, "fragment_edit_name");
+                Intent intent = new Intent(MainActivity.this, OptionActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -449,6 +451,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             public void onRefresh() {
                 listWord = database.getAll();
                 means = database.getAllMean();
+                types = database.getAllType();
+                tags = database.getAllTag();
                 addMeansToWord(listWord, means);
                 reloadList();
                 srRefresh.setRefreshing(false);
@@ -664,34 +668,16 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         if (edSearch.getVisibility() == View.VISIBLE) {
             return;
         }
-//        imSearch.setVisibility(View.GONE);
-//        txTitle.setVisibility(View.GONE);
-//        imAdd.setVisibility(View.GONE);
-//        imTranslate.setVisibility(View.GONE);
-//        Animation animExpandLeftToRight = AnimationUtils.loadAnimation(MainActivity.this, R.anim.anim_expand_left_to_right);
-//        Animation animShinkLeftToRight = AnimationUtils.loadAnimation(this, R.anim.anim_shink_left_to_right);
-//        edSearch.setAnimation(animExpandLeftToRight);
-//        ctHeaderButton.setAnimation(animShinkLeftToRight);
         edSearch.setVisibility(View.VISIBLE);
-        ctHeaderButton.setVisibility(View.GONE);
     }
 
     public void shrinkButtonSearch() {
         if (edSearch.getVisibility() == View.GONE) {
             return;
         }
-//        imSearch.setVisibility(View.VISIBLE);
-//        txTitle.setVisibility(View.VISIBLE);
-//        imAdd.setVisibility(View.VISIBLE);
-//        imTranslate.setVisibility(View.VISIBLE);
         hideKeyboard(this, edSearch);
         edSearch.setText("");
-//        Animation animShinkRightToLeft = AnimationUtils.loadAnimation(this, R.anim.anim_shink_right_to_left);
-//        Animation animExpandRightToLeft = AnimationUtils.loadAnimation(this, R.anim.anim_expand_right_to_left);
-//        edSearch.setAnimation(animShinkRightToLeft);
-//        ctHeaderButton.setAnimation(animExpandRightToLeft);
         edSearch.setVisibility(View.GONE);
-        ctHeaderButton.setVisibility(View.VISIBLE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
@@ -755,8 +741,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imTranslate = findViewById(R.id.im_translate_word);
         imGame = findViewById(R.id.im_game);
         srRefresh = findViewById(R.id.sr_refresh);
-        ctHeaderButton = findViewById(R.id.ct_header_button);
-        imAddType = findViewById(R.id.im_add_type);
+        imOption = findViewById(R.id.im_option);
     }
 
     public void setAutoNotify() {
@@ -905,6 +890,15 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public static boolean wordExists(String english, int id) {
         for (Word word : listWord) {
             if (word.english.toLowerCase().equals(english.toLowerCase()) && id != word.id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean typeExists(String t, int id) {
+        for (Type type : types) {
+            if (type.name.toLowerCase().equals(t.toLowerCase()) && id != type.id) {
                 return true;
             }
         }

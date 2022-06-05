@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.englishnotification.handle.CustomList.MeanAdapter;
-import com.example.englishnotification.handle.CustomList.TypeAdapter;
 import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.UtilContent;
@@ -29,11 +28,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class HandleWordActivity extends AppCompatActivity implements MeanAdapter.RecyclerViewReady {
+public class HandleWordActivity extends AppCompatActivity implements MeanAdapter.RecyclerViewReady, Serializable {
 
     public static final int ADD = 0;
     public static final int UPDATE = 1;

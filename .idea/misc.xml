@@ -9,21 +9,29 @@
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/border_corner_edittext_search.xml" value="0.2518518518518518" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/border_corner_item_list.xml" value="0.2518518518518518" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/border_edittext.xml" value="0.25462962962962965" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/chip.xml" value="0.1345" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/english_icon.xml" value="0.2518518518518518" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/ic_launcher_background.xml" value="0.20520833333333333" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_delete.xml" value="0.24074074074074073" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_dot.xml" value="0.22685185185185186" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_dot_blue.xml" value="0.22685185185185186" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_down.xml" value="0.22685185185185186" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_edittext_search.xml" value="0.1345" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_english.xml" value="0.22685185185185186" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_horizontal_bar.xml" value="0.22685185185185186" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_pencil.xml" value="0.1345" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_setting.xml" value="0.1345" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_tag.xml" value="0.1345" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_type.xml" value="0.1345" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_up.xml" value="0.22685185185185186" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/icon_vietnamese.xml" value="0.2518518518518518" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/drawable/image_button_click.xml" value="0.2490740740740741" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/activity_handle_word.xml" value="0.2" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/activity_main.xml" value="0.2" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/activity_option.xml" value="0.2427536231884058" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/dialog_add_word.xml" value="0.24818840579710144" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/dialog_example.xml" value="0.21467391304347827" />
+        <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/item_chip.xml" value="0.2427536231884058" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/item_list.xml" value="0.264" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/item_list_example.xml" value="0.21467391304347827" />
         <entry key="..\:/Github/EnglishNotification/app/src/main/res/layout/item_list_expand.xml" value="0.175" />
