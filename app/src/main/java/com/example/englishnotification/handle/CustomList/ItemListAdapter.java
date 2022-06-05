@@ -7,6 +7,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -24,9 +25,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.englishnotification.DialogAddEditWord;
 import com.example.englishnotification.DialogExample;
+import com.example.englishnotification.HandleWordActivity;
 import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.R;
 import com.example.englishnotification.handle.Example;
+import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.Word;
 import com.example.englishnotification.model.ItemDataExample;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -35,7 +39,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import org.jsoup.select.Elements;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHolder> implements Serializable {
 
@@ -65,12 +71,13 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         Word word = listWord.get(position);
 
         holder.txEnglish.setText(word.english);
-        //holder.txVietnamese.setText(word.vietnamese);
+        String means = MainActivity.meansToString(word);
+        holder.txVietnamese.setText(means);
         holder.txDate.setText(word.date);
         holder.txId.setText((listWord.size() - listWord.indexOf(word)) + "");
 
         holder.txEnglishExpand.setText(word.english);
-        //holder.txVietnameseExpand.setText(word.vietnamese);
+        holder.txVietnameseExpand.setText(means);
         holder.txDateExpand.setText(word.date);
         holder.txIdExpand.setText((listWord.size() - listWord.indexOf(word)) + "");
 
@@ -109,10 +116,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fm = mainActivity.getSupportFragmentManager();
-                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord
-                        .newInstance(mainActivity, listWord.get(position), DialogAddEditWord.UPDATE);
-                dialogAddEditWord.show(fm, "fragment_edit_name");
+                Intent intent = new Intent(mainActivity, HandleWordActivity.class);
+                intent.putExtra("flag", HandleWordActivity.UPDATE);
+                intent.putExtra("word", word);
+                mainActivity.startActivity(intent);
             }
         });
 
@@ -125,9 +132,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                             @RequiresApi(api = Build.VERSION_CODES.N)
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                mainActivity.database.deleteData(listWord.get(position).id);
-                                mainActivity.listWord.remove(position);
-                                mainActivity.reloadList();
+                                mainActivity.database.deleteData(word.id);
+                                mainActivity.database.deleteMeans(word.id);
+                                MainActivity.notifyItemRemoved(listWord.indexOf(word));
+                                mainActivity.listWord.remove(word);
                                 dialog.dismiss();
                             }
                         })
@@ -141,7 +149,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 holder.imSpeak.setImageResource(R.drawable.volume_blue);
                 holder.imSpeak.setEnabled(false);
-                //mainActivity.speak(word.english, word.vietnamese);
+                mainActivity.speak(word.english, word.means);
                 CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
@@ -165,40 +173,34 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                                 new OnSuccessListener() {
                                     @Override
                                     public void onSuccess(Object o) {
-//                                        if (o.toString().toLowerCase().equals(word.vietnamese.toLowerCase())) {
-//                                            new AlertDialog.Builder(mainActivity)
-//                                                    .setTitle(word.english)
-//                                                    .setMessage(o.toString())
-//                                                    .setNegativeButton("Close", null)
-//                                                    .show();
-//                                        } else {
-//                                            new AlertDialog.Builder(mainActivity)
-//                                                    .setTitle(word.english)
-//                                                    .setMessage(o.toString())
-//                                                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-//                                                        @RequiresApi(api = Build.VERSION_CODES.N)
-//                                                        @Override
-//                                                        public void onClick(DialogInterface dialog, int which) {
-//                                                            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-//                                                            String date = format.format(new Date());
-//                                                            word.date = date;
-//                                                            word.vietnamese = o.toString();
-//                                                            mainActivity.database.updateWord(word);
-//                                                            for (Word item : mainActivity.listWord) {
-//                                                                if (item.id == word.id) {
-//                                                                    item.english = word.english;
-//                                                                    item.vietnamese = word.vietnamese;
-//                                                                    item.date = word.date;
-//                                                                    break;
-//                                                                }
-//                                                            }
-//                                                            mainActivity.reloadList();
-//                                                            dialog.dismiss();
-//                                                        }
-//                                                    })
-//                                                    .setNegativeButton("Close", null)
-//                                                    .show();
-//                                        }
+                                        if (o.toString().toLowerCase().equals(word.means.get(0).meanWord.toLowerCase())) {
+                                            new AlertDialog.Builder(mainActivity)
+                                                    .setTitle(word.english)
+                                                    .setMessage(o.toString())
+                                                    .setNegativeButton("Close", null)
+                                                    .show();
+                                        } else {
+                                            new AlertDialog.Builder(mainActivity)
+                                                    .setTitle(word.english)
+                                                    .setMessage(o.toString())
+                                                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                                        @RequiresApi(api = Build.VERSION_CODES.N)
+                                                        @Override
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+                                                            String date = format.format(new Date());
+                                                            word.date = date;
+                                                            word.means.get(0).meanWord = o.toString();
+                                                            MainActivity.database.updateWord(word);
+                                                            MainActivity.database.deleteMeans(word.id);
+                                                            MainActivity.database.addMeans(word.means);
+                                                            MainActivity.notifyItemChanged(position);
+                                                            dialog.dismiss();
+                                                        }
+                                                    })
+                                                    .setNegativeButton("Close", null)
+                                                    .show();
+                                        }
                                     }
                                 })
                         .addOnFailureListener(

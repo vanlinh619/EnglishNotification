@@ -22,15 +22,6 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     private static final String DATABASE_NAME = "englishNotification.db";
     private static final int DATABASE_VERSION = 1;
 
-    private static final String TABLE_WORD = "word";
-    private static final String WORD_ID = "id";
-    private static final String WORD_DATE = "date";
-    private static final String WORD_ENGLISH = "english";
-    private static final String WORD_NOTIFICATION = "notification";
-    private static final String WORD_AUTO = "auto";
-    private static final String WORD_GAME = "game";
-    private static final String WORD_FORGET = "forget";
-
     private static final String TABLE_CONFIG = "config";
     private static final String CONFIG_ID = "id";
     private static final String CONFIG_AUTO_NOTIFY = "auto_notify";
@@ -50,28 +41,12 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     private static final String WORD_WORD_WORD_RELATION_ID = "word_relation_id";
     private static final String WORD_WORD_TYPE_RELATION = "type_relation";
 
-    private static final String TABLE_MEAN_WORD = "mean_word";
-    private static final String MEAN_WORD_ID = "id";
-    private static final String MEAN_WORD_TYPE_ID = "type_id";
-    private static final String MEAN_WORD_WORD_ID = "word_id";
-
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTableProject =
-                String.format("CREATE TABLE IF NOT EXISTS %s(" +
-                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                "%s TEXT, " +
-                                "%s TEXT, " +
-                                "%s INTEGER, " +
-                                "%s INTEGER, " +
-                                "%s INTEGER, " +
-                                "%s INTEGER)",
-                        TABLE_WORD, WORD_ID, WORD_DATE, WORD_ENGLISH, WORD_NOTIFICATION, WORD_AUTO,
-                        WORD_GAME, WORD_FORGET);
 
         String createTableConfig =
                 String.format("CREATE TABLE IF NOT EXISTS %s(" +
@@ -92,13 +67,6 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER)",
                         TABLE_TAG_WORD, TAG_WORD_ID, TAG_WORD_TAG_ID, TAG_WORD_WORD_ID);
 
-        String createTableMeanWord =
-                String.format("CREATE TABLE IF NOT EXISTS %s(" +
-                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                "%s INTEGER, " +
-                                "%s INTEGER)",
-                        TABLE_MEAN_WORD, MEAN_WORD_ID, MEAN_WORD_TYPE_ID, MEAN_WORD_WORD_ID);
-
         String createTableWordWord =
                 String.format("CREATE TABLE IF NOT EXISTS %s(" +
                                 "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -107,22 +75,21 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER)",
                         TABLE_WORD_WORD, WORD_WORD_ID, WORD_WORD_WORD_ID, WORD_WORD_WORD_RELATION_ID, WORD_WORD_TYPE_RELATION);
 
+        DataWord.createTable(db);
         DataType.createTable(db);
         DataMean.createTable(db);
 
-        db.execSQL(createTableProject);
         db.execSQL(createTableConfig);
         db.execSQL(createTableTag);
         db.execSQL(createTableTagWord);
-        db.execSQL(createTableMeanWord);
         db.execSQL(createTableWordWord);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String dropTable = String.format("DROP TABLE IF EXISTS %s", TABLE_WORD);
+//        String dropTable = String.format("DROP TABLE IF EXISTS %s", TABLE_WORD);
         String dropTableConfig = String.format("DROP TABLE IF EXISTS %s", TABLE_CONFIG);
-        db.execSQL(dropTable);
+//        db.execSQL(dropTable);
         db.execSQL(dropTableConfig);
 
         onCreate(db);
@@ -158,125 +125,37 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         db.close();
     }
 
-    public boolean addNewWord(Word data){
-        if(getItemEnglish(data.english) != null) {
-            return false;
-        }
-
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', %s, %s, %s, %s);",
-                TABLE_WORD, data.date, data.english, data.notification, data.auto, data.game,
-                data.forget);
-
-        db.execSQL(query);
-        db.close();
-        return true;
+    public boolean addNewWord(Word word){
+        return DataWord.addNewWord(word, this);
     }
 
-    public void updateWord(Word data){
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        String query = String.format("UPDATE %s SET %s = '%s', %s = '%s', %s = %s, %s = %s, " +
-                        "%s = %s, %s = %s WHERE %s = %s",
-                TABLE_WORD, WORD_DATE, data.date, WORD_ENGLISH, data.english, WORD_NOTIFICATION, data.notification,
-                WORD_AUTO, data.auto, WORD_GAME, data.game, WORD_FORGET, data.forget, WORD_ID, data.id);
-
-        db.execSQL(query);
-        db.close();
+    public void updateWord(Word word){
+        DataWord.updateWord(word, this);
     }
 
     public void updateOffNotify(int id){
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        String query = String.format("UPDATE %s SET %s = %s WHERE %s = %s",
-                TABLE_WORD, WORD_NOTIFICATION, 0, WORD_ID, id);
-
-        db.execSQL(query);
-        db.close();
+        DataWord.updateOffNotify(id, this);
     }
 
     public void updateOffBotNotify(int id){
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        String query = String.format("UPDATE %s SET %s = %s WHERE %s = %s",
-                TABLE_WORD, WORD_AUTO, 0, WORD_ID, id);
-
-        db.execSQL(query);
-        db.close();
-    }
-
-    public Word getItemEnglish(String english){
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_ENGLISH, english);
-        Cursor cursor = db.rawQuery(query, null);
-        Word word = null;
-        while (cursor.moveToNext()){
-            word = new Word(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
-                    cursor.getInt(5), cursor.getInt(6));
-            break;
-        }
-        db.close();
-        return word;
+        DataWord.updateOffBotNotify(id, this);
     }
 
     public void deleteData(int id){
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        String query = String.format("DELETE FROM %s WHERE %s = %s", TABLE_WORD, WORD_ID, id);
-
-        db.execSQL(query);
-        db.close();
+        DataWord.deleteData(id, this);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ArrayList<Word> getAll(){
-        SQLiteDatabase db = getReadableDatabase();
-
-        String query = "SELECT * FROM " + TABLE_WORD;
-        Cursor cursor = db.rawQuery(query, null);
-
-        ArrayList<Word> listWord = new ArrayList<>();
-        while (cursor.moveToNext()){
-            Word word = new Word(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
-                    cursor.getInt(5), cursor.getInt(6));
-            listWord.add(word);
-        }
-        db.close();
-        MainActivity.sortList(listWord);
-        return listWord;
+        return DataWord.getAll(this);
     }
 
     public ArrayList<Word> getDataForNotification(){
-        SQLiteDatabase db = getReadableDatabase();
-
-        String query = String.format("SELECT * FROM %s WHERE %s = %s", TABLE_WORD, WORD_AUTO, 1);
-        Cursor cursor = db.rawQuery(query, null);
-
-        ArrayList<Word> listWord = new ArrayList<>();
-        while (cursor.moveToNext()){
-            Word word = new Word(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
-                    cursor.getInt(5), cursor.getInt(6));
-            listWord.add(word);
-        }
-        db.close();
-        return listWord;
+        return DataWord.getDataForNotification(this);
     }
 
     public Word getNewWord(){
-        SQLiteDatabase db = getReadableDatabase();
-        String query = String.format("SELECT * FROM %s ORDER BY %s DESC LIMIT 1", TABLE_WORD, WORD_ID);
-        Cursor cursor = db.rawQuery(query, null);
-        cursor.moveToNext();
-        Word word = new Word(cursor.getInt(0), cursor.getString(1),
-                cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
-                cursor.getInt(5), cursor.getInt(6));
-        db.close();
-        return word;
+        return DataWord.getNewWord(this);
     }
 
     public void addNewType(Type type) {
@@ -289,5 +168,13 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
     public void addMeans(ArrayList<Mean> means){
         DataMean.addMeans(means, this);
+    }
+
+    public ArrayList<Mean> getAllMean(){
+        return DataMean.getAll(this);
+    }
+
+    public void deleteMeans(int wordId){
+        DataMean.deleteMeans(wordId, this);
     }
 }

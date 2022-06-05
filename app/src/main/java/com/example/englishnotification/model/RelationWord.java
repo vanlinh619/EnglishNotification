@@ -1,6 +1,8 @@
 package com.example.englishnotification.model;
 
-public class RelationWord {
+import java.io.Serializable;
+
+public class RelationWord implements Serializable {
     public static final int RELATED = 0;
     public static final int SYNONYM = 1;
     public static final int ANTONYM = 2;

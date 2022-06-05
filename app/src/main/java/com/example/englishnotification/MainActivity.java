@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.text.Editable;
@@ -47,6 +48,8 @@ import com.example.englishnotification.handle.notification.BotReceiver;
 import com.example.englishnotification.handle.CustomList.ItemListAdapter;
 import com.example.englishnotification.handle.notification.Notification;
 import com.example.englishnotification.model.Config;
+import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.database.Database;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.Word;
@@ -72,7 +75,6 @@ import java.util.Locale;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements Serializable {
-
     public static final int ENGLISH_ITEM = 0;
     public static final int NOTIFY_ITEM = 1;
     public static final int BOT_ITEM = 2;
@@ -94,9 +96,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public static Database database;
     public static ArrayList<Word> listWord, listTmp;
     public static ArrayList<Type> types;
+    private static ArrayList<Mean> means;
     public TextToSpeech textToSpeechEnglish;
     public TextToSpeech textToSpeechVietnamese;
-    public Translator translatorEnglish, translatorVietnamese;
+    public static Translator translatorEnglish, translatorVietnamese;
     public Config config;
     private static AlertDialog alertDialog;
     public MainActivity mainActivity;
@@ -172,6 +175,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         database = new Database(this);
         listWord = database.getAll();
         types = database.getAllType();
+        means = database.getAllMean();
+        addMeansToWord(listWord, means);
+
         listTmp = new ArrayList<>();
 
         //Config
@@ -416,9 +422,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fm = getSupportFragmentManager();
-                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(MainActivity.this, (Word) null, DialogAddEditWord.TRANSLATE);
-                dialogAddEditWord.show(fm, "fragment_edit_name");
+                Intent intent = new Intent(MainActivity.this, HandleWordActivity.class);
+                intent.putExtra("flag", HandleWordActivity.TRANSLATE);
+                startActivity(intent);
             }
         });
 
@@ -442,6 +448,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public void onRefresh() {
                 listWord = database.getAll();
+                means = database.getAllMean();
+                addMeansToWord(listWord, means);
                 reloadList();
                 srRefresh.setRefreshing(false);
             }
@@ -450,7 +458,24 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         edSearch.setOnTouchListener(deleteText());
     }
 
-    public void showDialogCheckWord(){
+    private void addMeansToWord(ArrayList<Word> listWord, ArrayList<Mean> means) {
+        for (Word word : listWord) {
+            ArrayList<Mean> tMeans = getMeanByWordId(word.id, means);
+            word.means = tMeans;
+        }
+    }
+
+    private ArrayList<Mean> getMeanByWordId(int id, ArrayList<Mean> means) {
+        ArrayList<Mean> tMeans = new ArrayList<>();
+        for (Mean mean : means) {
+            if (mean.wordId == id) {
+                tMeans.add(mean);
+            }
+        }
+        return tMeans;
+    }
+
+    public void showDialogCheckWord() {
         Random random = new Random();
         int index = random.nextInt(listWord.size());
         Word word = listWord.get(index);
@@ -624,7 +649,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 .setPositiveButton("Visit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(context instanceof Activity){
+                        if (context instanceof Activity) {
                             Activity activity = (Activity) context;
                             activity.finish();
                             MainActivity.setTextForSearch(text);
@@ -636,7 +661,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public static void expandButtonSearch() {
-        if(edSearch.getVisibility() == View.VISIBLE){
+        if (edSearch.getVisibility() == View.VISIBLE) {
             return;
         }
 //        imSearch.setVisibility(View.GONE);
@@ -652,7 +677,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void shrinkButtonSearch() {
-        if(edSearch.getVisibility() == View.GONE){
+        if (edSearch.getVisibility() == View.GONE) {
             return;
         }
 //        imSearch.setVisibility(View.VISIBLE);
@@ -697,6 +722,14 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public static void notifyItemInserted(int position) {
         adapter.notifyItemInserted(position);
+    }
+
+    public static void notifyItemRemoved(int position) {
+        adapter.notifyItemRemoved(position);
+    }
+
+    public static void notifyItemChanged(int position) {
+        adapter.notifyItemChanged(position);
     }
 
     public void reloadListFilter() {
@@ -748,11 +781,28 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         Intent intent = new Intent(this, AlarmReceiver.class);
         Bundle bundle = new Bundle();
         bundle.putString("english", word.english);
-//        bundle.putString("vietnamese", word.vietnamese);
+        String means = meansToString(word);
+        bundle.putString("vietnamese", means);
         bundle.putInt("id", word.id);
         intent.putExtra("bundle", bundle);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, word.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (2 * 60 * 60 * 1000), 2 * 60 * 60 * 1000, pendingIntent);
+    }
+
+    public static String meansToString(Word word){
+        StringBuilder stringMeansBuilder = new StringBuilder();
+        String means = "";
+        if(word.means != null) {
+            for (Mean mean : word.means) {
+                if (mean.type.id != UtilContent.NON) {
+                    stringMeansBuilder.append(mean.type.name + ". ");
+                }
+                stringMeansBuilder.append(mean.meanWord + "\n");
+            }
+            means = stringMeansBuilder.toString();
+            means = means.substring(0, means.length() - 1);
+        }
+        return means;
     }
 
     public void destroyRepeatAlarm(Word word) {
@@ -768,7 +818,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         edSearch.setText(text);
     }
 
-    public void speak(String english, String vietnamese){
+    public void speak(String english, String vietnamese) {
         textToSpeechEnglish = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -789,7 +839,47 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
     }
 
-    public View.OnTouchListener deleteText(){
+    public void speak(String english, ArrayList<Mean> means) {
+        textToSpeechEnglish = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    textToSpeechEnglish.setLanguage(Locale.ENGLISH);
+                    textToSpeechEnglish.speak(english, TextToSpeech.QUEUE_ADD, null);
+                }
+            }
+        });
+
+        CountDownTimer countDownTimer = new CountDownTimer(100, 100) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                if(means == null) {
+                    return;
+                }
+                StringBuilder s = new StringBuilder();
+                for (Mean mean : means) {
+                    if (!mean.meanWord.equals("")){
+                        s.append(mean.meanWord + ". ");
+                    }
+                }
+                textToSpeechVietnamese = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int status) {
+                        if (status == TextToSpeech.SUCCESS) {
+                            textToSpeechVietnamese.speak(s.toString(), TextToSpeech.QUEUE_ADD, null);
+                        }
+                    }
+                });
+            }
+        }.start();
+    }
+
+    public View.OnTouchListener deleteText() {
         return new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -800,8 +890,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
                 EditText editText = (EditText) v;
 
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (editText.getRight() - editText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (event.getRawX() >= (editText.getRight() - editText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
                         // your action here
                         shrinkButtonSearch();
                         return true;
@@ -823,7 +913,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     @Override
     public void onBackPressed() {
-        if(edSearch.getVisibility() == View.VISIBLE){
+        if (edSearch.getVisibility() == View.VISIBLE) {
             shrinkButtonSearch();
         } else {
             super.onBackPressed();

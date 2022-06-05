@@ -1,6 +1,8 @@
 package com.example.englishnotification.model;
 
-public class Tag {
+import java.io.Serializable;
+
+public class Tag implements Serializable {
     public int id;
     public String name;
 

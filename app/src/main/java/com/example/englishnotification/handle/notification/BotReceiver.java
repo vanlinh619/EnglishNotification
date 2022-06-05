@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.model.database.Database;
 import com.example.englishnotification.model.Word;
 
@@ -37,7 +38,8 @@ public class BotReceiver extends BroadcastReceiver {
             Word word = list.get(id[i]);
             Bundle bundle = new Bundle();
             bundle.putString("english", word.english);
-            //bundle.putString("vietnamese", word.vietnamese);
+            String means = MainActivity.meansToString(word);
+            bundle.putString("vietnamese", means);
             bundle.putInt("id", word.id);
             Notification notification = new Notification(context);
             NotificationCompat.Builder nb = notification.getChannelNotification(bundle, Notification.BOT_SETUP_NOTIFY);

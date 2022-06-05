@@ -11,9 +11,9 @@ import java.util.ArrayList;
 
 public class DataType {
 
-    private static final String TABLE_TYPE = "type";
-    private static final String TYPE_ID = "type_id";
-    private static final String TYPE_NAME = "type_name";
+    public static final String TABLE_TYPE = "type";
+    public static final String TYPE_ID = "id";
+    public static final String TYPE_NAME = "name";
 
     public static void createTable(SQLiteDatabase db){
         String createTableType =
