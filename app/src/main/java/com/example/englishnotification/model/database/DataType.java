@@ -74,4 +74,14 @@ public class DataType {
         db.execSQL(query);
         db.close();
     }
+
+    public static boolean foreignExist(int typeId, Database database){
+        SQLiteDatabase db = database.getWritableDatabase();
+        String query = String.format("SELECT * FROM %s WHERE %s = %s", DataMean.TABLE_MEAN, DataMean.MEAN_TYPE_ID, typeId);
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor.moveToNext()) {
+            return true;
+        }
+        return false;
+    }
 }

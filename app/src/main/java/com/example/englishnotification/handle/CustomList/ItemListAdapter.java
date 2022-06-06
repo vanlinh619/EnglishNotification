@@ -118,7 +118,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 Intent intent = new Intent(mainActivity, HandleWordActivity.class);
                 intent.putExtra("flag", HandleWordActivity.UPDATE);
-                intent.putExtra("word", word);
+                intent.putExtra("wordId", word.id);
                 mainActivity.startActivity(intent);
             }
         });

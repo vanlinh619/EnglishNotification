@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.UtilContent;
 import com.google.android.material.chip.Chip;
@@ -88,11 +89,39 @@ public class OptionActivity extends AppCompatActivity {
             cgType.addView(chip);
         }
 
+        for (Tag tag : MainActivity.tags) {
+            Chip chip = new Chip(this);
+            chip.setText(tag.name);
+            chip.setCheckable(true);
+            chip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(chip.isChecked()){
+                        ctTagEdit.setVisibility(View.VISIBLE);
+                        edTag.setHint(tag.name);
+                        edTag.setText(tag.name);
+                    } else {
+                        ctTagEdit.setVisibility(View.GONE);
+                    }
+                }
+            });
+            cgTag.addView(chip);
+        }
+
         imTypeAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getSupportFragmentManager();
                 DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(DialogAddEditWord.ADD_TYPE);
+                dialogAddEditWord.show(fm, "fragment_edit_name");
+            }
+        });
+
+        imTagAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getSupportFragmentManager();
+                DialogAddEditWord dialogAddEditWord = (DialogAddEditWord) DialogAddEditWord.newInstance(DialogAddEditWord.ADD_TAG);
                 dialogAddEditWord.show(fm, "fragment_edit_name");
             }
         });
@@ -124,6 +153,33 @@ public class OptionActivity extends AppCompatActivity {
             }
         });
 
+        imTagEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String t = edTag.getText().toString().trim();
+                String th = edTag.getHint().toString().trim();
+                for (int i = 0; i < MainActivity.tags.size(); i++){
+                    Tag tag = MainActivity.tags.get(i);
+                    if (tag.name == th){
+                        if(!t.equals("") && !MainActivity.tagExists(t, tag.id)){
+                            tag.name = t;
+                            MainActivity.database.updateTag(tag);
+                            edTag.setHint(tag.name);
+                            Chip chip = (Chip) cgTag.getChildAt(i);
+                            chip.setText(tag.name);
+                        } else {
+                            if (t.equals("")){
+                                Toast.makeText(OptionActivity.this, "Please fill text!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(OptionActivity.this, "Tag already exist!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        });
+
         imTypeDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,18 +187,43 @@ public class OptionActivity extends AppCompatActivity {
                 for (int i = 0; i < MainActivity.types.size(); i++){
                     Type type = MainActivity.types.get(i);
                     if (type.name == th){
-                        MainActivity.database.deleteType(type.id);
-                        MainActivity.types.remove(type);
-                        ctTypeEdit.setVisibility(View.GONE);
-                        Chip chip = (Chip) cgType.getChildAt(i);
-                        cgType.removeView(chip);
+                        if(!MainActivity.database.foreignTypeExist(type.id)) {
+                            MainActivity.database.deleteType(type.id);
+                            MainActivity.types.remove(type);
+                            ctTypeEdit.setVisibility(View.GONE);
+                            Chip chip = (Chip) cgType.getChildAt(i);
+                            cgType.removeView(chip);
+                        } else {
+                            Toast.makeText(OptionActivity.this, "Can not delete type because already foreign type exist!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            }
+        });
+
+        imTagDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String th = edTag.getHint().toString().trim();
+                for (int i = 0; i < MainActivity.tags.size(); i++){
+                    Tag tag = MainActivity.tags.get(i);
+                    if (tag.name == th){
+                        if(!MainActivity.database.foreignTagExist(tag.id)) {
+                            MainActivity.database.deleteTag(tag.id);
+                            MainActivity.tags.remove(tag);
+                            ctTagEdit.setVisibility(View.GONE);
+                            Chip chip = (Chip) cgTag.getChildAt(i);
+                            cgTag.removeView(chip);
+                        } else {
+                            Toast.makeText(OptionActivity.this, "Can not delete tag because already foreign type exist!", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             }
         });
     }
 
-    public void createNewChip(){
+    public void createNewTypeChip(){
         Type type = MainActivity.types.get(MainActivity.types.size() - 1);
         Chip chip = new Chip(this);
         chip.setText(type.name);
@@ -160,6 +241,26 @@ public class OptionActivity extends AppCompatActivity {
             }
         });
         cgType.addView(chip);
+    }
+
+    public void createNewTagChip(){
+        Tag tag = MainActivity.tags.get(MainActivity.tags.size() - 1);
+        Chip chip = new Chip(this);
+        chip.setText(tag.name);
+        chip.setCheckable(true);
+        chip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(chip.isChecked()){
+                    ctTagEdit.setVisibility(View.VISIBLE);
+                    edTag.setHint(tag.name);
+                    edTag.setText(tag.name);
+                } else {
+                    ctTagEdit.setVisibility(View.GONE);
+                }
+            }
+        });
+        cgTag.addView(chip);
     }
 
     private void setView() {

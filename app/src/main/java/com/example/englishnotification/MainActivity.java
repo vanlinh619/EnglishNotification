@@ -50,6 +50,7 @@ import com.example.englishnotification.handle.notification.Notification;
 import com.example.englishnotification.model.Config;
 import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.Tag;
+import com.example.englishnotification.model.TagWord;
 import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.database.Database;
 import com.example.englishnotification.model.Type;
@@ -98,7 +99,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public static ArrayList<Word> listWord, listTmp;
     public static ArrayList<Type> types;
     public static ArrayList<Tag> tags;
-    private static ArrayList<Mean> means;
+    private ArrayList<Mean> means;
+    private ArrayList<TagWord> tagWords;
     public TextToSpeech textToSpeechEnglish;
     public TextToSpeech textToSpeechVietnamese;
     public static Translator translatorEnglish, translatorVietnamese;
@@ -179,7 +181,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         types = database.getAllType();
         tags = database.getAllTag();
         means = database.getAllMean();
+        tagWords = database.getAllTagWord();
         addMeansToWord(listWord, means);
+        addTagsToWord(listWord, tagWords, tags);
 
         listTmp = new ArrayList<>();
 
@@ -453,7 +457,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 means = database.getAllMean();
                 types = database.getAllType();
                 tags = database.getAllTag();
+                tagWords = database.getAllTagWord();
                 addMeansToWord(listWord, means);
+                addTagsToWord(listWord, tagWords, tags);
                 reloadList();
                 srRefresh.setRefreshing(false);
             }
@@ -469,6 +475,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
     }
 
+    public static void addTagsToWord(ArrayList<Word> listWord, ArrayList<TagWord> tagWords, ArrayList<Tag> tags ) {
+        for (Word word : listWord) {
+            ArrayList<Tag> ts = getTagByWordId(word.id, tagWords, tags);
+            word.tags = ts;
+        }
+    }
+
     private static ArrayList<Mean> getMeanByWordId(int id, ArrayList<Mean> means) {
         ArrayList<Mean> tMeans = new ArrayList<>();
         for (Mean mean : means) {
@@ -477,6 +490,21 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             }
         }
         return tMeans;
+    }
+
+    private static ArrayList<Tag> getTagByWordId(int id, ArrayList<TagWord> tagWords, ArrayList<Tag> tags) {
+        ArrayList<Tag> ts = new ArrayList<>();
+        for (TagWord tagWord : tagWords) {
+            if (tagWord.wordId == id) {
+                for (Tag tag: tags){
+                    if(tag.id == tagWord.tagId){
+                        ts.add(tag);
+                        break;
+                    }
+                }
+            }
+        }
+        return ts;
     }
 
     public void showDialogCheckWord() {
@@ -899,6 +927,15 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public static boolean typeExists(String t, int id) {
         for (Type type : types) {
             if (type.name.toLowerCase().equals(t.toLowerCase()) && id != type.id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean tagExists(String t, int id) {
+        for (Tag tag : tags) {
+            if (tag.name.toLowerCase().equals(t.toLowerCase()) && id != tag.id) {
                 return true;
             }
         }

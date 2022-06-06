@@ -13,11 +13,11 @@ import java.util.ArrayList;
 
 public class DataMean {
 
-    private static final String TABLE_MEAN = "mean";
-    private static final String MEAN_ID = "id";
-    private static final String MEAN_TYPE_ID = "type_id";
-    private static final String MEAN_MEAN_WORD = "mean_word";
-    private static final String MEAN_WORD_ID = "word_id";
+    public static final String TABLE_MEAN = "mean";
+    public static final String MEAN_ID = "id";
+    public static final String MEAN_TYPE_ID = "type_id";
+    public static final String MEAN_MEAN_WORD = "mean_word";
+    public static final String MEAN_WORD_ID = "word_id";
 
     public static void createTable(SQLiteDatabase db){
         String createTableMean =
@@ -32,26 +32,28 @@ public class DataMean {
     }
 
     public static void addMeans(ArrayList<Mean> means, Database database){
-        SQLiteDatabase db = database.getWritableDatabase();
-        StringBuffer sqlObject = new StringBuffer();
-        ArrayList<String> paramsObject = new ArrayList<String>();
-        sqlObject.append("INSERT INTO mean VALUES");
-        for (int i = 0; i < means.size(); i++){
-            Mean mean = means.get(i);
-            if(i == 0){
-                sqlObject.append("  (NULL, %s, '%s', %s)");
-            } else {
-                sqlObject.append("  ,(NULL, %s, '%s', %s)");
+        if(means.size() >= 1){
+            SQLiteDatabase db = database.getWritableDatabase();
+            StringBuffer sqlObject = new StringBuffer();
+            ArrayList<String> paramsObject = new ArrayList<String>();
+            sqlObject.append("INSERT INTO mean VALUES");
+            for (int i = 0; i < means.size(); i++){
+                Mean mean = means.get(i);
+                if(i == 0){
+                    sqlObject.append("  (NULL, %s, '%s', %s)");
+                } else {
+                    sqlObject.append("  ,(NULL, %s, '%s', %s)");
+                }
+                paramsObject.add(mean.type.id + "");
+                paramsObject.add(mean.meanWord);
+                paramsObject.add(mean.wordId + "");
             }
-            paramsObject.add(mean.type.id + "");
-            paramsObject.add(mean.meanWord);
-            paramsObject.add(mean.wordId + "");
+
+            String query = String.format(sqlObject.toString(), paramsObject.toArray());
+
+            db.execSQL(query);
+            db.close();
         }
-
-        String query = String.format(sqlObject.toString(), paramsObject.toArray());
-
-        db.execSQL(query);
-        db.close();
     }
 
     public static ArrayList<Mean> getAll(Database database){

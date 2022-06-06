@@ -22,6 +22,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.Word;
@@ -38,6 +39,7 @@ public class DialogAddEditWord extends DialogFragment {
     public static final int GAME = 8;
     public static final int UPDATE = 9;
     public static final int ADD_TYPE = 10;
+    public static final int ADD_TAG = 11;
 
     private EditText edEnglish;
     private EditText edVietnamese;
@@ -229,7 +231,7 @@ public class DialogAddEditWord extends DialogFragment {
                         Activity activity = getActivity();
                         if (activity instanceof OptionActivity){
                             OptionActivity optionActivity = (OptionActivity) activity;
-                            optionActivity.createNewChip();
+                            optionActivity.createNewTypeChip();
                         }
                         Toast.makeText(getContext(), type + " Added!", Toast.LENGTH_SHORT).show();
                         dismiss();
@@ -238,6 +240,35 @@ public class DialogAddEditWord extends DialogFragment {
                             Toast.makeText(getContext(), "Please fill text!", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(getContext(), "Type already exist!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+        } else if (flags == ADD_TAG){
+            txTitle.setText("Add Tag");
+            edVietnamese.setVisibility(View.GONE);
+            edEnglish.setHint("Tag");
+            edEnglish.setCompoundDrawables(null, null, null, null);
+            btAdd.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String tag = edEnglish.getText().toString().trim();
+                    if (!tag.equals("") && !MainActivity.tagExists(tag, UtilContent.NON)) {
+                        MainActivity.database.addNewTag(new Tag(0, tag));
+                        Tag t = MainActivity.database.getNewTag();
+                        MainActivity.tags.add(t);
+                        Activity activity = getActivity();
+                        if (activity instanceof OptionActivity){
+                            OptionActivity optionActivity = (OptionActivity) activity;
+                            optionActivity.createNewTagChip();
+                        }
+                        Toast.makeText(getContext(), tag + " Added!", Toast.LENGTH_SHORT).show();
+                        dismiss();
+                    } else {
+                        if (tag.equals("")){
+                            Toast.makeText(getContext(), "Please fill text!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Tag already exist!", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }

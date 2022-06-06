@@ -12,6 +12,7 @@ import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.model.Config;
 import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.Tag;
+import com.example.englishnotification.model.TagWord;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.Word;
 
@@ -20,23 +21,18 @@ import java.util.ArrayList;
 
 public class Database extends SQLiteOpenHelper implements Serializable {
 
-    private static final String DATABASE_NAME = "englishNotification.db";
-    private static final int DATABASE_VERSION = 1;
+    public static final String DATABASE_NAME = "englishNotification.db";
+    public static final int DATABASE_VERSION = 1;
 
-    private static final String TABLE_CONFIG = "config";
-    private static final String CONFIG_ID = "id";
-    private static final String CONFIG_AUTO_NOTIFY = "auto_notify";
+    public static final String TABLE_CONFIG = "config";
+    public static final String CONFIG_ID = "id";
+    public static final String CONFIG_AUTO_NOTIFY = "auto_notify";
 
-    private static final String TABLE_TAG_WORD = "tag_word";
-    private static final String TAG_WORD_ID = "id";
-    private static final String TAG_WORD_TAG_ID = "tag_id";
-    private static final String TAG_WORD_WORD_ID = "word_id";
-
-    private static final String TABLE_WORD_WORD = "word_word";
-    private static final String WORD_WORD_ID = "id";
-    private static final String WORD_WORD_WORD_ID = "word_id";
-    private static final String WORD_WORD_WORD_RELATION_ID = "word_relation_id";
-    private static final String WORD_WORD_TYPE_RELATION = "type_relation";
+    public static final String TABLE_WORD_WORD = "word_word";
+    public static final String WORD_WORD_ID = "id";
+    public static final String WORD_WORD_WORD_ID = "word_id";
+    public static final String WORD_WORD_WORD_RELATION_ID = "word_relation_id";
+    public static final String WORD_WORD_TYPE_RELATION = "type_relation";
 
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,13 +47,6 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER)",
                         TABLE_CONFIG, CONFIG_ID, CONFIG_AUTO_NOTIFY);
 
-        String createTableTagWord =
-                String.format("CREATE TABLE IF NOT EXISTS %s(" +
-                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                "%s INTEGER, " +
-                                "%s INTEGER)",
-                        TABLE_TAG_WORD, TAG_WORD_ID, TAG_WORD_TAG_ID, TAG_WORD_WORD_ID);
-
         String createTableWordWord =
                 String.format("CREATE TABLE IF NOT EXISTS %s(" +
                                 "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -70,9 +59,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         DataType.createTable(db);
         DataTag.createTableTag(db);
         DataMean.createTable(db);
+        DataTagWord.createTable(db);
 
         db.execSQL(createTableConfig);
-        db.execSQL(createTableTagWord);
         db.execSQL(createTableWordWord);
     }
 
@@ -165,6 +154,10 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         DataType.deleteType(id, this);
     }
 
+    public boolean foreignTypeExist(int typeId){
+        return DataType.foreignExist(typeId, this);
+    }
+
     public ArrayList<Type> getAllType(){
         return DataType.getAll(this);
     }
@@ -183,5 +176,37 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
     public ArrayList<Tag> getAllTag(){
         return DataTag.getAll(this);
+    }
+
+    public void addNewTag(Tag tag){
+        DataTag.addNewTag(tag, this);
+    }
+
+    public Tag getNewTag(){
+        return DataTag.getNewTag(this);
+    }
+
+    public void updateTag(Tag tag){
+        DataTag.updateTag(tag, this);
+    }
+
+    public boolean foreignTagExist(int tagId){
+        return DataTag.foreignExist(tagId, this);
+    }
+
+    public void deleteTag(int id){
+        DataTag.deleteTag(id, this);
+    }
+
+    public ArrayList<TagWord> getAllTagWord(){
+        return DataTagWord.getAll(this);
+    }
+
+    public void addTagWords(int wordId, ArrayList<Tag> tags){
+        DataTagWord.addTags(wordId, tags, this);
+    }
+
+    public void deleteTagWordByWordId(int wordId){
+        DataTagWord.deleteByWordId(wordId, this);
     }
 }

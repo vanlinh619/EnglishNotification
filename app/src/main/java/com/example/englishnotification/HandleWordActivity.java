@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.example.englishnotification.handle.CustomList.MeanAdapter;
 import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.Word;
@@ -32,6 +33,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class HandleWordActivity extends AppCompatActivity implements MeanAdapter.RecyclerViewReady, Serializable {
 
@@ -41,13 +43,13 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
 
     private RecyclerView rcMean;
     private ArrayList<Type> choseTypes;
-    private ChipGroup cgType;
+    private ArrayList<Tag> choseTags;
+    private ChipGroup cgType, cgTag;
     private MeanAdapter meanAdapter;
     public ImageView imHandle;
     public EditText edEnglish;
     private TextView txTitle;
     public int flag;
-    private Word word;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,34 +60,42 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
 
         Intent intent = getIntent();
         flag = intent.getIntExtra("flag", UtilContent.NON);
-        word = (Word) intent.getSerializableExtra("word");
-        if(word != null){
-            for (Word w: MainActivity.listWord){
-                if (w.id == word.id){
-                    word = w;
-                }
-            }
-        }
+        int idWord = intent.getIntExtra("wordId", UtilContent.NON);
+        choseTags = new ArrayList<>();
 
         switch (flag) {
             case ADD:
                 txTitle.setText("Add New Word");
                 createEmptyListMean(this);
                 imHandle.setOnClickListener(addWord());
-                createListChip(null);
+                createListTypeChip(null);
+                createListTagChip(null);
                 break;
             case UPDATE:
+                Word word = null;
+                for (Word w : MainActivity.listWord) {
+                    if (w.id == idWord) {
+                        word = w;
+                    }
+                }
+
                 txTitle.setText("Update Word");
                 edEnglish.setText(word.english);
                 imHandle.setImageResource(R.drawable.edit);
 
-                ArrayList<Integer> positionChips = new ArrayList<>();
+                ArrayList<Integer> choseTypeChips = new ArrayList<>();
                 if (word.means == null) {
                     createEmptyListMean(this);
                 } else {
-                    createListMean(word.means, positionChips);
+                    createListMean(word.means, choseTypeChips);
                 }
-                createListChip(positionChips);
+                createListTypeChip(choseTypeChips);
+                ArrayList<Integer> choseTagChips = new ArrayList<>();
+                for(Tag tag: word.tags){
+                    choseTagChips.add(MainActivity.tags.indexOf(tag));
+                    choseTags.add(tag);
+                }
+                createListTagChip(choseTagChips);
 
                 imHandle.setOnClickListener(updateWord(word));
                 break;
@@ -93,7 +103,8 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 txTitle.setText("Translate Word");
                 imHandle.setImageResource(R.drawable.translate);
                 createEmptyListMean(this);
-                createListChip(null);
+                createListTypeChip(null);
+                createListTagChip(null);
                 edEnglish.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -198,13 +209,13 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         };
     }
 
-    private void createListChip(ArrayList<Integer> positionChips) {
+    private void createListTypeChip(ArrayList<Integer> choseChips) {
         for (Type type : MainActivity.types) {
             Chip chip = new Chip(this);
             chip.setText(type.name);
             chip.setCheckable(true);
-            if (positionChips != null) {
-                for (Integer position : positionChips) {
+            if (choseChips != null) {
+                for (Integer position : choseChips) {
                     if (position == MainActivity.types.indexOf(type)) {
                         chip.setChecked(true);
                     }
@@ -221,6 +232,32 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 }
             });
             cgType.addView(chip);
+        }
+    }
+
+    private void createListTagChip(ArrayList<Integer> choseChips) {
+        for (Tag tag : MainActivity.tags) {
+            Chip chip = new Chip(this);
+            chip.setText(tag.name);
+            chip.setCheckable(true);
+            if (choseChips != null) {
+                for (Integer position : choseChips) {
+                    if (position == MainActivity.tags.indexOf(tag)) {
+                        chip.setChecked(true);
+                    }
+                }
+            }
+            chip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (chip.isChecked()) {
+                        choseTags.add(tag);
+                    } else {
+                        choseTags.remove(tag);
+                    }
+                }
+            });
+            cgTag.addView(chip);
         }
     }
 
@@ -288,7 +325,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 for (Type type : choseTypes) {
                     int index = choseTypes.indexOf(type);
                     MeanAdapter.ViewHolder holder = (MeanAdapter.ViewHolder) rcMean.getChildViewHolder(rcMean.getChildAt(index));
-                    Mean mean = new Mean(0, type, holder.edMean.getText().toString().trim(), 0);
+                    Mean mean = new Mean(0, type, holder.edMean.getText().toString().trim(), word.id);
                     if (!notNullOrEmpty(mean) && !isTypeNon(choseTypes)) {
                         notNullOrEmpty = false;
                     }
@@ -301,14 +338,23 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                     word.date = date;
                     word.english = english;
                     MainActivity.database.updateWord(word);
-                    for (Mean mean : means) {
-                        mean.wordId = word.id;
+                    boolean updateMean = checkNotEqual(means, word.means);
+                    if(updateMean){
+                        for (Mean mean : means) {
+                            mean.wordId = word.id;
+                        }
+                        if (word.means != null) {
+                            MainActivity.database.deleteMeans(word.id);
+                        }
+                        MainActivity.database.addMeans(means);
+                        word.means = means;
                     }
-                    if(word.means != null){
-                        MainActivity.database.deleteMeans(word.id);
+                    boolean updateTag = checkNotEqual(choseTags, word.tags);
+                    if(updateTag){
+                        MainActivity.database.deleteTagWordByWordId(word.id);
+                        MainActivity.database.addTagWords(word.id, choseTags);
+                        word.tags = choseTags;
                     }
-                    MainActivity.database.addMeans(means);
-                    word.means = means;
                     MainActivity.notifyItemChanged(indexWord);
                     finish();
                 } else {
@@ -320,6 +366,41 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 }
             }
         };
+    }
+
+    private boolean checkNotEqual(Object o1, Object o2){
+        ArrayList<Object> objects1 = (ArrayList<Object>) o1;
+        ArrayList<Object> objects2 = (ArrayList<Object>) o2;
+        boolean isUpdate = false;
+        if(objects1.size() != objects2.size()){
+            isUpdate = true;
+        } else {
+            for (Object o: objects1){
+                if(!containMean(objects2, o)){
+                    isUpdate = true;
+                }
+            }
+        }
+        return isUpdate;
+    }
+
+    private boolean containMean(ArrayList<Object> objects, Object object){
+        for (Object o: objects){
+            if(o instanceof Mean){
+                Mean mean1 = (Mean) o;
+                Mean mean2 = (Mean) object;
+                boolean q = mean1.type.equals(mean2.type);
+                boolean w = mean1.meanWord.equals(mean2.meanWord);
+                boolean e = mean1.wordId == mean2.wordId;
+                if(mean1.type.equals(mean2.type) && mean1.meanWord.equals(mean2.meanWord) && mean1.wordId == mean2.wordId){
+                    return true;
+                }
+            }
+            if (o.equals(object)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public View.OnClickListener addWord() {
@@ -351,6 +432,8 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                         MainActivity.database.addMeans(means);
                         newWord.means = means;
                     }
+                    MainActivity.database.addTagWords(newWord.id, choseTags);
+                    newWord.tags = choseTags;
                     MainActivity.listWord.add(0, newWord);
                     MainActivity.notifyItemInserted(0);
                     finish();
@@ -365,7 +448,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         };
     }
 
-    private boolean isTypeNon(ArrayList<Type> choseTypes){
+    private boolean isTypeNon(ArrayList<Type> choseTypes) {
         return (choseTypes.size() == 1 && choseTypes.get(0).id == UtilContent.NON);
     }
 
@@ -388,6 +471,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
     private void setView() {
         rcMean = findViewById(R.id.rc_mean);
         cgType = findViewById(R.id.cg_type);
+        cgTag = findViewById(R.id.cg_tag);
         imHandle = findViewById(R.id.im_handle);
         edEnglish = findViewById(R.id.ed_english);
         txTitle = findViewById(R.id.tx_title);
