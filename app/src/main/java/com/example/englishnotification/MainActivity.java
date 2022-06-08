@@ -88,9 +88,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private int botFilter = FILTER_1;
     private static ItemListAdapter adapter;
     private RecyclerView rcListWord;
-    private ImageView imAdd, imSearch, imExpandOption, imImport, imExport, imTranslate, imGame, imOption;
+    private static ImageView imAdd, imSearch, imTranslate;
+    private ImageView imExpandOption, imImport, imExport, imGame, imOption;
     private static EditText edSearch;
-    private TextView txTitle, txEnglishSort, txNotifyFilter, txBotFilter;
+    private TextView txEnglishSort, txNotifyFilter, txBotFilter;
+    private static TextView txTitle;
     private static ConstraintLayout ctOption, ctHead;
     private Switch swAutoNotify;
     private SwipeRefreshLayout srRefresh;
@@ -231,12 +233,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 ArrayList<Word> list = new ArrayList<>();
                 for (Word word : listWord) {
                     String english = word.english.toLowerCase();
-//                    String vietnamese = word.vietnamese.toLowerCase();
 
-//                    if (english.indexOf(s.toString().toLowerCase()) != -1 ||
-//                            vietnamese.indexOf(s.toString().toLowerCase()) != -1) {
-//                        list.add(word);
-//                    }
+                    if (english.indexOf(s.toString().toLowerCase()) != -1 || checkContainString(s.toString(), word.means)) {
+                        list.add(word);
+                    }
+                    if (english.equals(s.toString().trim())){
+                        database.incrementOnceForget(word);
+                    }
                 }
                 adapter = new ItemListAdapter(list, MainActivity.this);
                 rcListWord.setAdapter(adapter);
@@ -468,6 +471,15 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         edSearch.setOnTouchListener(deleteText());
     }
 
+    public boolean checkContainString(String check, ArrayList<Mean> means){
+        for (Mean mean: means){
+            if(mean.meanWord.indexOf(check.toLowerCase()) != -1){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void addMeansToWord(ArrayList<Word> listWord, ArrayList<Mean> means) {
         for (Word word : listWord) {
             ArrayList<Mean> tMeans = getMeanByWordId(word.id, means);
@@ -697,6 +709,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             return;
         }
         edSearch.setVisibility(View.VISIBLE);
+        imSearch.setVisibility(View.GONE);
+        imAdd.setVisibility(View.GONE);
+        imTranslate.setVisibility(View.GONE);
+        txTitle.setVisibility(View.GONE);
     }
 
     public void shrinkButtonSearch() {
@@ -706,6 +722,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         hideKeyboard(this, edSearch);
         edSearch.setText("");
         edSearch.setVisibility(View.GONE);
+        imSearch.setVisibility(View.VISIBLE);
+        imAdd.setVisibility(View.VISIBLE);
+        imTranslate.setVisibility(View.VISIBLE);
+        txTitle.setVisibility(View.VISIBLE);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)

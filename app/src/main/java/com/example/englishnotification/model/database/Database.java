@@ -28,12 +28,6 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     public static final String CONFIG_ID = "id";
     public static final String CONFIG_AUTO_NOTIFY = "auto_notify";
 
-    public static final String TABLE_WORD_WORD = "word_word";
-    public static final String WORD_WORD_ID = "id";
-    public static final String WORD_WORD_WORD_ID = "word_id";
-    public static final String WORD_WORD_WORD_RELATION_ID = "word_relation_id";
-    public static final String WORD_WORD_TYPE_RELATION = "type_relation";
-
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -47,22 +41,15 @@ public class Database extends SQLiteOpenHelper implements Serializable {
                                 "%s INTEGER)",
                         TABLE_CONFIG, CONFIG_ID, CONFIG_AUTO_NOTIFY);
 
-        String createTableWordWord =
-                String.format("CREATE TABLE IF NOT EXISTS %s(" +
-                                "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                "%s INTEGER, " +
-                                "%s INTEGER, " +
-                                "%s INTEGER)",
-                        TABLE_WORD_WORD, WORD_WORD_ID, WORD_WORD_WORD_ID, WORD_WORD_WORD_RELATION_ID, WORD_WORD_TYPE_RELATION);
 
         DataWord.createTable(db);
         DataType.createTable(db);
         DataTag.createTableTag(db);
         DataMean.createTable(db);
         DataTagWord.createTable(db);
+        DataRelationWord.createTable(db);
 
         db.execSQL(createTableConfig);
-        db.execSQL(createTableWordWord);
     }
 
     @Override
@@ -105,6 +92,8 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         db.close();
     }
 
+    //Word
+
     public boolean addNewWord(Word word){
         return DataWord.addNewWord(word, this);
     }
@@ -138,6 +127,13 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         return DataWord.getNewWord(this);
     }
 
+    public void incrementOnceForget(Word word){
+       DataWord.incrementOnceForget(word, this);
+    }
+
+
+    //Type
+
     public void addNewType(Type type) {
         DataType.addNewType(type, this);
     }
@@ -162,6 +158,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         return DataType.getAll(this);
     }
 
+
+    //Mean
+
     public void addMeans(ArrayList<Mean> means){
         DataMean.addMeans(means, this);
     }
@@ -173,6 +172,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     public void deleteMeans(int wordId){
         DataMean.deleteMeans(wordId, this);
     }
+
+
+    //Tag
 
     public ArrayList<Tag> getAllTag(){
         return DataTag.getAll(this);
@@ -197,6 +199,9 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     public void deleteTag(int id){
         DataTag.deleteTag(id, this);
     }
+
+
+    //Tag Word
 
     public ArrayList<TagWord> getAllTagWord(){
         return DataTagWord.getAll(this);

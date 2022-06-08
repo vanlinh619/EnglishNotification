@@ -109,7 +109,6 @@
                     android:id="@+id/ct_item_type"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
                     android:background="@drawable/border_corner_item_list"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
@@ -165,7 +164,6 @@
                     android:id="@+id/ct_item_tag"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
                     android:background="@drawable/border_corner_item_list"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
@@ -217,6 +215,288 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/ct_item_related"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
+                    android:background="@drawable/border_corner_item_list"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ct_item_tag">
+
+                    <ImageView
+                        android:id="@+id/im_related"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/image_button_click"
+                        android:src="@drawable/related"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tx_related"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="Related"
+                        app:layout_constraintBottom_toBottomOf="@id/im_related"
+                        app:layout_constraintLeft_toRightOf="@id/im_related"
+                        app:layout_constraintTop_toTopOf="@id/im_related" />
+
+                    <ImageView
+                        android:id="@+id/im_related_directional"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/down_gray"
+                        app:layout_constraintBottom_toBottomOf="@+id/im_related"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/im_related" />
+
+                    <EditText
+                        android:id="@+id/ed_related"
+                        app:layout_constraintTop_toTopOf="@+id/im_related"
+                        app:layout_constraintBottom_toBottomOf="@+id/im_related"
+                        app:layout_constraintLeft_toRightOf="@id/im_related"
+                        app:layout_constraintRight_toLeftOf="@+id/im_related_add"
+                        android:hint="Related"
+                        android:visibility="gone"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/border_edittext"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"/>
+
+                    <ImageView
+                        android:id="@+id/im_related_add"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="@+id/im_related"
+                        app:layout_constraintBottom_toBottomOf="@id/im_related"
+                        app:layout_constraintRight_toRightOf="parent"
+                        android:background="@drawable/image_button_click"
+                        android:src="@drawable/delete1"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rc_related"
+                        android:layout_marginTop="10dp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/im_related"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/cg_related"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:visibility="gone"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/rc_related"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/ct_item_synonym"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
+                    android:background="@drawable/border_corner_item_list"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ct_item_related">
+
+                    <ImageView
+                        android:id="@+id/im_synonym"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/image_button_click"
+                        android:src="@drawable/synonym"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tx_synonym"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="Synonym"
+                        app:layout_constraintBottom_toBottomOf="@id/im_synonym"
+                        app:layout_constraintLeft_toRightOf="@id/im_synonym"
+                        app:layout_constraintTop_toTopOf="@id/im_synonym" />
+
+                    <ImageView
+                        android:id="@+id/im_synonym_directional"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/down_gray"
+                        app:layout_constraintBottom_toBottomOf="@+id/im_synonym"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/im_synonym" />
+
+                    <EditText
+                        android:id="@+id/ed_synonym"
+                        app:layout_constraintTop_toTopOf="@+id/im_synonym"
+                        app:layout_constraintBottom_toBottomOf="@+id/im_synonym"
+                        app:layout_constraintLeft_toRightOf="@id/im_synonym"
+                        app:layout_constraintRight_toLeftOf="@+id/im_synonym_add"
+                        android:hint="Synonym"
+                        android:visibility="gone"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/border_edittext"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"/>
+
+                    <ImageView
+                        android:id="@+id/im_synonym_add"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="@+id/im_synonym"
+                        app:layout_constraintBottom_toBottomOf="@id/im_synonym"
+                        app:layout_constraintRight_toRightOf="parent"
+                        android:background="@drawable/image_button_click"
+                        android:src="@drawable/delete1"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rc_synonym"
+                        android:layout_marginTop="10dp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/im_synonym"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/cg_synonym"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:visibility="gone"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/rc_synonym"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/ct_item_antonym"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
+                    android:background="@drawable/border_corner_item_list"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ct_item_synonym">
+
+                    <ImageView
+                        android:id="@+id/im_antonym"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/image_button_click"
+                        android:src="@drawable/antonym"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tx_antonym"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="Antonym"
+                        app:layout_constraintBottom_toBottomOf="@id/im_antonym"
+                        app:layout_constraintLeft_toRightOf="@id/im_antonym"
+                        app:layout_constraintTop_toTopOf="@id/im_antonym" />
+
+                    <ImageView
+                        android:id="@+id/im_antonym_directional"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/down_gray"
+                        app:layout_constraintBottom_toBottomOf="@+id/im_antonym"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/im_antonym" />
+
+                    <EditText
+                        android:id="@+id/ed_antonym"
+                        app:layout_constraintTop_toTopOf="@+id/im_antonym"
+                        app:layout_constraintBottom_toBottomOf="@+id/im_antonym"
+                        app:layout_constraintLeft_toRightOf="@id/im_antonym"
+                        app:layout_constraintRight_toLeftOf="@+id/im_antonym_add"
+                        android:hint="Antonym"
+                        android:visibility="gone"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/border_edittext"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"/>
+
+                    <ImageView
+                        android:id="@+id/im_antonym_add"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="@+id/im_antonym"
+                        app:layout_constraintBottom_toBottomOf="@id/im_antonym"
+                        app:layout_constraintRight_toRightOf="parent"
+                        android:background="@drawable/image_button_click"
+                        android:src="@drawable/delete1"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rc_antonym"
+                        android:layout_marginTop="10dp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/im_antonym"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/cg_antonym"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="10dp"
+                        android:visibility="gone"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/rc_antonym"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
                 <ImageView
                     android:id="@+id/im_handle"
                     android:layout_width="60dp"
@@ -228,7 +508,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/ct_item_tag" />
+                    app:layout_constraintTop_toBottomOf="@+id/ct_item_antonym" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

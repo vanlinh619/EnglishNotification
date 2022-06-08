@@ -75,11 +75,13 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.txVietnamese.setText(means);
         holder.txDate.setText(word.date);
         holder.txId.setText((listWord.size() - listWord.indexOf(word)) + "");
+        holder.txForget.setText(word.forget + "");
 
         holder.txEnglishExpand.setText(word.english);
         holder.txVietnameseExpand.setText(means);
         holder.txDateExpand.setText(word.date);
         holder.txIdExpand.setText((listWord.size() - listWord.indexOf(word)) + "");
+        holder.txForgetExpand.setText(word.forget + "");
 
         if (word.notification == 0) {
             holder.imNotification.setImageResource(R.drawable.notification);
@@ -343,6 +345,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public ImageView imExample;
         public ImageView imCopy;
 
+        public TextView txForget;
+        public TextView txForgetExpand;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -370,6 +375,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
             imExample = itemView.findViewById(R.id.im_example);
             imCopy = itemView.findViewById(R.id.im_copy);
+
+            txForget = itemView.findViewById(R.id.tx_forget);
+            txForgetExpand = itemView.findViewById(R.id.tx_forget_expand);
         }
     }
 

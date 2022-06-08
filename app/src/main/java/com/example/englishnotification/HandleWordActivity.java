@@ -3,6 +3,7 @@ package com.example.englishnotification;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -13,12 +14,15 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.englishnotification.handle.CustomList.MeanAdapter;
+import com.example.englishnotification.handle.CustomList.SearchAdapter;
 import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Type;
@@ -44,11 +48,14 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
     private RecyclerView rcMean;
     private ArrayList<Type> choseTypes;
     private ArrayList<Tag> choseTags;
-    private ChipGroup cgType, cgTag;
+    private ChipGroup cgType, cgTag, cgRelated, cgSynonym, cgAntonym;
     private MeanAdapter meanAdapter;
-    public ImageView imHandle;
-    public EditText edEnglish;
-    private TextView txTitle;
+    public ImageView imHandle, imRelated, imSynonym, imAntonym, imDRelated, imDSynonym, imDAntonym;
+    public EditText edEnglish, edRelated, edSynonym, edAntonym;
+    public RecyclerView rcRelated, rcSynonym, rcAntonym;
+    private TextView txTitle, txRelated, txSynonym, txAntonym;
+    private ConstraintLayout ctRelated, ctSynonym, ctAntonym;
+    public ArrayList<Word> choseWordRelated, choseWordSynonym, choseWordAntonym;
     public int flag;
 
     @Override
@@ -62,6 +69,9 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         flag = intent.getIntExtra("flag", UtilContent.NON);
         int idWord = intent.getIntExtra("wordId", UtilContent.NON);
         choseTags = new ArrayList<>();
+        choseWordRelated = new ArrayList<>();
+        choseWordSynonym = new ArrayList<>();
+        choseWordAntonym = new ArrayList<>();
 
         switch (flag) {
             case ADD:
@@ -130,6 +140,137 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 });
                 break;
         }
+
+        ctRelated.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (edRelated.getVisibility() == View.GONE){
+                    edRelated.setVisibility(View.VISIBLE);
+                    rcRelated.setVisibility(View.VISIBLE);
+                    cgRelated.setVisibility(View.VISIBLE);
+                    txRelated.setVisibility(View.GONE);
+                    imDRelated.setVisibility(View.GONE);
+                } else {
+                    edRelated.setVisibility(View.GONE);
+                    rcRelated.setVisibility(View.GONE);
+                    imRelated.setVisibility(View.GONE);
+                    cgRelated.setVisibility(View.GONE);
+                    txRelated.setVisibility(View.VISIBLE);
+                    imDRelated.setVisibility(View.VISIBLE);
+                    edRelated.setText("");
+                    unCheckChip(cgRelated);
+                }
+            }
+        });
+
+        ctSynonym.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (edSynonym.getVisibility() == View.GONE){
+                    edSynonym.setVisibility(View.VISIBLE);
+                    rcSynonym.setVisibility(View.VISIBLE);
+                    cgSynonym.setVisibility(View.VISIBLE);
+                    txSynonym.setVisibility(View.GONE);
+                    imDSynonym.setVisibility(View.GONE);
+                } else {
+                    edSynonym.setVisibility(View.GONE);
+                    rcSynonym.setVisibility(View.GONE);
+                    imSynonym.setVisibility(View.GONE);
+                    cgSynonym.setVisibility(View.GONE);
+                    txSynonym.setVisibility(View.VISIBLE);
+                    imDSynonym.setVisibility(View.VISIBLE);
+                    edSynonym.setText("");
+                    unCheckChip(cgSynonym);
+                }
+            }
+        });
+
+        ctAntonym.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (edAntonym.getVisibility() == View.GONE){
+                    edAntonym.setVisibility(View.VISIBLE);
+                    rcAntonym.setVisibility(View.VISIBLE);
+                    cgAntonym.setVisibility(View.VISIBLE);
+                    txAntonym.setVisibility(View.GONE);
+                    imDAntonym.setVisibility(View.GONE);
+                } else {
+                    edAntonym.setVisibility(View.GONE);
+                    rcAntonym.setVisibility(View.GONE);
+                    imAntonym.setVisibility(View.GONE);
+                    cgAntonym.setVisibility(View.GONE);
+                    txAntonym.setVisibility(View.VISIBLE);
+                    imDAntonym.setVisibility(View.VISIBLE);
+                    edAntonym.setText("");
+                    unCheckChip(cgSynonym);
+                }
+            }
+        });
+
+        edRelated.addTextChangedListener(textWatcher(rcRelated, imRelated, cgRelated, choseWordRelated));
+        edSynonym.addTextChangedListener(textWatcher(rcSynonym, imSynonym, cgSynonym, choseWordSynonym));
+        edAntonym.addTextChangedListener(textWatcher(rcAntonym, imAntonym, cgAntonym, choseWordAntonym));
+
+        imRelated.setOnClickListener(removeChip(cgRelated, choseWordRelated, edRelated));
+        imSynonym.setOnClickListener(removeChip(cgSynonym, choseWordSynonym, edSynonym));
+        imAntonym.setOnClickListener(removeChip(cgAntonym, choseWordAntonym, edAntonym));
+    }
+
+    public void unCheckChip(ChipGroup chipGroup){
+        for (int i = chipGroup.getChildCount() - 1; i >= 0; i--){
+            Chip chip = (Chip) chipGroup.getChildAt(i);
+            chip.setChecked(false);
+        }
+    }
+
+    public View.OnClickListener removeChip(ChipGroup chipGroup, ArrayList<Word> choseWords, EditText editText){
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (int i = chipGroup.getChildCount() - 1; i >= 0; i--){
+                    Chip chip = (Chip) chipGroup.getChildAt(i);
+                    if(chip.isChecked()){
+                        for (Word word: choseWords){
+                            if (word.english.equals(chip.getText().toString())){
+                                choseWords.remove(word);
+                                break;
+                            }
+                        }
+                        chipGroup.removeViewAt(i);
+                    }
+                }
+                v.setVisibility(View.GONE);
+                editText.setText("");
+            }
+        };
+    }
+
+    public TextWatcher textWatcher(RecyclerView recyclerView, ImageView imageView, ChipGroup chipGroup, ArrayList<Word> choseWords){
+        return new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                ArrayList<Word> ls = new ArrayList<>();
+                for (int i = 0; i < MainActivity.listWord.size() && ls.size() < 10; i++){
+                    Word word = MainActivity.listWord.get(i);
+                    if(word.english.toLowerCase().indexOf(s.toString().toLowerCase()) != -1 && s.toString().length() != 0){
+                        ls.add(word);
+                    }
+                }
+                SearchAdapter adapter = new SearchAdapter(ls, HandleWordActivity.this, chipGroup, choseWords, imageView);
+                recyclerView.setAdapter(adapter);
+                recyclerView.setLayoutManager(new LinearLayoutManager(HandleWordActivity.this));
+            }
+        };
     }
 
     @Override
@@ -475,5 +616,26 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         imHandle = findViewById(R.id.im_handle);
         edEnglish = findViewById(R.id.ed_english);
         txTitle = findViewById(R.id.tx_title);
+        ctRelated = findViewById(R.id.ct_item_related);
+        ctAntonym = findViewById(R.id.ct_item_antonym);
+        ctSynonym = findViewById(R.id.ct_item_synonym);
+        edRelated = findViewById(R.id.ed_related);
+        edSynonym = findViewById(R.id.ed_synonym);
+        edAntonym = findViewById(R.id.ed_antonym);
+        imRelated = findViewById(R.id.im_related_add);
+        imSynonym = findViewById(R.id.im_synonym_add);
+        imAntonym = findViewById(R.id.im_antonym_add);
+        rcRelated = findViewById(R.id.rc_related);
+        rcSynonym = findViewById(R.id.rc_synonym);
+        rcAntonym = findViewById(R.id.rc_antonym);
+        cgRelated = findViewById(R.id.cg_related);
+        cgSynonym = findViewById(R.id.cg_synonym);
+        cgAntonym = findViewById(R.id.cg_antonym);
+        txRelated = findViewById(R.id.tx_related);
+        txSynonym = findViewById(R.id.tx_synonym);
+        txAntonym = findViewById(R.id.tx_antonym);
+        imDRelated = findViewById(R.id.im_related_directional);
+        imDSynonym = findViewById(R.id.im_synonym_directional);
+        imDAntonym = findViewById(R.id.im_antonym_directional);
     }
 }

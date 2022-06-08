@@ -47,6 +47,27 @@ public class DataWord {
         db.close();
     }
 
+    public static void incrementOnceForget(Word word, Database database){
+        SQLiteDatabase db = database.getWritableDatabase();
+
+//        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_ID, id);
+//        Cursor cursor = db.rawQuery(query, null);
+//        if(cursor.moveToNext()){
+//            Word word = new Word(cursor.getInt(0), cursor.getString(1),
+//                    cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
+//                    cursor.getInt(5), cursor.getInt(6));
+//
+//
+//        }
+
+        word.forget++;
+        String query = String.format("UPDATE %s SET %s = %s WHERE %s = %s",
+                TABLE_WORD, WORD_FORGET, word.forget, WORD_ID, word.id);
+        db.execSQL(query);
+
+        db.close();
+    }
+
     public static void updateWord(Word word, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
 
