@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.example.englishnotification.handle.CustomList.MeanAdapter;
 import com.example.englishnotification.handle.CustomList.SearchAdapter;
 import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.RelationWord;
 import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.UtilContent;
@@ -57,6 +58,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
     private ConstraintLayout ctRelated, ctSynonym, ctAntonym;
     public ArrayList<Word> choseWordRelated, choseWordSynonym, choseWordAntonym;
     public int flag;
+    public Word word;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +84,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 createListTagChip(null);
                 break;
             case UPDATE:
-                Word word = null;
+                word = null;
                 for (Word w : MainActivity.listWord) {
                     if (w.id == idWord) {
                         word = w;
@@ -262,7 +264,9 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 ArrayList<Word> ls = new ArrayList<>();
                 for (int i = 0; i < MainActivity.listWord.size() && ls.size() < 10; i++){
                     Word word = MainActivity.listWord.get(i);
-                    if(word.english.toLowerCase().indexOf(s.toString().toLowerCase()) != -1 && s.toString().length() != 0){
+                    if(word.english.toLowerCase().indexOf(s.toString().toLowerCase()) != -1 && s.toString().length() != 0 &&
+                            (HandleWordActivity.this.word == null || (HandleWordActivity.this.word != null &&
+                                    HandleWordActivity.this.word.id != word.id))){
                         ls.add(word);
                     }
                 }
@@ -530,9 +534,6 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
             if(o instanceof Mean){
                 Mean mean1 = (Mean) o;
                 Mean mean2 = (Mean) object;
-                boolean q = mean1.type.equals(mean2.type);
-                boolean w = mean1.meanWord.equals(mean2.meanWord);
-                boolean e = mean1.wordId == mean2.wordId;
                 if(mean1.type.equals(mean2.type) && mean1.meanWord.equals(mean2.meanWord) && mean1.wordId == mean2.wordId){
                     return true;
                 }
@@ -575,6 +576,9 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                     }
                     MainActivity.database.addTagWords(newWord.id, choseTags);
                     newWord.tags = choseTags;
+                    addRelationWord(newWord, choseWordRelated, RelationWord.RELATED);
+                    addRelationWord(newWord, choseWordSynonym, RelationWord.SYNONYM);
+                    addRelationWord(newWord, choseWordAntonym, RelationWord.ANTONYM);
                     MainActivity.listWord.add(0, newWord);
                     MainActivity.notifyItemInserted(0);
                     finish();
@@ -587,6 +591,17 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 }
             }
         };
+    }
+
+    public void addRelationWord(Word word, ArrayList<Word> words, int type){
+        word.relationWords = new ArrayList<>();
+        for (Word w: words){
+            MainActivity.database.addNewRelationWord(word, w, type);
+            RelationWord relationWord = MainActivity.database.getNewRelationWord();
+            MainActivity.addRelationWord(word, relationWord);
+            MainActivity.addRelationWord(w, relationWord);
+            MainActivity.notifyItemChanged(MainActivity.listWord.indexOf(w));
+        }
     }
 
     private boolean isTypeNon(ArrayList<Type> choseTypes) {

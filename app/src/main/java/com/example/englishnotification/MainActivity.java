@@ -49,6 +49,7 @@ import com.example.englishnotification.handle.CustomList.ItemListAdapter;
 import com.example.englishnotification.handle.notification.Notification;
 import com.example.englishnotification.model.Config;
 import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.RelationWord;
 import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.TagWord;
 import com.example.englishnotification.model.UtilContent;
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public static ArrayList<Tag> tags;
     private ArrayList<Mean> means;
     private ArrayList<TagWord> tagWords;
+    private ArrayList<RelationWord> relationWords;
     public TextToSpeech textToSpeechEnglish;
     public TextToSpeech textToSpeechVietnamese;
     public static Translator translatorEnglish, translatorVietnamese;
@@ -186,6 +188,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         tagWords = database.getAllTagWord();
         addMeansToWord(listWord, means);
         addTagsToWord(listWord, tagWords, tags);
+        relationWords = database.getAllRelationWord();
+        addRelationToWord(listWord, relationWords);
 
         listTmp = new ArrayList<>();
 
@@ -463,12 +467,42 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 tagWords = database.getAllTagWord();
                 addMeansToWord(listWord, means);
                 addTagsToWord(listWord, tagWords, tags);
+                relationWords = database.getAllRelationWord();
+                addRelationToWord(listWord, relationWords);
                 reloadList();
                 srRefresh.setRefreshing(false);
             }
         });
 
         edSearch.setOnTouchListener(deleteText());
+    }
+
+    public void addRelationToWord(ArrayList<Word> listWord, ArrayList<RelationWord> relationWords) {
+        for (RelationWord relationWord: relationWords){
+            addRelationWordById(listWord, relationWord);
+        }
+    }
+
+    public void addRelationWordById(ArrayList<Word> words, RelationWord relationWord){
+        int i = 0;
+        for (Word word: words){
+            if (word.id == relationWord.wordId || word.id == relationWord.relationWordId){
+                addRelationWord(word, relationWord);
+                i++;
+            }
+            if(i == 2){
+                break;
+            }
+        }
+    }
+
+    public static void addRelationWord(Word word, RelationWord relationWord){
+        if(word.relationWords == null){
+            word.relationWords = new ArrayList<>();
+            word.relationWords.add(relationWord);
+        } else {
+            word.relationWords.add(relationWord);
+        }
     }
 
     public boolean checkContainString(String check, ArrayList<Mean> means){

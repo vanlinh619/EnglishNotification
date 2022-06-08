@@ -30,11 +30,14 @@ import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.R;
 import com.example.englishnotification.handle.Example;
 import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.RelationWord;
 import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.Word;
 import com.example.englishnotification.model.ItemDataExample;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import org.jsoup.select.Elements;
 
@@ -82,6 +85,29 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.txDateExpand.setText(word.date);
         holder.txIdExpand.setText((listWord.size() - listWord.indexOf(word)) + "");
         holder.txForgetExpand.setText(word.forget + "");
+
+        ArrayList<Word> wordRelated = getRelation(word, RelationWord.RELATED);
+        ArrayList<Word> wordSynonym = getRelation(word, RelationWord.SYNONYM);
+        ArrayList<Word> wordAntonym = getRelation(word, RelationWord.ANTONYM);
+
+        if(wordRelated.size() > 0){
+            holder.ctRelatedExpand.setVisibility(View.VISIBLE);
+            addChipToGroup(wordRelated, holder.cgRelatedExpand);
+        } else {
+            holder.ctRelatedExpand.setVisibility(View.GONE);
+        }
+        if(wordSynonym.size() > 0){
+            holder.ctSynonymExpand.setVisibility(View.VISIBLE);
+            addChipToGroup(wordSynonym, holder.cgSynonymExpand);
+        } else {
+            holder.ctSynonymExpand.setVisibility(View.GONE);
+        }
+        if(wordAntonym.size() > 0){
+            holder.ctAntonymExpand.setVisibility(View.VISIBLE);
+            addChipToGroup(wordAntonym, holder.cgAntonymExpand);
+        } else {
+            holder.ctAntonymExpand.setVisibility(View.GONE);
+        }
 
         if (word.notification == 0) {
             holder.imNotification.setImageResource(R.drawable.notification);
@@ -303,6 +329,32 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         }
     }
 
+    private ArrayList<Word> getRelation(Word word, int type){
+        ArrayList<Word> words = new ArrayList<>();
+        if(word.relationWords != null){
+            for (RelationWord relationWord: word.relationWords){
+                for (Word w: MainActivity.listWord){
+                    if (((word.id == relationWord.wordId && w.id == relationWord.relationWordId) ||
+                            (word.id == relationWord.relationWordId && w.id == relationWord.wordId)) &&
+                            relationWord.relationType == type){
+                        words.add(w);
+                        break;
+                    }
+                }
+            }
+        }
+        return words;
+    }
+
+    private void addChipToGroup(ArrayList<Word> words, ChipGroup chipGroup){
+        for (Word word: words){
+            Chip chip = new Chip(mainActivity);
+            chip.setText(word.english);
+            chip.setCheckable(false);
+            chipGroup.addView(chip);
+        }
+    }
+
     private void expandView(ItemListAdapter.ViewHolder holder) {
         holder.ctItemShrink.setVisibility(View.GONE);
         holder.ctItemExpand.setVisibility(View.VISIBLE);
@@ -348,6 +400,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public TextView txForget;
         public TextView txForgetExpand;
 
+        public ConstraintLayout ctRelatedExpand, ctSynonymExpand, ctAntonymExpand;
+        public ChipGroup cgRelatedExpand, cgSynonymExpand, cgAntonymExpand;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -378,6 +433,14 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
             txForget = itemView.findViewById(R.id.tx_forget);
             txForgetExpand = itemView.findViewById(R.id.tx_forget_expand);
+
+            ctRelatedExpand = itemView.findViewById(R.id.ct_body_item_expand_related);
+            ctSynonymExpand = itemView.findViewById(R.id.ct_body_item_expand_synonym);
+            ctAntonymExpand = itemView.findViewById(R.id.ct_body_item_expand_antonym);
+
+            cgRelatedExpand = itemView.findViewById(R.id.cg_item_related_expand);
+            cgSynonymExpand = itemView.findViewById(R.id.cg_item_synonym_expand);
+            cgAntonymExpand = itemView.findViewById(R.id.cg_item_antonym_expand);
         }
     }
 

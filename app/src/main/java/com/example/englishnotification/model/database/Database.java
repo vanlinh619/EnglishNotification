@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi;
 import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.model.Config;
 import com.example.englishnotification.model.Mean;
+import com.example.englishnotification.model.RelationWord;
 import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.TagWord;
 import com.example.englishnotification.model.Type;
@@ -213,5 +214,20 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
     public void deleteTagWordByWordId(int wordId){
         DataTagWord.deleteByWordId(wordId, this);
+    }
+
+
+    //Relation Word
+
+    public void addNewRelationWord(Word word, Word relationWord, int type){
+        DataRelationWord.addRelationWord(word, relationWord, type, this);
+    }
+
+    public RelationWord getNewRelationWord(){
+        return DataRelationWord.getNewRelationWord(this);
+    }
+
+    public ArrayList<RelationWord> getAllRelationWord(){
+        return DataRelationWord.getAll(this);
     }
 }
