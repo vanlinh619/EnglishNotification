@@ -37,6 +37,15 @@ public class DataRelationWord {
         db.close();
     }
 
+    public static void addRelationWord(RelationWord relationWord, Database database){
+        SQLiteDatabase db = database.getWritableDatabase();
+        String query = String.format("INSERT INTO %s VALUES(null, %s, %s, %s);",
+                TABLE_WORD_WORD, relationWord.wordId, relationWord.relationWordId, relationWord.relationType);
+
+        db.execSQL(query);
+        db.close();
+    }
+
     public static RelationWord getNewRelationWord(Database database){
         SQLiteDatabase db = database.getReadableDatabase();
         String query = String.format("SELECT * FROM %s ORDER BY %s DESC LIMIT 1", TABLE_WORD_WORD, WORD_WORD_ID);
@@ -62,5 +71,14 @@ public class DataRelationWord {
         }
         db.close();
         return relationWords;
+    }
+
+    public static void deleteRelation(int id, Database database) {
+        SQLiteDatabase db = database.getWritableDatabase();
+
+        String query = String.format("DELETE FROM %s WHERE %s = %s", TABLE_WORD_WORD, WORD_WORD_ID, id);
+
+        db.execSQL(query);
+        db.close();
     }
 }

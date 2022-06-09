@@ -86,9 +86,13 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.txIdExpand.setText((listWord.size() - listWord.indexOf(word)) + "");
         holder.txForgetExpand.setText(word.forget + "");
 
-        ArrayList<Word> wordRelated = getRelation(word, RelationWord.RELATED);
-        ArrayList<Word> wordSynonym = getRelation(word, RelationWord.SYNONYM);
-        ArrayList<Word> wordAntonym = getRelation(word, RelationWord.ANTONYM);
+        ArrayList<Word> wordRelated = MainActivity.getWordsByRelations(word, RelationWord.RELATED);
+        ArrayList<Word> wordSynonym = MainActivity.getWordsByRelations(word, RelationWord.SYNONYM);
+        ArrayList<Word> wordAntonym = MainActivity.getWordsByRelations(word, RelationWord.ANTONYM);
+
+        holder.cgRelatedExpand.removeAllViews();
+        holder.cgSynonymExpand.removeAllViews();
+        holder.cgAntonymExpand.removeAllViews();
 
         if(wordRelated.size() > 0){
             holder.ctRelatedExpand.setVisibility(View.VISIBLE);
@@ -329,27 +333,11 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         }
     }
 
-    private ArrayList<Word> getRelation(Word word, int type){
-        ArrayList<Word> words = new ArrayList<>();
-        if(word.relationWords != null){
-            for (RelationWord relationWord: word.relationWords){
-                for (Word w: MainActivity.listWord){
-                    if (((word.id == relationWord.wordId && w.id == relationWord.relationWordId) ||
-                            (word.id == relationWord.relationWordId && w.id == relationWord.wordId)) &&
-                            relationWord.relationType == type){
-                        words.add(w);
-                        break;
-                    }
-                }
-            }
-        }
-        return words;
-    }
-
     private void addChipToGroup(ArrayList<Word> words, ChipGroup chipGroup){
         for (Word word: words){
             Chip chip = new Chip(mainActivity);
             chip.setText(word.english);
+            chip.setTextSize(10);
             chip.setCheckable(false);
             chipGroup.addView(chip);
         }

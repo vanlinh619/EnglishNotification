@@ -477,6 +477,52 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         edSearch.setOnTouchListener(deleteText());
     }
 
+    public static ArrayList<Word> getWordsByRelations(Word word, int type){
+        ArrayList<Word> words = new ArrayList<>();
+        if(word.relationWords != null){
+            for (RelationWord relationWord: word.relationWords){
+                for (Word w: MainActivity.listWord){
+                    if (((word.id == relationWord.wordId && w.id == relationWord.relationWordId) ||
+                            (word.id == relationWord.relationWordId && w.id == relationWord.wordId)) &&
+                            relationWord.relationType == type){
+                        words.add(w);
+                        break;
+                    }
+                }
+            }
+        }
+        return words;
+    }
+
+    public static Word getWordById(int id, ArrayList<Word> words){
+        for (Word word: words){
+            if(word.id == id){
+                return word;
+            }
+        }
+        return null;
+    }
+
+    public static void getWordsByRelations(Word word, ArrayList<Word> related, ArrayList<Word> synonym, ArrayList<Word> antonym){
+        if(word.relationWords != null){
+            for (RelationWord relationWord: word.relationWords){
+                for (Word w: MainActivity.listWord){
+                    if (((word.id == relationWord.wordId && w.id == relationWord.relationWordId) ||
+                            (word.id == relationWord.relationWordId && w.id == relationWord.wordId))){
+                        if (relationWord.relationType == RelationWord.RELATED){
+                            related.add(word);
+                        } else if (relationWord.relationType == RelationWord.SYNONYM){
+                            synonym.add(word);
+                        } else if (relationWord.relationType == RelationWord.ANTONYM){
+                            antonym.add(word);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     public void addRelationToWord(ArrayList<Word> listWord, ArrayList<RelationWord> relationWords) {
         for (RelationWord relationWord: relationWords){
             addRelationWordById(listWord, relationWord);

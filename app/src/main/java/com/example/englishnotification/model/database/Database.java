@@ -223,11 +223,19 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         DataRelationWord.addRelationWord(word, relationWord, type, this);
     }
 
+    public void addNewRelationWord(RelationWord relationWord){
+        DataRelationWord.addRelationWord(relationWord, this);
+    }
+
     public RelationWord getNewRelationWord(){
         return DataRelationWord.getNewRelationWord(this);
     }
 
     public ArrayList<RelationWord> getAllRelationWord(){
         return DataRelationWord.getAll(this);
+    }
+
+    public void deleteRelation(int id){
+        DataRelationWord.deleteRelation(id, this);
     }
 }

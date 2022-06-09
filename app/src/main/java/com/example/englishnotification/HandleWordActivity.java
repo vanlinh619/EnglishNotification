@@ -90,6 +90,12 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                         word = w;
                     }
                 }
+                choseWordRelated.addAll(MainActivity.getWordsByRelations(word, RelationWord.RELATED));
+                choseWordSynonym.addAll(MainActivity.getWordsByRelations(word, RelationWord.SYNONYM));
+                choseWordAntonym.addAll(MainActivity.getWordsByRelations(word, RelationWord.ANTONYM));
+                createListRelationWord(choseWordRelated, imRelated, cgRelated);
+                createListRelationWord(choseWordSynonym, imSynonym, cgSynonym);
+                createListRelationWord(choseWordAntonym, imAntonym, cgAntonym);
 
                 txTitle.setText("Update Word");
                 edEnglish.setText(word.english);
@@ -103,7 +109,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 }
                 createListTypeChip(choseTypeChips);
                 ArrayList<Integer> choseTagChips = new ArrayList<>();
-                for(Tag tag: word.tags){
+                for (Tag tag : word.tags) {
                     choseTagChips.add(MainActivity.tags.indexOf(tag));
                     choseTags.add(tag);
                 }
@@ -146,7 +152,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         ctRelated.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (edRelated.getVisibility() == View.GONE){
+                if (edRelated.getVisibility() == View.GONE) {
                     edRelated.setVisibility(View.VISIBLE);
                     rcRelated.setVisibility(View.VISIBLE);
                     cgRelated.setVisibility(View.VISIBLE);
@@ -168,7 +174,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         ctSynonym.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (edSynonym.getVisibility() == View.GONE){
+                if (edSynonym.getVisibility() == View.GONE) {
                     edSynonym.setVisibility(View.VISIBLE);
                     rcSynonym.setVisibility(View.VISIBLE);
                     cgSynonym.setVisibility(View.VISIBLE);
@@ -190,7 +196,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         ctAntonym.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (edAntonym.getVisibility() == View.GONE){
+                if (edAntonym.getVisibility() == View.GONE) {
                     edAntonym.setVisibility(View.VISIBLE);
                     rcAntonym.setVisibility(View.VISIBLE);
                     cgAntonym.setVisibility(View.VISIBLE);
@@ -218,22 +224,23 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         imAntonym.setOnClickListener(removeChip(cgAntonym, choseWordAntonym, edAntonym));
     }
 
-    public void unCheckChip(ChipGroup chipGroup){
-        for (int i = chipGroup.getChildCount() - 1; i >= 0; i--){
+
+    public void unCheckChip(ChipGroup chipGroup) {
+        for (int i = chipGroup.getChildCount() - 1; i >= 0; i--) {
             Chip chip = (Chip) chipGroup.getChildAt(i);
             chip.setChecked(false);
         }
     }
 
-    public View.OnClickListener removeChip(ChipGroup chipGroup, ArrayList<Word> choseWords, EditText editText){
+    public View.OnClickListener removeChip(ChipGroup chipGroup, ArrayList<Word> choseWords, EditText editText) {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = chipGroup.getChildCount() - 1; i >= 0; i--){
+                for (int i = chipGroup.getChildCount() - 1; i >= 0; i--) {
                     Chip chip = (Chip) chipGroup.getChildAt(i);
-                    if(chip.isChecked()){
-                        for (Word word: choseWords){
-                            if (word.english.equals(chip.getText().toString())){
+                    if (chip.isChecked()) {
+                        for (Word word : choseWords) {
+                            if (word.english.equals(chip.getText().toString())) {
                                 choseWords.remove(word);
                                 break;
                             }
@@ -247,7 +254,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         };
     }
 
-    public TextWatcher textWatcher(RecyclerView recyclerView, ImageView imageView, ChipGroup chipGroup, ArrayList<Word> choseWords){
+    public TextWatcher textWatcher(RecyclerView recyclerView, ImageView imageView, ChipGroup chipGroup, ArrayList<Word> choseWords) {
         return new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -262,11 +269,11 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
             @Override
             public void afterTextChanged(Editable s) {
                 ArrayList<Word> ls = new ArrayList<>();
-                for (int i = 0; i < MainActivity.listWord.size() && ls.size() < 10; i++){
+                for (int i = 0; i < MainActivity.listWord.size() && ls.size() < 10; i++) {
                     Word word = MainActivity.listWord.get(i);
-                    if(word.english.toLowerCase().indexOf(s.toString().toLowerCase()) != -1 && s.toString().length() != 0 &&
+                    if (word.english.toLowerCase().indexOf(s.toString().toLowerCase()) != -1 && s.toString().length() != 0 &&
                             (HandleWordActivity.this.word == null || (HandleWordActivity.this.word != null &&
-                                    HandleWordActivity.this.word.id != word.id))){
+                                    HandleWordActivity.this.word.id != word.id))) {
                         ls.add(word);
                     }
                 }
@@ -275,6 +282,36 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 recyclerView.setLayoutManager(new LinearLayoutManager(HandleWordActivity.this));
             }
         };
+    }
+
+    public void createListRelationWord(ArrayList<Word> wordRelations, ImageView imDelete, ChipGroup cgRelation) {
+        for (Word word : wordRelations) {
+            Chip chip = new Chip(this);
+            chip.setText(word.english);
+            chip.setCheckable(true);
+            chip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (chip.isChecked()) {
+                        imDelete.setVisibility(View.VISIBLE);
+                    } else {
+                        boolean haveCheckChip = false;
+                        for (int i = 0; i < cgRelation.getChildCount(); i++) {
+                            Chip chip = (Chip) cgRelation.getChildAt(i);
+                            Chip c = (Chip) v;
+                            if (!chip.getText().toString().equals(c.getText().toString()) && chip.isChecked()) {
+                                haveCheckChip = true;
+                                break;
+                            }
+                        }
+                        if (!haveCheckChip) {
+                            imDelete.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            });
+            cgRelation.addView(chip);
+        }
     }
 
     @Override
@@ -484,7 +521,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                     word.english = english;
                     MainActivity.database.updateWord(word);
                     boolean updateMean = checkNotEqual(means, word.means);
-                    if(updateMean){
+                    if (updateMean) {
                         for (Mean mean : means) {
                             mean.wordId = word.id;
                         }
@@ -495,10 +532,37 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                         word.means = means;
                     }
                     boolean updateTag = checkNotEqual(choseTags, word.tags);
-                    if(updateTag){
+                    if (updateTag) {
                         MainActivity.database.deleteTagWordByWordId(word.id);
                         MainActivity.database.addTagWords(word.id, choseTags);
                         word.tags = choseTags;
+                    }
+                    ArrayList<Word> relation = new ArrayList<>();
+                    relation.addAll(choseWordRelated);
+                    relation.addAll(choseWordSynonym);
+                    relation.addAll(choseWordAntonym);
+                    ArrayList<RelationWord> relationWords = createRelations(word, choseWordRelated, choseWordSynonym, choseWordAntonym);
+                    boolean updateRelation = checkNotEqual(word.relationWords, relationWords);
+                    if (updateRelation) {
+                        if(word.relationWords != null){
+                            for (RelationWord relationWord : word.relationWords) {
+                                MainActivity.database.deleteRelation(relationWord.id);
+                                Word w = null;
+                                if(relationWord.wordId == word.id){
+                                    w = MainActivity.getWordById(relationWord.relationWordId, MainActivity.listWord);
+
+                                } else {
+                                    w = MainActivity.getWordById(relationWord.wordId, MainActivity.listWord);
+                                }
+                                int indexRel = contain(w.relationWords, relationWord);
+                                w.relationWords.remove(indexRel);
+                                MainActivity.notifyItemChanged(MainActivity.listWord.indexOf(w));
+                            }
+                            word.relationWords.clear();
+                        }
+                        addRelationWord(word, choseWordRelated, RelationWord.RELATED);
+                        addRelationWord(word, choseWordSynonym, RelationWord.SYNONYM);
+                        addRelationWord(word, choseWordAntonym, RelationWord.ANTONYM);
                     }
                     MainActivity.notifyItemChanged(indexWord);
                     finish();
@@ -513,15 +577,32 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         };
     }
 
-    private boolean checkNotEqual(Object o1, Object o2){
+    public ArrayList<RelationWord> createRelations(Word word, ArrayList<Word> related, ArrayList<Word> synonym, ArrayList<Word> antonym) {
+        ArrayList<RelationWord> relationWords = new ArrayList<>();
+        for (Word w : related) {
+            relationWords.add(new RelationWord(0, word.id, w.id, RelationWord.RELATED));
+        }
+        for (Word w : synonym) {
+            relationWords.add(new RelationWord(0, word.id, w.id, RelationWord.SYNONYM));
+        }
+        for (Word w : antonym) {
+            relationWords.add(new RelationWord(0, word.id, w.id, RelationWord.ANTONYM));
+        }
+        return relationWords;
+    }
+
+    private boolean checkNotEqual(Object o1, Object o2) {
         ArrayList<Object> objects1 = (ArrayList<Object>) o1;
         ArrayList<Object> objects2 = (ArrayList<Object>) o2;
+        if(objects1 == null || objects2 == null){
+            return true;
+        }
         boolean isUpdate = false;
-        if(objects1.size() != objects2.size()){
+        if (objects1.size() != objects2.size()) {
             isUpdate = true;
         } else {
-            for (Object o: objects1){
-                if(!containMean(objects2, o)){
+            for (Object o : objects1) {
+                if (!contain(objects2, o)) {
                     isUpdate = true;
                 }
             }
@@ -529,20 +610,40 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         return isUpdate;
     }
 
-    private boolean containMean(ArrayList<Object> objects, Object object){
-        for (Object o: objects){
-            if(o instanceof Mean){
+    private boolean contain(ArrayList<Object> objects, Object object) {
+        for (Object o : objects) {
+            if (o instanceof Mean) {
                 Mean mean1 = (Mean) o;
                 Mean mean2 = (Mean) object;
-                if(mean1.type.equals(mean2.type) && mean1.meanWord.equals(mean2.meanWord) && mean1.wordId == mean2.wordId){
+                if (mean1.type.equals(mean2.type) && mean1.meanWord.equals(mean2.meanWord) && mean1.wordId == mean2.wordId) {
                     return true;
                 }
             }
-            if (o.equals(object)){
+            if (o instanceof RelationWord) {
+                RelationWord r1 = (RelationWord) o;
+                RelationWord r2 = (RelationWord) object;
+                if (((r1.wordId == r2.wordId && r1.relationWordId == r2.relationWordId) ||
+                        (r1.wordId == r2.relationWordId && r1.relationWordId == r2.wordId)) &&
+                        r1.relationType == r2.relationType) {
+                    return true;
+                }
+            }
+            if (o.equals(object)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private int contain(ArrayList<RelationWord> relationWords, RelationWord relationWord) {
+        for (RelationWord r : relationWords) {
+            if (((r.wordId == relationWord.wordId && r.relationWordId == relationWord.relationWordId) ||
+                    (r.wordId == relationWord.relationWordId && r.relationWordId == relationWord.wordId)) &&
+                    r.relationType == relationWord.relationType) {
+                return relationWords.indexOf(r);
+            }
+        }
+        return -1;
     }
 
     public View.OnClickListener addWord() {
@@ -593,9 +694,8 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         };
     }
 
-    public void addRelationWord(Word word, ArrayList<Word> words, int type){
-        word.relationWords = new ArrayList<>();
-        for (Word w: words){
+    public void addRelationWord(Word word, ArrayList<Word> words, int type) {
+        for (Word w : words) {
             MainActivity.database.addNewRelationWord(word, w, type);
             RelationWord relationWord = MainActivity.database.getNewRelationWord();
             MainActivity.addRelationWord(word, relationWord);
