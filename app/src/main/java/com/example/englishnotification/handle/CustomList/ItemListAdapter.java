@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.englishnotification.DialogAddEditWord;
@@ -90,25 +91,21 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         ArrayList<Word> wordSynonym = MainActivity.getWordsByRelations(word, RelationWord.SYNONYM);
         ArrayList<Word> wordAntonym = MainActivity.getWordsByRelations(word, RelationWord.ANTONYM);
 
-        holder.cgRelatedExpand.removeAllViews();
-        holder.cgSynonymExpand.removeAllViews();
-        holder.cgAntonymExpand.removeAllViews();
-
         if(wordRelated.size() > 0){
             holder.ctRelatedExpand.setVisibility(View.VISIBLE);
-            addChipToGroup(wordRelated, holder.cgRelatedExpand);
+            addRecycleView(wordRelated, holder.rcRelatedExpand);
         } else {
             holder.ctRelatedExpand.setVisibility(View.GONE);
         }
         if(wordSynonym.size() > 0){
             holder.ctSynonymExpand.setVisibility(View.VISIBLE);
-            addChipToGroup(wordSynonym, holder.cgSynonymExpand);
+            addRecycleView(wordSynonym, holder.rcSynonymExpand);
         } else {
             holder.ctSynonymExpand.setVisibility(View.GONE);
         }
         if(wordAntonym.size() > 0){
             holder.ctAntonymExpand.setVisibility(View.VISIBLE);
-            addChipToGroup(wordAntonym, holder.cgAntonymExpand);
+            addRecycleView(wordAntonym, holder.rcAntonymExpand);
         } else {
             holder.ctAntonymExpand.setVisibility(View.GONE);
         }
@@ -343,6 +340,12 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         }
     }
 
+    private void addRecycleView(ArrayList<Word> words, RecyclerView recyclerView){
+        StringHorizontalAdapter stringHorizontalAdapter = new StringHorizontalAdapter(words);
+        recyclerView.setAdapter(stringHorizontalAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(mainActivity, LinearLayoutManager.HORIZONTAL, false));
+    }
+
     private void expandView(ItemListAdapter.ViewHolder holder) {
         holder.ctItemShrink.setVisibility(View.GONE);
         holder.ctItemExpand.setVisibility(View.VISIBLE);
@@ -389,7 +392,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public TextView txForgetExpand;
 
         public ConstraintLayout ctRelatedExpand, ctSynonymExpand, ctAntonymExpand;
-        public ChipGroup cgRelatedExpand, cgSynonymExpand, cgAntonymExpand;
+        public RecyclerView rcRelatedExpand, rcSynonymExpand, rcAntonymExpand;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -426,9 +429,9 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             ctSynonymExpand = itemView.findViewById(R.id.ct_body_item_expand_synonym);
             ctAntonymExpand = itemView.findViewById(R.id.ct_body_item_expand_antonym);
 
-            cgRelatedExpand = itemView.findViewById(R.id.cg_item_related_expand);
-            cgSynonymExpand = itemView.findViewById(R.id.cg_item_synonym_expand);
-            cgAntonymExpand = itemView.findViewById(R.id.cg_item_antonym_expand);
+            rcRelatedExpand = itemView.findViewById(R.id.rc_item_related_expand);
+            rcSynonymExpand = itemView.findViewById(R.id.rc_item_synonym_expand);
+            rcAntonymExpand = itemView.findViewById(R.id.rc_item_antonym_expand);
         }
     }
 
