@@ -14,11 +14,15 @@ import android.widget.Toast;
 import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.UtilContent;
+import com.example.englishnotification.model.Word;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 
-public class OptionActivity extends AppCompatActivity {
+import java.io.Serializable;
+import java.util.Random;
+
+public class OptionActivity extends AppCompatActivity implements Serializable {
 
     private ConstraintLayout ctType, ctTag, ctTagEdit, ctTypeEdit;
     private ChipGroup cgType, cgTag;

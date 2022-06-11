@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/mn_game"
+        android:icon="@drawable/console"
+        android:title="Game" />
+    <item
+        android:id="@+id/mn_import"
+        android:icon="@drawable/importt"
+        android:title="Import" />
+    <item
+        android:id="@+id/mn_export"
+        android:icon="@drawable/export"
+        android:title="Export" />
+
+    <item
+        android:id="@+id/mn_more"
+        android:icon="@drawable/more"
+        android:title="More" />
+
+</menu>

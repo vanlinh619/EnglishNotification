@@ -18,6 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EnglishNotification">
         <activity
+            android:name=".RememberActivity"
+            android:exported="false" />
+        <activity
             android:name=".OptionActivity"
             android:exported="false" />
         <activity

@@ -29,6 +29,7 @@ import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
@@ -58,6 +59,7 @@ import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.Word;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.navigation.NavigationView;
 import com.google.mlkit.common.model.DownloadConditions;
 import com.google.mlkit.nl.translate.TranslateLanguage;
 import com.google.mlkit.nl.translate.Translation;
@@ -90,11 +92,12 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private static ItemListAdapter adapter;
     private RecyclerView rcListWord;
     private static ImageView imAdd, imSearch, imTranslate;
-    private ImageView imExpandOption, imImport, imExport, imGame, imOption;
+    private ImageView imExpandOption;
     private static EditText edSearch;
     private TextView txEnglishSort, txNotifyFilter, txBotFilter;
     private static TextView txTitle;
-    private static ConstraintLayout ctOption, ctHead;
+    private static ConstraintLayout ctHead;
+    private NavigationView nvOption;
     private Switch swAutoNotify;
     private SwipeRefreshLayout srRefresh;
     private final String fileName = "english.en";
@@ -268,10 +271,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imExpandOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ctOption.getVisibility() == View.VISIBLE) {
-                    ctOption.setVisibility(View.GONE);
+                if (nvOption.getVisibility() == View.VISIBLE) {
+                    nvOption.setVisibility(View.GONE);
                 } else {
-                    ctOption.setVisibility(View.VISIBLE);
+                    nvOption.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -287,128 +290,15 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         break;
                     case MotionEvent.ACTION_UP:
                         if (event.getX() - x0 > 100) {
-                            ctOption.setVisibility(View.VISIBLE);
-                            txTitle.setText("");
+                            nvOption.setVisibility(View.VISIBLE);
                         } else if (event.getX() - x0 < -100) {
-                            ctOption.setVisibility(View.GONE);
-                            txTitle.setText("English Notification");
+                            nvOption.setVisibility(View.GONE);
                         } else {
                             shrinkButtonSearch();
                         }
                         break;
                 }
                 return true;
-            }
-        });
-
-        imExport.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
-                        ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
-                } else {
-                    showAlertDialog(MainActivity.this, "Exporting...");
-                    Thread thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            File dir = getExternalFilesDir(null);
-                            File file = new File(dir.getAbsolutePath(), fileName);
-                            if (file.exists()) {
-                                file.delete();
-                            }
-                            try {
-                                FileOutputStream stream = new FileOutputStream(file);
-                                ObjectOutputStream objectOutputStream = new ObjectOutputStream(stream);
-                                for (Word itemData : listWord) {
-                                    objectOutputStream.writeObject(itemData);
-                                }
-                                objectOutputStream.close();
-                                stream.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            alertDialog.cancel();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    showAlertDialog(MainActivity.this, "Exported!");
-                                }
-                            });
-                        }
-
-                    });
-                    thread.start();
-                }
-            }
-        });
-
-        imImport.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
-                        ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-                } else {
-                    showAlertDialog(MainActivity.this, "Importing...");
-                    Thread thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            File dir = getExternalFilesDir(null);
-                            File file = new File(dir.getAbsolutePath(), fileName);
-                            ArrayList<Word> list = new ArrayList<>();
-                            try {
-                                FileInputStream stream = new FileInputStream(file);
-                                ObjectInputStream objectInputStream = new ObjectInputStream(stream);
-                                while (true) {
-                                    Word word = (Word) objectInputStream.readObject();
-                                    if (word != null) {
-                                        list.add(word);
-                                    } else {
-                                        break;
-                                    }
-                                }
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                                alertDialog.cancel();
-                                new AlertDialog.Builder(MainActivity.this)
-                                        .setTitle("Please move the file english.en to the download folder!")
-                                        .setNegativeButton("Close", null)
-                                        .show();
-                                return;
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                            if (list.size() > 0) {
-                                for (int i = list.size() - 1; i >= 0; i--) {
-                                    boolean added = database.addNewWord(list.get(i));
-                                    if (added) {
-                                        Word item = database.getNewWord();
-                                        listWord.add(item);
-                                    }
-                                }
-                                sortList(listWord);
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        reloadList();
-                                    }
-                                });
-                            }
-                            alertDialog.cancel();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    showAlertDialog(MainActivity.this, "Imported!");
-                                }
-                            });
-                        }
-                    });
-                    thread.start();
-                }
             }
         });
 
@@ -442,21 +332,6 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             }
         });
 
-        imGame.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDialogCheckWord();
-            }
-        });
-
-        imOption.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, OptionActivity.class);
-                startActivity(intent);
-            }
-        });
-
         srRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -475,6 +350,150 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
 
         edSearch.setOnTouchListener(deleteText());
+
+        for (int i = 0; i < nvOption.getHeaderCount(); i++){
+            View view = nvOption.getHeaderView(i);
+            if(view.findViewById(R.id.im_close) != null){
+                ImageView imageView = view.findViewById(R.id.im_close);
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        nvOption.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }
+
+        nvOption.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()){
+                    case R.id.mn_game:
+                        showDialogCheckWord();
+                        break;
+                    case R.id.mn_import:
+                        importData();
+                        break;
+                    case R.id.mn_export:
+                        exportData();
+                        break;
+                    case R.id.mn_more:
+                        Intent intent = new Intent(MainActivity.this, OptionActivity.class);
+                        startActivity(intent);
+                        break;
+                    default:
+                        nvOption.setVisibility(View.GONE);
+                }
+                nvOption.setVisibility(View.GONE);
+                return true;
+            }
+        });
+    }
+
+    public void exportData(){
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
+        } else {
+            showAlertDialog(MainActivity.this, "Exporting...");
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    File dir = getExternalFilesDir(null);
+                    File file = new File(dir.getAbsolutePath(), fileName);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    try {
+                        FileOutputStream stream = new FileOutputStream(file);
+                        ObjectOutputStream objectOutputStream = new ObjectOutputStream(stream);
+                        for (Word itemData : listWord) {
+                            objectOutputStream.writeObject(itemData);
+                        }
+                        objectOutputStream.close();
+                        stream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    alertDialog.cancel();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showAlertDialog(MainActivity.this, "Exported!");
+                        }
+                    });
+                }
+
+            });
+            thread.start();
+        }
+    }
+
+    public void importData(){
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        } else {
+            showAlertDialog(MainActivity.this, "Importing...");
+            Thread thread = new Thread(new Runnable() {
+                @RequiresApi(api = Build.VERSION_CODES.N)
+                @Override
+                public void run() {
+                    File dir = getExternalFilesDir(null);
+                    File file = new File(dir.getAbsolutePath(), fileName);
+                    ArrayList<Word> list = new ArrayList<>();
+                    try {
+                        FileInputStream stream = new FileInputStream(file);
+                        ObjectInputStream objectInputStream = new ObjectInputStream(stream);
+                        while (true) {
+                            Word word = (Word) objectInputStream.readObject();
+                            if (word != null) {
+                                list.add(word);
+                            } else {
+                                break;
+                            }
+                        }
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        alertDialog.cancel();
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("Please move the file english.en to the download folder!")
+                                .setNegativeButton("Close", null)
+                                .show();
+                        return;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    if (list.size() > 0) {
+                        for (int i = list.size() - 1; i >= 0; i--) {
+                            boolean added = database.addNewWord(list.get(i));
+                            if (added) {
+                                Word item = database.getNewWord();
+                                listWord.add(item);
+                            }
+                        }
+                        MainActivity.sortList(listWord);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                reloadList();
+                            }
+                        });
+                    }
+                    alertDialog.cancel();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showAlertDialog(MainActivity.this, "Imported!");
+                        }
+                    });
+                }
+            });
+            thread.start();
+        }
     }
 
     public static ArrayList<Word> getWordsByRelations(Word word, int type){
@@ -551,7 +570,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
     }
 
-    public boolean checkContainString(String check, ArrayList<Mean> means){
+    public static boolean checkContainString(String check, ArrayList<Mean> means){
         for (Mean mean: means){
             if(mean.meanWord.indexOf(check.toLowerCase()) != -1){
                 return true;
@@ -859,17 +878,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imSearch = findViewById(R.id.im_search);
         swAutoNotify = findViewById(R.id.sw_auto_notify);
         imExpandOption = findViewById(R.id.im_expand_option);
-        ctOption = findViewById(R.id.ct_option);
+        nvOption = findViewById(R.id.nv_option);
         ctHead = findViewById(R.id.ct_header_title);
-        imExport = findViewById(R.id.im_export);
-        imImport = findViewById(R.id.im_import);
         txEnglishSort = findViewById(R.id.tx_english_sort);
         txNotifyFilter = findViewById(R.id.tx_notify_filter);
         txBotFilter = findViewById(R.id.tx_bot_filter);
         imTranslate = findViewById(R.id.im_translate_word);
-        imGame = findViewById(R.id.im_game);
         srRefresh = findViewById(R.id.sr_refresh);
-        imOption = findViewById(R.id.im_option);
     }
 
     public void setAutoNotify() {

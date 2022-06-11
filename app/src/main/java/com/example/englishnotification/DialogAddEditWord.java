@@ -2,6 +2,7 @@ package com.example.englishnotification;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
@@ -47,6 +48,7 @@ public class DialogAddEditWord extends DialogFragment {
     private Button btCancel;
     private TextView txTitle;
     private MainActivity mainActivity;
+    private OptionActivity optionActivity;
 
     public static DialogAddEditWord newInstance(MainActivity mainActivity, Word word, int flags) {
         DialogAddEditWord frag = new DialogAddEditWord();
@@ -200,13 +202,13 @@ public class DialogAddEditWord extends DialogFragment {
                             mainActivity.showDialogCheckWord();
                         }
                     };
-                    mainActivity.setTextForSearch(edEnglish.getText().toString().trim());
+                    MainActivity.setTextForSearch(edEnglish.getText().toString().trim());
                     String title = "";
-//                    if(edVietnamese.getText().toString().trim().toLowerCase().equals(word.vietnamese.toLowerCase())){
-//                        title = "Exact!";
-//                    } else {
-//                        title = "Incorrect!";
-//                    }
+                    if(MainActivity.checkContainString(edVietnamese.getText().toString().trim().toLowerCase(), word.means)){
+                        title = "Exact!";
+                    } else {
+                        title = "Incorrect!";
+                    }
                     new AlertDialog.Builder(mainActivity)
                             .setTitle(title)
 //                            .setMessage(word.english + " : " + word.vietnamese)
