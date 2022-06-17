@@ -5,7 +5,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Word;
@@ -18,6 +20,7 @@ public class RememberActivity extends AppCompatActivity {
 
     private TabLayout tlTag;
     private FrameLayout flPage;
+    private ImageView imBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,13 @@ public class RememberActivity extends AppCompatActivity {
 
             }
         });
+
+        imBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     public void createPageChip(String tagName){
@@ -76,5 +86,6 @@ public class RememberActivity extends AppCompatActivity {
     private void setView() {
         tlTag = findViewById(R.id.tl_tag);
         flPage = findViewById(R.id.fl_page);
+        imBack = findViewById(R.id.im_back);
     }
 }

@@ -202,9 +202,10 @@ public class DialogAddEditWord extends DialogFragment {
                             mainActivity.showDialogCheckWord();
                         }
                     };
+                    MainActivity.shrinkButtonSearch();
                     MainActivity.setTextForSearch(edEnglish.getText().toString().trim());
                     String title = "";
-                    if(MainActivity.checkContainString(edVietnamese.getText().toString().trim().toLowerCase(), word.means)){
+                    if(MainActivity.containEqualString(edVietnamese.getText().toString().trim().toLowerCase(), word.means)){
                         title = "Exact!";
                     } else {
                         title = "Incorrect!";

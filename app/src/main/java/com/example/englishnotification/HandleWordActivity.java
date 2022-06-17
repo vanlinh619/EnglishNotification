@@ -51,7 +51,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
     private ArrayList<Tag> choseTags;
     private ChipGroup cgType, cgTag, cgRelated, cgSynonym, cgAntonym;
     private MeanAdapter meanAdapter;
-    public ImageView imHandle, imRelated, imSynonym, imAntonym, imDRelated, imDSynonym, imDAntonym;
+    public ImageView imHandle, imRelated, imSynonym, imAntonym, imDRelated, imDSynonym, imDAntonym, imBack;
     public EditText edEnglish, edRelated, edSynonym, edAntonym;
     public RecyclerView rcRelated, rcSynonym, rcAntonym;
     private TextView txTitle, txRelated, txSynonym, txAntonym;
@@ -222,6 +222,13 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         imRelated.setOnClickListener(removeChip(cgRelated, choseWordRelated, edRelated));
         imSynonym.setOnClickListener(removeChip(cgSynonym, choseWordSynonym, edSynonym));
         imAntonym.setOnClickListener(removeChip(cgAntonym, choseWordAntonym, edAntonym));
+
+        imBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
 
@@ -752,5 +759,6 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         imDRelated = findViewById(R.id.im_related_directional);
         imDSynonym = findViewById(R.id.im_synonym_directional);
         imDAntonym = findViewById(R.id.im_antonym_directional);
+        imBack = findViewById(R.id.im_back);
     }
 }

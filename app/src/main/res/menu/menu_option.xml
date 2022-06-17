@@ -15,6 +15,11 @@
         android:title="Export" />
 
     <item
+        android:id="@+id/mn_remember"
+        android:icon="@drawable/forget"
+        android:title="Remember" />
+
+    <item
         android:id="@+id/mn_more"
         android:icon="@drawable/more"
         android:title="More" />

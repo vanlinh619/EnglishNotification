@@ -147,6 +147,17 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toRightOf="@+id/tx_notify_filter" />
 
+            <TextView
+                android:id="@+id/tx_forget_filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:background="@drawable/background_item_sort"
+                android:text="forget"
+                android:textSize="10sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@+id/tx_bot_filter" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ImageView

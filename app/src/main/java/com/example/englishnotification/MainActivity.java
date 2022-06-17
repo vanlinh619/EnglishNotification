@@ -86,15 +86,17 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public static final int FILTER_1 = 3;
     public static final int FILTER_2 = 4;
     public static final int FILTER_3 = 5;
+    public static final int FORGET_ITEM = 6;
     private int englishSort = FILTER_1;
     private int notifyFilter = FILTER_1;
     private int botFilter = FILTER_1;
+    private int forgetFilter = FILTER_1;
     private static ItemListAdapter adapter;
     private RecyclerView rcListWord;
     private static ImageView imAdd, imSearch, imTranslate;
     private ImageView imExpandOption;
-    private static EditText edSearch;
-    private TextView txEnglishSort, txNotifyFilter, txBotFilter;
+    public static EditText edSearch;
+    private TextView txEnglishSort, txNotifyFilter, txBotFilter, txForgetFilter;
     private static TextView txTitle;
     private static ConstraintLayout ctHead;
     private NavigationView nvOption;
@@ -244,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     if (english.indexOf(s.toString().toLowerCase()) != -1 || checkContainString(s.toString(), word.means)) {
                         list.add(word);
                     }
-                    if (english.equals(s.toString().trim())){
+                    if (edSearch.getVisibility() == View.VISIBLE && english.equals(s.toString().trim())){
                         database.incrementOnceForget(word);
                     }
                 }
@@ -323,6 +325,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             }
         });
 
+        txForgetFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeViewItemFilter(FORGET_ITEM);
+            }
+        });
+
         imTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -380,6 +389,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     case R.id.mn_more:
                         Intent intent = new Intent(MainActivity.this, OptionActivity.class);
                         startActivity(intent);
+                        break;
+                    case R.id.mn_remember:
+                        Intent intentRemember = new Intent(MainActivity.this, RememberActivity.class);
+                        startActivity(intentRemember);
                         break;
                     default:
                         nvOption.setVisibility(View.GONE);
@@ -579,6 +592,15 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         return false;
     }
 
+    public static boolean containEqualString(String check, ArrayList<Mean> means){
+        for (Mean mean: means){
+            if(mean.meanWord.equals(check.toLowerCase())){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void addMeansToWord(ArrayList<Word> listWord, ArrayList<Mean> means) {
         for (Word word : listWord) {
             ArrayList<Mean> tMeans = getMeanByWordId(word.id, means);
@@ -642,6 +664,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     englishSort = FILTER_2;
                     txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_up, 0);
                     txEnglishSort.setTextColor(R.color.blue);
+                    forgetFilter = FILTER_1;
+                    txForgetFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txForgetFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     sortByName(listWord, 0);
                     reloadListFilter();
@@ -672,6 +697,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     notifyFilter = FILTER_2;
                     txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot_blue, 0);
                     txNotifyFilter.setTextColor(R.color.blue);
+                    forgetFilter = FILTER_1;
+                    txForgetFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txForgetFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     filterByNotify(1);
                     reloadListFilter();
@@ -691,7 +719,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     reloadListFilter();
                     break;
             }
-        } else {
+        } else if (flags == BOT_ITEM){
             switch (botFilter) {
                 case FILTER_1:
                     englishSort = FILTER_1;
@@ -703,6 +731,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     botFilter = FILTER_2;
                     txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_dot_blue, 0);
                     txBotFilter.setTextColor(R.color.blue);
+                    forgetFilter = FILTER_1;
+                    txForgetFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txForgetFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     filterByBot(1);
                     reloadListFilter();
@@ -719,6 +750,42 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     botFilter = FILTER_1;
                     txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                     refreshlistWord();
+                    reloadListFilter();
+                    break;
+            }
+        } else if (flags == FORGET_ITEM){
+            switch (forgetFilter){
+                case FILTER_1:
+                    notifyFilter = FILTER_1;
+                    txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txNotifyFilter.setTextColor(R.color.black);
+                    botFilter = FILTER_1;
+                    txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txBotFilter.setTextColor(R.color.black);
+                    englishSort = FILTER_1;
+                    txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txEnglishSort.setTextColor(R.color.black);
+                    forgetFilter = FILTER_2;
+                    txForgetFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_up, 0);
+                    txForgetFilter.setTextColor(R.color.blue);
+                    refreshlistWord();
+                    sortByForget(listWord, 0);
+                    reloadListFilter();
+                    break;
+                case FILTER_2:
+                    forgetFilter = FILTER_3;
+                    txForgetFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_down, 0);
+                    txForgetFilter.setTextColor(R.color.blue);
+                    refreshlistWord();
+                    sortByForget(listWord, 1);
+                    reloadListFilter();
+                    break;
+                case FILTER_3:
+                    forgetFilter = FILTER_1;
+                    txForgetFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    txForgetFilter.setTextColor(R.color.black);
+                    refreshlistWord();
+                    sortList(listWord);
                     reloadListFilter();
                     break;
             }
@@ -744,6 +811,20 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     return o1.english.toLowerCase().compareTo(o2.english.toLowerCase());
                 } else {
                     return o2.english.toLowerCase().compareTo(o1.english.toLowerCase());
+                }
+            }
+        });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void sortByForget(ArrayList<Word> list, int flags) {
+        list.sort(new Comparator<Word>() {
+            @Override
+            public int compare(Word o1, Word o2) {
+                if (flags == 0) {
+                    return o1.forget > o2.forget ? 1 : -1;
+                } else {
+                    return o1.forget < o2.forget ? 1 : -1;
                 }
             }
         });
@@ -814,11 +895,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         txTitle.setVisibility(View.GONE);
     }
 
-    public void shrinkButtonSearch() {
+    public static void shrinkButtonSearch() {
         if (edSearch.getVisibility() == View.GONE) {
             return;
         }
-        hideKeyboard(this, edSearch);
+        //hideKeyboard(this, edSearch);
         edSearch.setText("");
         edSearch.setVisibility(View.GONE);
         imSearch.setVisibility(View.VISIBLE);
@@ -885,6 +966,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         txBotFilter = findViewById(R.id.tx_bot_filter);
         imTranslate = findViewById(R.id.im_translate_word);
         srRefresh = findViewById(R.id.sr_refresh);
+        txForgetFilter = findViewById(R.id.tx_forget_filter);
     }
 
     public void setAutoNotify() {

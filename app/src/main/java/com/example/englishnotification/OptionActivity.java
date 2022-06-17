@@ -26,7 +26,8 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
 
     private ConstraintLayout ctType, ctTag, ctTagEdit, ctTypeEdit;
     private ChipGroup cgType, cgTag;
-    private ImageView imTypeDirectional, imTagDirectional, imTagAdd, imTypeAdd, imTagEdit, imTagDelete, imTypeEdit, imTypeDelete;
+    private ImageView imTypeDirectional, imTagDirectional, imTagAdd, imTypeAdd, imTagEdit, imTagDelete,
+            imTypeEdit, imTypeDelete, imBack;
     private EditText edType, edTag;
 
     @Override
@@ -225,6 +226,13 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
                 }
             }
         });
+
+        imBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     public void createNewTypeChip(){
@@ -284,5 +292,6 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
         imTypeEdit = findViewById(R.id.im_type_edit);
         imTagDelete = findViewById(R.id.im_tag_delete);
         imTypeDelete = findViewById(R.id.im_type_delete);
+        imBack = findViewById(R.id.im_back);
     }
 }
