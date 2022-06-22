@@ -136,13 +136,13 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
 
                     @Override
                     public void afterTextChanged(Editable s) {
-                        MeanAdapter.ViewHolder holder = (MeanAdapter.ViewHolder) rcMean.getChildViewHolder(rcMean.getChildAt(0));
+                        MeanAdapter.ViewHolder holder = (MeanAdapter.ViewHolder) rcMean.findViewHolderForAdapterPosition(0);
                         if (!s.toString().equals("") && !holder.edMean.getText().toString().trim().equals("")) {
                             imHandle.setImageResource(R.drawable.add);
                             imHandle.setOnClickListener(addWord());
                         } else {
                             imHandle.setImageResource(R.drawable.translate);
-                            imHandle.setOnClickListener(translateWord(edEnglish, holder.edMean));
+                            imHandle.setOnClickListener(translateWord(edEnglish, null));
                         }
                     }
                 });
@@ -351,15 +351,26 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MeanAdapter.ViewHolder holder = (MeanAdapter.ViewHolder) rcMean.findViewHolderForAdapterPosition(0);
                 String english = edEnglish.getText().toString().trim();
-                String vietnamese = edMean.getText().toString().trim();
+                String vietnamese;
+                if(edMean != null){
+                    vietnamese = edMean.getText().toString().trim();
+                } else {
+                    vietnamese = holder.edMean.getText().toString().trim();
+                }
+
                 if (!english.equals("") && vietnamese.equals("")) {
                     MainActivity.translatorEnglish.translate(english)
                             .addOnSuccessListener(
                                     new OnSuccessListener() {
                                         @Override
                                         public void onSuccess(Object o) {
-                                            edMean.setText(o.toString());
+                                            if(edMean != null){
+                                                edMean.setText(o.toString());
+                                            } else {
+                                                holder.edMean.setText(o.toString());
+                                            }
                                             imHandle.setImageResource(R.drawable.add);
                                             imHandle.setOnClickListener(addWord());
                                         }

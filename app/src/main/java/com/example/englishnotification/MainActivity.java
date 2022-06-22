@@ -1011,7 +1011,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 stringMeansBuilder.append(mean.meanWord + "\n");
             }
             means = stringMeansBuilder.toString();
-            means = means.substring(0, means.length() - 1);
+            if(means.length() > 0){
+                means = means.substring(0, means.length() - 1);
+            }
         }
         return means;
     }
