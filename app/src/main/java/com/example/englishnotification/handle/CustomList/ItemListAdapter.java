@@ -93,19 +93,19 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
         if(wordRelated.size() > 0){
             holder.ctRelatedExpand.setVisibility(View.VISIBLE);
-            addRecycleView(wordRelated, holder.rcRelatedExpand);
+            addRecycleView(wordRelated, holder.rcRelatedExpand, mainActivity);
         } else {
             holder.ctRelatedExpand.setVisibility(View.GONE);
         }
         if(wordSynonym.size() > 0){
             holder.ctSynonymExpand.setVisibility(View.VISIBLE);
-            addRecycleView(wordSynonym, holder.rcSynonymExpand);
+            addRecycleView(wordSynonym, holder.rcSynonymExpand, mainActivity);
         } else {
             holder.ctSynonymExpand.setVisibility(View.GONE);
         }
         if(wordAntonym.size() > 0){
             holder.ctAntonymExpand.setVisibility(View.VISIBLE);
-            addRecycleView(wordAntonym, holder.rcAntonymExpand);
+            addRecycleView(wordAntonym, holder.rcAntonymExpand, mainActivity);
         } else {
             holder.ctAntonymExpand.setVisibility(View.GONE);
         }
@@ -340,10 +340,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         }
     }
 
-    private void addRecycleView(ArrayList<Word> words, RecyclerView recyclerView){
+    public static void addRecycleView(ArrayList<Word> words, RecyclerView recyclerView, Context context){
         StringHorizontalAdapter stringHorizontalAdapter = new StringHorizontalAdapter(words);
         recyclerView.setAdapter(stringHorizontalAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(mainActivity, LinearLayoutManager.HORIZONTAL, false));
+        recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
     }
 
     private void expandView(ItemListAdapter.ViewHolder holder) {

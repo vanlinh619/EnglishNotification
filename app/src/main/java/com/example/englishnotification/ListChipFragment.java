@@ -1,5 +1,7 @@
 package com.example.englishnotification;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 
 import com.example.englishnotification.model.Word;
 import com.google.android.material.chip.Chip;
@@ -21,6 +24,7 @@ public class ListChipFragment extends Fragment {
 
     private ArrayList<Word> words;
     private ChipGroup cgWord;
+    private CompoundButton buttonViewCache;
 
     public static ListChipFragment newInstance(ArrayList<Word> words) {
         ListChipFragment fragment = new ListChipFragment();
@@ -55,6 +59,7 @@ public class ListChipFragment extends Fragment {
         for (Word word: words){
             Chip chip = new Chip(getContext());
             chip.setText(word.english);
+            chip.setCheckable(true);
             chip.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -62,7 +67,31 @@ public class ListChipFragment extends Fragment {
                     return true;
                 }
             });
+            chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(isChecked){
+                        Activity activity = getActivity();
+                        if(activity instanceof RememberActivity){
+                            RememberActivity rememberActivity = (RememberActivity) activity;
+                            rememberActivity.action(word, chip);
+                            buttonViewCache = buttonView;
+                        }
+                    } else {
+                        Activity activity = getActivity();
+                        if(activity instanceof RememberActivity && buttonViewCache.equals(buttonView)){
+                            RememberActivity rememberActivity = (RememberActivity) activity;
+                            rememberActivity.hide();
+                        }
+                    }
+                }
+            });
             cgWord.addView(chip);
         }
+    }
+
+    public interface ClickChipListener{
+        public void action(Word word, Chip chip);
+        public void hide();
     }
 }

@@ -641,6 +641,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void showDialogCheckWord() {
+        if(listWord.size() == 0) return;
         Random random = new Random();
         int index = random.nextInt(listWord.size());
         Word word = listWord.get(index);
@@ -876,8 +877,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         if (context instanceof Activity) {
                             Activity activity = (Activity) context;
                             activity.finish();
-                            MainActivity.setTextForSearch(text);
                             MainActivity.expandButtonSearch();
+                            MainActivity.setTextForSearch(text);
                         }
                     }
                 })
