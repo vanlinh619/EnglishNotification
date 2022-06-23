@@ -14,7 +14,10 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -229,6 +232,21 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 finish();
             }
         });
+
+        edEnglish.setOnTouchListener(MainActivity.clearEdittext());
+    }
+
+    public void clearChip(ChipGroup chipGroup, Object object, boolean remove) {
+        if (remove) {
+            chipGroup.removeAllViews();
+        } else {
+            for (int i = 0; i < chipGroup.getChildCount(); i++) {
+                Chip chip = (Chip) chipGroup.getChildAt(i);
+                chip.setChecked(false);
+            }
+        }
+        ArrayList<Object> objects = (ArrayList<Object>) object;
+        objects.clear();
     }
 
 
@@ -354,7 +372,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 MeanAdapter.ViewHolder holder = (MeanAdapter.ViewHolder) rcMean.findViewHolderForAdapterPosition(0);
                 String english = edEnglish.getText().toString().trim();
                 String vietnamese;
-                if(edMean != null){
+                if (edMean != null) {
                     vietnamese = edMean.getText().toString().trim();
                 } else {
                     vietnamese = holder.edMean.getText().toString().trim();
@@ -366,7 +384,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                                     new OnSuccessListener() {
                                         @Override
                                         public void onSuccess(Object o) {
-                                            if(edMean != null){
+                                            if (edMean != null) {
                                                 edMean.setText(o.toString());
                                             } else {
                                                 holder.edMean.setText(o.toString());
@@ -421,10 +439,10 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                     }
                 }
             }
-            chip.setOnClickListener(new View.OnClickListener() {
+            chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
-                public void onClick(View v) {
-                    if (chip.isChecked()) {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
                         addType(type);
                     } else {
                         removeType(type);
@@ -447,10 +465,10 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                     }
                 }
             }
-            chip.setOnClickListener(new View.OnClickListener() {
+            chip.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
-                public void onClick(View v) {
-                    if (chip.isChecked()) {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
                         choseTags.add(tag);
                     } else {
                         choseTags.remove(tag);
@@ -562,11 +580,11 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                     ArrayList<RelationWord> relationWords = createRelations(word, choseWordRelated, choseWordSynonym, choseWordAntonym);
                     boolean updateRelation = checkNotEqual(word.relationWords, relationWords);
                     if (updateRelation) {
-                        if(word.relationWords != null){
+                        if (word.relationWords != null) {
                             for (RelationWord relationWord : word.relationWords) {
                                 MainActivity.database.deleteRelation(relationWord.id);
                                 Word w = null;
-                                if(relationWord.wordId == word.id){
+                                if (relationWord.wordId == word.id) {
                                     w = MainActivity.getWordById(relationWord.relationWordId, MainActivity.listWord);
 
                                 } else {
@@ -612,7 +630,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
     private boolean checkNotEqual(Object o1, Object o2) {
         ArrayList<Object> objects1 = (ArrayList<Object>) o1;
         ArrayList<Object> objects2 = (ArrayList<Object>) o2;
-        if(objects1 == null || objects2 == null){
+        if (objects1 == null || objects2 == null) {
             return true;
         }
         boolean isUpdate = false;

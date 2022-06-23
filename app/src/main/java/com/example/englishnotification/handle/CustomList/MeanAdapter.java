@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.englishnotification.HandleWordActivity;
+import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.R;
 import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.Type;
@@ -50,6 +51,7 @@ public class MeanAdapter extends RecyclerView.Adapter<MeanAdapter.ViewHolder> {
         Type type = choTypes.get(position);
         holder.edMean.setHint(type.name);
         holder.edMean.setText("");
+        holder.edMean.setOnTouchListener(MainActivity.clearEdittext());
         if (flag == HandleWordActivity.UPDATE) {
             for (Mean mean: means){
                 if (mean.type.id == type.id){

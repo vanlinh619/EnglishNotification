@@ -1115,6 +1115,26 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         };
     }
 
+    public static View.OnTouchListener clearEdittext() {
+        return new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_RIGHT = 2;
+
+                EditText editText = (EditText) v;
+
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (event.getRawX() >= (editText.getRight() - editText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        editText.setText("");
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
+    }
+
     public static boolean wordExists(String english, int id) {
         for (Word word : listWord) {
             if (word.english.toLowerCase().equals(english.toLowerCase()) && id != word.id) {

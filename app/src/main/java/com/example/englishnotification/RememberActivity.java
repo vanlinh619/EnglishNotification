@@ -128,6 +128,12 @@ public class RememberActivity extends AppCompatActivity implements ListChipFragm
                         showInforWord(word);
                     }
                 })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        chip.setChecked(false);
+                    }
+                })
                 .show();
 
     }

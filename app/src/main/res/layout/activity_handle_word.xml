@@ -46,17 +46,17 @@
                     android:textSize="20sp"
                     app:layout_constraintBottom_toBottomOf="@+id/im_back"
                     app:layout_constraintLeft_toRightOf="@+id/im_back"
-                    app:layout_constraintRight_toLeftOf="@+id/im_clear"
+                    app:layout_constraintRight_toLeftOf="@+id/im_handle"
                     app:layout_constraintTop_toTopOf="@+id/im_back" />
 
                 <ImageView
-                    android:id="@+id/im_clear"
+                    android:id="@+id/im_handle"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginTop="20dp"
                     android:layout_marginRight="10dp"
                     android:background="@drawable/image_button_click"
-                    android:src="@drawable/reload"
+                    android:src="@drawable/add"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -496,19 +496,6 @@
                         app:layout_constraintTop_toBottomOf="@+id/rc_antonym"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <ImageView
-                    android:id="@+id/im_handle"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/image_button_click"
-                    android:src="@drawable/add"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/ct_item_antonym" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
