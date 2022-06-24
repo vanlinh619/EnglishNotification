@@ -823,9 +823,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public int compare(Word o1, Word o2) {
                 if (flags == 0) {
-                    return o1.forget > o2.forget ? 1 : -1;
+                    return o1.forget >= o2.forget ? 1 : -1;
                 } else {
-                    return o1.forget < o2.forget ? 1 : -1;
+                    return o1.forget >= o2.forget ? -1 : 1;
                 }
             }
         });

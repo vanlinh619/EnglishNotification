@@ -213,6 +213,12 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
                 for (int i = 0; i < MainActivity.tags.size(); i++){
                     Tag tag = MainActivity.tags.get(i);
                     if (tag.name == th){
+//                        MainActivity.database.deleteTag(tag.id);
+//                        MainActivity.database.deleteTagWordByTagId(tag.id);
+//                        MainActivity.tags.remove(tag);
+//                        ctTagEdit.setVisibility(View.GONE);
+//                        Chip chip = (Chip) cgTag.getChildAt(i);
+//                        cgTag.removeView(chip);
                         if(!MainActivity.database.foreignTagExist(tag.id)) {
                             MainActivity.database.deleteTag(tag.id);
                             MainActivity.tags.remove(tag);

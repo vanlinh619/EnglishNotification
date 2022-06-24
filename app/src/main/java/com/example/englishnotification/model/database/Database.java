@@ -216,6 +216,10 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         DataTagWord.deleteByWordId(wordId, this);
     }
 
+    public void deleteTagWordByTagId(int tagId){
+        DataTagWord.deleteByTagId(tagId, this);
+    }
+
 
     //Relation Word
 

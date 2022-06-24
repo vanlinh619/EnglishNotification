@@ -74,4 +74,13 @@ public class DataTagWord {
         db.execSQL(query);
         db.close();
     }
+
+    public static void deleteByTagId(int tagId, Database database) {
+        SQLiteDatabase db = database.getWritableDatabase();
+
+        String query = String.format("DELETE FROM %s WHERE %s = %s", TABLE_TAG_WORD, TAG_WORD_TAG_ID, tagId);
+
+        db.execSQL(query);
+        db.close();
+    }
 }

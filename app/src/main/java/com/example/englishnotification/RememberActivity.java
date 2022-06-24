@@ -151,7 +151,7 @@ public class RememberActivity extends AppCompatActivity implements ListChipFragm
         ArrayList<Word> wordAntonym = MainActivity.getWordsByRelations(word, RelationWord.ANTONYM);
 
         if(wordRelated.size() > 0){
-            ctSynonymExpand.setVisibility(View.VISIBLE);
+            ctRelatedExpand.setVisibility(View.VISIBLE);
             ItemListAdapter.addRecycleView(wordRelated, rcRelated, this);
         } else {
             ctRelatedExpand.setVisibility(View.GONE);

@@ -163,6 +163,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                             public void onClick(DialogInterface dialog, int which) {
                                 mainActivity.database.deleteData(word.id);
                                 mainActivity.database.deleteMeans(word.id);
+                                MainActivity.database.deleteTagWordByWordId(word.id);
                                 MainActivity.notifyItemRemoved(listWord.indexOf(word));
                                 mainActivity.listWord.remove(word);
                                 dialog.dismiss();
