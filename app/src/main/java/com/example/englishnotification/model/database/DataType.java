@@ -33,6 +33,19 @@ public class DataType {
         db.close();
     }
 
+    public static boolean typeExist(Type type, Database database){
+        SQLiteDatabase db = database.getReadableDatabase();
+
+        String getType = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_TYPE, TYPE_NAME, type.name);
+        Cursor cursor = db.rawQuery(getType, null);
+        if(cursor.moveToNext()) {
+            db.close();
+            return true;
+        }
+        db.close();
+        return false;
+    }
+
     public static Type getNewType(Database database){
         SQLiteDatabase db = database.getReadableDatabase();
         String query = String.format("SELECT * FROM %s ORDER BY %s DESC LIMIT 1", TABLE_TYPE, TYPE_ID);

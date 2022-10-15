@@ -29,6 +29,7 @@ import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -76,6 +77,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -123,78 +125,17 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getWindow().setDecorFitsSystemWindows(false);
-        WindowInsetsController controller = getWindow().getInsetsController();
-        if (controller != null) {
-            controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-            controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        }
+        hideSystemBar(this);
 
         setView();
         mainActivity = this;
 
         // Create an English-German translator:
-        TranslatorOptions optionsEnglish =
-                new TranslatorOptions.Builder()
-                        .setSourceLanguage(TranslateLanguage.ENGLISH)
-                        .setTargetLanguage(TranslateLanguage.VIETNAMESE)
-                        .build();
-        TranslatorOptions optionsVietnamese =
-                new TranslatorOptions.Builder()
-                        .setSourceLanguage(TranslateLanguage.VIETNAMESE)
-                        .setTargetLanguage(TranslateLanguage.ENGLISH)
-                        .build();
-
-        translatorEnglish = Translation.getClient(optionsEnglish);
-        translatorVietnamese = Translation.getClient(optionsVietnamese);
-
-        DownloadConditions conditions = new DownloadConditions.Builder()
-                .requireWifi()
-                .build();
-        translatorEnglish.downloadModelIfNeeded(conditions)
-                .addOnSuccessListener(new OnSuccessListener() {
-                    @Override
-                    public void onSuccess(Object o) {
-                        // Model downloaded successfully. Okay to start translating.
-                        // (Set a flag, unhide the translation UI, etc.)
-                    }
-                })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                // Model couldn’t be downloaded or other internal error.
-                                Toast.makeText(MainActivity.this, "Model couldn’t be downloaded or other internal error.", Toast.LENGTH_LONG).show();
-                            }
-                        });
-
-        translatorVietnamese.downloadModelIfNeeded(conditions)
-                .addOnSuccessListener(new OnSuccessListener() {
-                    @Override
-                    public void onSuccess(Object o) {
-                        // Model downloaded successfully. Okay to start translating.
-                        // (Set a flag, unhide the translation UI, etc.)
-                    }
-                })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                // Model couldn’t be downloaded or other internal error.
-                                Toast.makeText(MainActivity.this, "Model couldn’t be downloaded or other internal error.", Toast.LENGTH_LONG).show();
-                            }
-                        });
+        loadTranslate();
 
         database = new Database(this);
-        listWord = database.getAll();
-        types = database.getAllType();
-        tags = database.getAllTag();
-        means = database.getAllMean();
-        tagWords = database.getAllTagWord();
-        addMeansToWord(listWord, means);
-        addTagsToWord(listWord, tagWords, tags);
-        relationWords = database.getAllRelationWord();
-        addRelationToWord(listWord, relationWords);
+        reloadData();
+        reloadList();
 
         listTmp = new ArrayList<>();
 
@@ -246,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     if (english.indexOf(s.toString().toLowerCase()) != -1 || checkContainString(s.toString(), word.means)) {
                         list.add(word);
                     }
-                    if (edSearch.getVisibility() == View.VISIBLE && english.equals(s.toString().trim())){
+                    if (edSearch.getVisibility() == View.VISIBLE && english.equals(s.toString().trim())) {
                         database.incrementOnceForget(word);
                     }
                 }
@@ -344,15 +285,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         srRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                listWord = database.getAll();
-                means = database.getAllMean();
-                types = database.getAllType();
-                tags = database.getAllTag();
-                tagWords = database.getAllTagWord();
-                addMeansToWord(listWord, means);
-                addTagsToWord(listWord, tagWords, tags);
-                relationWords = database.getAllRelationWord();
-                addRelationToWord(listWord, relationWords);
+                reloadData();
                 reloadList();
                 srRefresh.setRefreshing(false);
             }
@@ -360,9 +293,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
         edSearch.setOnTouchListener(deleteText());
 
-        for (int i = 0; i < nvOption.getHeaderCount(); i++){
+        for (int i = 0; i < nvOption.getHeaderCount(); i++) {
             View view = nvOption.getHeaderView(i);
-            if(view.findViewById(R.id.im_close) != null){
+            if (view.findViewById(R.id.im_close) != null) {
                 ImageView imageView = view.findViewById(R.id.im_close);
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -376,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         nvOption.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()){
+                switch (item.getItemId()) {
                     case R.id.mn_game:
                         showDialogCheckWord();
                         break;
@@ -403,7 +336,88 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
     }
 
-    public void exportData(){
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void reloadData(){
+        listWord = database.getAll();
+        means = database.getAllMean();
+        types = database.getAllType();
+        tags = database.getAllTag();
+        tagWords = database.getAllTagWord();
+        addMeansToWord(listWord, means);
+        addTagsToWord(listWord, tagWords, tags);
+        relationWords = database.getAllRelationWord();
+        addRelationToWord(listWord, relationWords);
+    }
+
+    public static void hideSystemBar(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                activity.getWindow().setDecorFitsSystemWindows(false);
+                WindowInsetsController controller = activity.getWindow().getInsetsController();
+                if (controller != null) {
+                    controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                    controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                }
+            } catch (Exception e) {
+                Log.d("Exception", e.toString());
+            }
+        }
+    }
+
+    private void loadTranslate() {
+        TranslatorOptions optionsEnglish =
+                new TranslatorOptions.Builder()
+                        .setSourceLanguage(TranslateLanguage.ENGLISH)
+                        .setTargetLanguage(TranslateLanguage.VIETNAMESE)
+                        .build();
+        TranslatorOptions optionsVietnamese =
+                new TranslatorOptions.Builder()
+                        .setSourceLanguage(TranslateLanguage.VIETNAMESE)
+                        .setTargetLanguage(TranslateLanguage.ENGLISH)
+                        .build();
+
+        translatorEnglish = Translation.getClient(optionsEnglish);
+        translatorVietnamese = Translation.getClient(optionsVietnamese);
+
+        DownloadConditions conditions = new DownloadConditions.Builder()
+                .requireWifi()
+                .build();
+        translatorEnglish.downloadModelIfNeeded(conditions)
+                .addOnSuccessListener(new OnSuccessListener() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        // Model downloaded successfully. Okay to start translating.
+                        // (Set a flag, unhide the translation UI, etc.)
+                    }
+                })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Model couldn’t be downloaded or other internal error.
+                                Toast.makeText(MainActivity.this, "Model couldn’t be downloaded or other internal error.", Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+        translatorVietnamese.downloadModelIfNeeded(conditions)
+                .addOnSuccessListener(new OnSuccessListener() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        // Model downloaded successfully. Okay to start translating.
+                        // (Set a flag, unhide the translation UI, etc.)
+                    }
+                })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Model couldn’t be downloaded or other internal error.
+                                Toast.makeText(MainActivity.this, "Model couldn’t be downloaded or other internal error.", Toast.LENGTH_LONG).show();
+                            }
+                        });
+    }
+
+    public void exportData() {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
@@ -443,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
     }
 
-    public void importData(){
+    public void importData() {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
@@ -470,53 +484,95 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                         alertDialog.cancel();
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("Please move the file english.en to the download folder!")
-                                .setNegativeButton("Close", null)
-                                .show();
-                        return;
+                        runOnUiThread(() -> {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("Error!")
+                                    .setMessage("Move file english.en to /sdcard/Android/data/com.example.englishnotification/files/english.en")
+                                    .setNegativeButton("Hide", null)
+                                    .show();
+                            return;
+                        });
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                     if (list.size() > 0) {
-                        for (int i = list.size() - 1; i >= 0; i--) {
-                            boolean added = database.addNewWord(list.get(i));
-                            if (added) {
-                                Word item = database.getNewWord();
-                                listWord.add(item);
-                            }
-                        }
-                        MainActivity.sortList(listWord);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                reloadList();
-                            }
-                        });
+                        importWord(list);
+                    } else {
+                        alertDialog.cancel();
                     }
-                    alertDialog.cancel();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showAlertDialog(MainActivity.this, "Imported!");
-                        }
-                    });
                 }
             });
             thread.start();
         }
     }
 
-    public static ArrayList<Word> getWordsByRelations(Word word, int type){
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void importWord(ArrayList<Word> list) {
+        for (int i = list.size() - 1; i >= 0; i--) {
+            Word word = list.get(i);
+            boolean added = database.addNewWord(word);
+            if (added) {
+                Word item = database.getNewWord();
+//                listWord.add(item);
+//                Add means
+                if (word.means != null) {
+                    for (Mean mean : word.means) {
+                        if (mean.type != null && mean.type.id != -1) {
+                            if (!database.typeExist(mean.type)) {
+                                database.addNewType(mean.type);
+                                mean.type = database.getNewType();
+                            }
+                        }
+                        mean.wordId = item.id;
+                    }
+                    database.addMeans(word.means);
+                }
+//                Add relation word
+                if (word.relationWords != null) {
+                    word.relationWords.forEach(relationWord -> {
+                        int id = word.id == relationWord.wordId ? relationWord.relationWordId : relationWord.wordId;
+                        Word relWord = MainActivity.getWordById(id, list);
+                        if (relWord != null) {
+                            if (!database.existRelationWord(word, relWord, relationWord)) {
+                                database.importRelationWord(word, relWord, relationWord.relationType);
+                            }
+                        }
+                    });
+                }
+//                Add tag
+                if(word.tags != null){
+                    word.tags.forEach(tag -> {
+                        if(!database.existTag(tag)){
+                            database.addNewTag(tag);
+                        }
+                        Tag newTag = database.getTagByName(tag.name);
+                        tag.id = newTag.id;
+                    });
+                    database.addTagWords(item.id, word.tags);
+                }
+            }
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                reloadData();
+                reloadList();
+                alertDialog.cancel();
+                showAlertDialog(MainActivity.this, "Imported!");
+            }
+        });
+    }
+
+    public static ArrayList<Word> getWordsByRelations(Word word, int type) {
         ArrayList<Word> words = new ArrayList<>();
-        if(word.relationWords != null){
-            for (RelationWord relationWord: word.relationWords){
-                for (Word w: MainActivity.listWord){
+        if (word.relationWords != null) {
+            for (RelationWord relationWord : word.relationWords) {
+                for (Word w : MainActivity.listWord) {
                     if (((word.id == relationWord.wordId && w.id == relationWord.relationWordId) ||
                             (word.id == relationWord.relationWordId && w.id == relationWord.wordId)) &&
-                            relationWord.relationType == type){
+                            relationWord.relationType == type) {
                         words.add(w);
                         break;
                     }
@@ -526,26 +582,26 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         return words;
     }
 
-    public static Word getWordById(int id, ArrayList<Word> words){
-        for (Word word: words){
-            if(word.id == id){
+    public static Word getWordById(int id, ArrayList<Word> words) {
+        for (Word word : words) {
+            if (word.id == id) {
                 return word;
             }
         }
         return null;
     }
 
-    public static void getWordsByRelations(Word word, ArrayList<Word> related, ArrayList<Word> synonym, ArrayList<Word> antonym){
-        if(word.relationWords != null){
-            for (RelationWord relationWord: word.relationWords){
-                for (Word w: MainActivity.listWord){
+    public static void getWordsByRelations(Word word, ArrayList<Word> related, ArrayList<Word> synonym, ArrayList<Word> antonym) {
+        if (word.relationWords != null) {
+            for (RelationWord relationWord : word.relationWords) {
+                for (Word w : MainActivity.listWord) {
                     if (((word.id == relationWord.wordId && w.id == relationWord.relationWordId) ||
-                            (word.id == relationWord.relationWordId && w.id == relationWord.wordId))){
-                        if (relationWord.relationType == RelationWord.RELATED){
+                            (word.id == relationWord.relationWordId && w.id == relationWord.wordId))) {
+                        if (relationWord.relationType == RelationWord.RELATED) {
                             related.add(word);
-                        } else if (relationWord.relationType == RelationWord.SYNONYM){
+                        } else if (relationWord.relationType == RelationWord.SYNONYM) {
                             synonym.add(word);
-                        } else if (relationWord.relationType == RelationWord.ANTONYM){
+                        } else if (relationWord.relationType == RelationWord.ANTONYM) {
                             antonym.add(word);
                         }
                         break;
@@ -556,26 +612,26 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void addRelationToWord(ArrayList<Word> listWord, ArrayList<RelationWord> relationWords) {
-        for (RelationWord relationWord: relationWords){
+        for (RelationWord relationWord : relationWords) {
             addRelationWordById(listWord, relationWord);
         }
     }
 
-    public void addRelationWordById(ArrayList<Word> words, RelationWord relationWord){
+    public void addRelationWordById(ArrayList<Word> words, RelationWord relationWord) {
         int i = 0;
-        for (Word word: words){
-            if (word.id == relationWord.wordId || word.id == relationWord.relationWordId){
+        for (Word word : words) {
+            if (word.id == relationWord.wordId || word.id == relationWord.relationWordId) {
                 addRelationWord(word, relationWord);
                 i++;
             }
-            if(i == 2){
+            if (i == 2) {
                 break;
             }
         }
     }
 
-    public static void addRelationWord(Word word, RelationWord relationWord){
-        if(word.relationWords == null){
+    public static void addRelationWord(Word word, RelationWord relationWord) {
+        if (word.relationWords == null) {
             word.relationWords = new ArrayList<>();
             word.relationWords.add(relationWord);
         } else {
@@ -583,18 +639,18 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
     }
 
-    public static boolean checkContainString(String check, ArrayList<Mean> means){
-        for (Mean mean: means){
-            if(mean.meanWord.indexOf(check.toLowerCase()) != -1){
+    public static boolean checkContainString(String check, ArrayList<Mean> means) {
+        for (Mean mean : means) {
+            if (mean.meanWord.indexOf(check.toLowerCase()) != -1) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean containEqualString(String check, ArrayList<Mean> means){
-        for (Mean mean: means){
-            if(mean.meanWord.equals(check.toLowerCase())){
+    public static boolean containEqualString(String check, ArrayList<Mean> means) {
+        for (Mean mean : means) {
+            if (mean.meanWord.equals(check.toLowerCase())) {
                 return true;
             }
         }
@@ -608,7 +664,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         }
     }
 
-    public static void addTagsToWord(ArrayList<Word> listWord, ArrayList<TagWord> tagWords, ArrayList<Tag> tags ) {
+    public static void addTagsToWord(ArrayList<Word> listWord, ArrayList<TagWord> tagWords, ArrayList<Tag> tags) {
         for (Word word : listWord) {
             ArrayList<Tag> ts = getTagByWordId(word.id, tagWords, tags);
             word.tags = ts;
@@ -629,8 +685,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         ArrayList<Tag> ts = new ArrayList<>();
         for (TagWord tagWord : tagWords) {
             if (tagWord.wordId == id) {
-                for (Tag tag: tags){
-                    if(tag.id == tagWord.tagId){
+                for (Tag tag : tags) {
+                    if (tag.id == tagWord.tagId) {
                         ts.add(tag);
                         break;
                     }
@@ -641,7 +697,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void showDialogCheckWord() {
-        if(listWord.size() == 0) return;
+        if (listWord.size() == 0) return;
         Random random = new Random();
         int index = random.nextInt(listWord.size());
         Word word = listWord.get(index);
@@ -720,7 +776,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     reloadListFilter();
                     break;
             }
-        } else if (flags == BOT_ITEM){
+        } else if (flags == BOT_ITEM) {
             switch (botFilter) {
                 case FILTER_1:
                     englishSort = FILTER_1;
@@ -754,8 +810,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     reloadListFilter();
                     break;
             }
-        } else if (flags == FORGET_ITEM){
-            switch (forgetFilter){
+        } else if (flags == FORGET_ITEM) {
+            switch (forgetFilter) {
                 case FILTER_1:
                     notifyFilter = FILTER_1;
                     txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
@@ -1000,10 +1056,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (2 * 60 * 60 * 1000), 2 * 60 * 60 * 1000, pendingIntent);
     }
 
-    public static String meansToString(Word word){
+    public static String meansToString(Word word) {
         StringBuilder stringMeansBuilder = new StringBuilder();
         String means = "";
-        if(word.means != null) {
+        if (word.means != null) {
             for (Mean mean : word.means) {
                 if (mean.type.id != UtilContent.NON) {
                     stringMeansBuilder.append(mean.type.name + ". ");
@@ -1011,7 +1067,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 stringMeansBuilder.append(mean.meanWord + "\n");
             }
             means = stringMeansBuilder.toString();
-            if(means.length() > 0){
+            if (means.length() > 0) {
                 means = means.substring(0, means.length() - 1);
             }
         }
@@ -1071,12 +1127,12 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
             @Override
             public void onFinish() {
-                if(means == null) {
+                if (means == null) {
                     return;
                 }
                 StringBuilder s = new StringBuilder();
                 for (Mean mean : means) {
-                    if (!mean.meanWord.equals("")){
+                    if (!mean.meanWord.equals("")) {
                         s.append(mean.meanWord + ". ");
                     }
                 }

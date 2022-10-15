@@ -54,7 +54,7 @@ public class Database extends SQLiteOpenHelper implements Serializable {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public synchronized void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 //        String dropTable = String.format("DROP TABLE IF EXISTS %s", TABLE_WORD);
         String dropTableConfig = String.format("DROP TABLE IF EXISTS %s", TABLE_CONFIG);
 //        db.execSQL(dropTable);
@@ -63,7 +63,7 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         onCreate(db);
     }
 
-    public Config getConfig(){
+    public synchronized Config getConfig(){
         SQLiteDatabase db = this.getReadableDatabase();
         String query = String.format("SELECT * FROM %s", TABLE_CONFIG);
         Cursor cursor = db.rawQuery(query, null);
@@ -78,14 +78,14 @@ public class Database extends SQLiteOpenHelper implements Serializable {
         return config;
     }
 
-    private void addDefaultConfig() {
+    private synchronized void addDefaultConfig() {
         SQLiteDatabase db = this.getWritableDatabase();
         String query = String.format("INSERT INTO %s VALUES(null, %s)", TABLE_CONFIG, 0);
         db.execSQL(query);
         db.close();
     }
 
-    public void updateConfig(Config config){
+    public synchronized void updateConfig(Config config){
         SQLiteDatabase db = this.getWritableDatabase();
         String query = String.format("UPDATE %s SET %s = %s WHERE %s = %s", TABLE_CONFIG,
                 CONFIG_AUTO_NOTIFY, config.autoNotify, CONFIG_ID, config.id);
@@ -95,151 +95,183 @@ public class Database extends SQLiteOpenHelper implements Serializable {
 
     //Word
 
-    public boolean addNewWord(Word word){
+    public synchronized boolean addNewWord(Word word){
         return DataWord.addNewWord(word, this);
     }
 
-    public void updateWord(Word word){
+    public synchronized void updateWord(Word word){
         DataWord.updateWord(word, this);
     }
 
-    public void updateOffNotify(int id){
+    public synchronized void updateOffNotify(int id){
         DataWord.updateOffNotify(id, this);
     }
 
-    public void updateOffBotNotify(int id){
+    public synchronized void updateOffBotNotify(int id){
         DataWord.updateOffBotNotify(id, this);
     }
 
-    public void deleteData(int id){
+    public synchronized void deleteData(int id){
         DataWord.deleteData(id, this);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public ArrayList<Word> getAll(){
+    public synchronized ArrayList<Word> getAll(){
         return DataWord.getAll(this);
     }
 
-    public ArrayList<Word> getDataForNotification(){
+    public synchronized ArrayList<Word> getDataForNotification(){
         return DataWord.getDataForNotification(this);
     }
 
-    public Word getNewWord(){
+    public synchronized Word getNewWord(){
         return DataWord.getNewWord(this);
     }
 
-    public void incrementOnceForget(Word word){
+    public synchronized Word getWordByEnglish(String english){
+        return DataWord.getWordByEnglish(english, this);
+    }
+
+    public synchronized void incrementOnceForget(Word word){
        DataWord.incrementOnceForget(word, this);
     }
 
 
     //Type
 
-    public void addNewType(Type type) {
+    public synchronized void addNewType(Type type) {
         DataType.addNewType(type, this);
     }
 
-    public Type getNewType(){
+    public synchronized Type getNewType(){
         return DataType.getNewType(this);
     }
 
-    public void updateType(Type type){
+    public synchronized boolean typeExist(Type type){
+        return DataType.typeExist(type, this);
+    }
+
+    public synchronized void updateType(Type type){
         DataType.updateType(type, this);
     }
 
-    public void deleteType(int id){
+    public synchronized void deleteType(int id){
         DataType.deleteType(id, this);
     }
 
-    public boolean foreignTypeExist(int typeId){
+    public synchronized boolean foreignTypeExist(int typeId){
         return DataType.foreignExist(typeId, this);
     }
 
-    public ArrayList<Type> getAllType(){
+    public synchronized ArrayList<Type> getAllType(){
         return DataType.getAll(this);
     }
 
 
     //Mean
 
-    public void addMeans(ArrayList<Mean> means){
+    public synchronized void addMeans(ArrayList<Mean> means){
         DataMean.addMeans(means, this);
     }
 
-    public ArrayList<Mean> getAllMean(){
+    public synchronized void addMean(Mean mean){
+        DataMean.addMean(mean, this);
+    }
+
+    public synchronized ArrayList<Mean> getAllMean(){
         return DataMean.getAll(this);
     }
 
-    public void deleteMeans(int wordId){
+    public synchronized void deleteMeans(int wordId){
         DataMean.deleteMeans(wordId, this);
     }
 
 
     //Tag
 
-    public ArrayList<Tag> getAllTag(){
+    public synchronized ArrayList<Tag> getAllTag(){
         return DataTag.getAll(this);
     }
 
-    public void addNewTag(Tag tag){
+    public synchronized void addNewTag(Tag tag){
         DataTag.addNewTag(tag, this);
     }
 
-    public Tag getNewTag(){
+    public synchronized Tag getNewTag(){
         return DataTag.getNewTag(this);
     }
 
-    public void updateTag(Tag tag){
+    public synchronized Tag getTagByName(String name){
+        return DataTag.getTagByName(name, this);
+    }
+
+    public synchronized boolean existTag(Tag tag){
+        return DataTag.existTag(tag, this);
+    }
+
+    public synchronized void updateTag(Tag tag){
         DataTag.updateTag(tag, this);
     }
 
-    public boolean foreignTagExist(int tagId){
+    public synchronized boolean foreignTagExist(int tagId){
         return DataTag.foreignExist(tagId, this);
     }
 
-    public void deleteTag(int id){
+    public synchronized void deleteTag(int id){
         DataTag.deleteTag(id, this);
     }
 
 
     //Tag Word
 
-    public ArrayList<TagWord> getAllTagWord(){
+    public synchronized ArrayList<TagWord> getAllTagWord(){
         return DataTagWord.getAll(this);
     }
 
-    public void addTagWords(int wordId, ArrayList<Tag> tags){
+    public synchronized void addTagWords(int wordId, ArrayList<Tag> tags){
         DataTagWord.addTags(wordId, tags, this);
     }
 
-    public void deleteTagWordByWordId(int wordId){
+    public synchronized void deleteTagWordByWordId(int wordId){
         DataTagWord.deleteByWordId(wordId, this);
     }
 
-    public void deleteTagWordByTagId(int tagId){
+    public synchronized void deleteTagWordByTagId(int tagId){
         DataTagWord.deleteByTagId(tagId, this);
     }
 
 
     //Relation Word
 
-    public void addNewRelationWord(Word word, Word relationWord, int type){
+    public synchronized void addNewRelationWord(Word word, Word relationWord, int type){
         DataRelationWord.addRelationWord(word, relationWord, type, this);
     }
 
-    public void addNewRelationWord(RelationWord relationWord){
+    public synchronized void addNewRelationWord(RelationWord relationWord){
         DataRelationWord.addRelationWord(relationWord, this);
     }
 
-    public RelationWord getNewRelationWord(){
+    public synchronized void importRelationWord(Word word, Word wordRel, int type){
+        Word w = getWordByEnglish(word.english);
+        Word wRel = getWordByEnglish(wordRel.english);
+        if(w != null && wRel != null){
+            DataRelationWord.addRelationWord(w, wRel, type, this);
+        }
+    }
+
+    public synchronized boolean existRelationWord(Word word, Word relWord, RelationWord relationWord){
+        return DataRelationWord.existRelationWord(word, relWord, relationWord, this);
+    }
+
+    public synchronized RelationWord getNewRelationWord(){
         return DataRelationWord.getNewRelationWord(this);
     }
 
-    public ArrayList<RelationWord> getAllRelationWord(){
+    public synchronized ArrayList<RelationWord> getAllRelationWord(){
         return DataRelationWord.getAll(this);
     }
 
-    public void deleteRelation(int id){
+    public synchronized void deleteRelation(int id){
         DataRelationWord.deleteRelation(id, this);
     }
 }

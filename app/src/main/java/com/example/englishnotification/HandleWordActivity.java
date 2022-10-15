@@ -67,6 +67,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_handle_word);
+        MainActivity.hideSystemBar(this);
 
         setView();
 

@@ -57,6 +57,28 @@ public class DataTag {
         return tag;
     }
 
+    public static Tag getTagByName(String name, Database database){
+        SQLiteDatabase db = database.getReadableDatabase();
+        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_TAG, TAG_NAME, name);
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToNext();
+        Tag tag = new Tag(cursor.getInt(0), cursor.getString(1));
+        db.close();
+        return tag;
+    }
+
+    public static boolean existTag(Tag tag, Database database){
+        SQLiteDatabase db = database.getReadableDatabase();
+        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_TAG, TAG_NAME, tag.name);
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor.moveToNext()){
+            db.close();
+            return true;
+        }
+        db.close();
+        return false;
+    }
+
     public static void updateTag(Tag tag, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
         String query = String.format("UPDATE %s SET %s = '%s' WHERE %s = %s", TABLE_TAG, TAG_NAME,

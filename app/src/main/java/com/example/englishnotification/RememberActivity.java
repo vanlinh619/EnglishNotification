@@ -37,6 +37,7 @@ public class RememberActivity extends AppCompatActivity implements ListChipFragm
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_remember);
+        MainActivity.hideSystemBar(this);
 
         setView();
 

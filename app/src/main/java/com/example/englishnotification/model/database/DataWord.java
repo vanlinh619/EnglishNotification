@@ -12,14 +12,14 @@ import com.example.englishnotification.model.Word;
 import java.util.ArrayList;
 
 public class DataWord {
-    private static final String TABLE_WORD = "word";
-    private static final String WORD_ID = "id";
-    private static final String WORD_DATE = "date";
-    private static final String WORD_ENGLISH = "english";
-    private static final String WORD_NOTIFICATION = "notification";
-    private static final String WORD_AUTO = "auto";
-    private static final String WORD_GAME = "game";
-    private static final String WORD_FORGET = "forget";
+    public static final String TABLE_WORD = "word";
+    public static final String WORD_ID = "id";
+    public static final String WORD_DATE = "date";
+    public static final String WORD_ENGLISH = "english";
+    public static final String WORD_NOTIFICATION = "notification";
+    public static final String WORD_AUTO = "auto";
+    public static final String WORD_GAME = "game";
+    public static final String WORD_FORGET = "forget";
 
     public static void createTable(SQLiteDatabase db){
         String createTableProject =
@@ -177,5 +177,21 @@ public class DataWord {
                 cursor.getInt(5), cursor.getInt(6));
         db.close();
         return word;
+    }
+
+    public static Word getWordByEnglish(String english, Database database) {
+        SQLiteDatabase db = database.getReadableDatabase();
+        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_ENGLISH, english);
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor.moveToNext()){
+            Word word = new Word(cursor.getInt(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getInt(3), cursor.getInt(4),
+                    cursor.getInt(5), cursor.getInt(6));
+            db.close();
+            return word;
+        }
+
+        db.close();
+        return null;
     }
 }

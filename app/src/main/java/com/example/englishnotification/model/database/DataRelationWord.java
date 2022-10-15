@@ -57,6 +57,29 @@ public class DataRelationWord {
         return relationWord;
     }
 
+    public static boolean existRelationWord(Word word, Word relWord, RelationWord relationWord, Database database){
+        SQLiteDatabase db = database.getReadableDatabase();
+        String query = String.format("SELECT * " +
+                        "FROM %s ww " +
+                        "LEFT JOIN %s w ON ww.%s = w.%s " +
+                        "LEFT JOIN %s wr ON ww.%s = wr.%s " +
+                        "WHERE " +
+                        "((w.%s = '%s' AND wr.%s = '%s') " +
+                        "OR (w.%s = '%s' AND wr.%s = '%s')) " +
+                        "AND ww.%s = %s",
+                TABLE_WORD_WORD, DataWord.TABLE_WORD, WORD_WORD_WORD_ID, DataWord.WORD_ID,
+                DataWord.TABLE_WORD, WORD_WORD_WORD_RELATION_ID, DataWord.WORD_ID, DataWord.WORD_ENGLISH,
+                word.english, DataWord.WORD_ENGLISH, relWord.english, DataWord.WORD_ENGLISH,
+                relWord.english, DataWord.WORD_ENGLISH, word.english, WORD_WORD_TYPE_RELATION, relationWord.relationType);
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor.moveToNext()){
+            db.close();
+            return true;
+        }
+        db.close();
+        return false;
+    }
+
     public static ArrayList<RelationWord> getAll(Database database){
         SQLiteDatabase db = database.getReadableDatabase();
 
