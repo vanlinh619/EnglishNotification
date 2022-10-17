@@ -2,6 +2,7 @@ package com.example.englishnotification.handle.CustomList;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -30,6 +31,7 @@ import com.example.englishnotification.HandleWordActivity;
 import com.example.englishnotification.MainActivity;
 import com.example.englishnotification.R;
 import com.example.englishnotification.handle.Example;
+import com.example.englishnotification.handle.Translate;
 import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.RelationWord;
 import com.example.englishnotification.model.UtilContent;
@@ -210,26 +212,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
                                                     .setNegativeButton("Close", null)
                                                     .show();
                                         } else {
-                                            new AlertDialog.Builder(mainActivity)
-                                                    .setTitle(word.english)
-                                                    .setMessage(o.toString())
-                                                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                                                        @RequiresApi(api = Build.VERSION_CODES.N)
-                                                        @Override
-                                                        public void onClick(DialogInterface dialog, int which) {
-                                                            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-                                                            String date = format.format(new Date());
-                                                            word.date = date;
-                                                            word.means.get(0).meanWord = o.toString();
-                                                            MainActivity.database.updateWord(word);
-                                                            MainActivity.database.deleteMeans(word.id);
-                                                            MainActivity.database.addMeans(word.means);
-                                                            MainActivity.notifyItemChanged(position);
-                                                            dialog.dismiss();
-                                                        }
-                                                    })
-                                                    .setNegativeButton("Close", null)
-                                                    .show();
+                                            updateWordTranslated(word, o.toString(), mainActivity, position);
                                         }
                                     }
                                 })
@@ -299,6 +282,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             }
         });
 
+        holder.imGG.setOnClickListener(view -> {
+            Translate translate = new Translate(word, mainActivity, position);
+            translate.execute("");
+        });
     }
 
     public void translateElement(DataLoop dataLoop, Elements elements, ArrayList<ItemDataExample> listExample, String english) {
@@ -389,6 +376,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public ImageView imExample;
         public ImageView imCopy;
 
+        public ImageView imGG;
+
         public TextView txForget;
         public TextView txForgetExpand;
 
@@ -423,6 +412,8 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             imExample = itemView.findViewById(R.id.im_example);
             imCopy = itemView.findViewById(R.id.im_copy);
 
+            imGG = itemView.findViewById(R.id.im_gg);
+
             txForget = itemView.findViewById(R.id.tx_forget);
             txForgetExpand = itemView.findViewById(R.id.tx_forget_expand);
 
@@ -442,5 +433,28 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public DataLoop() {
             this.i = 0;
         }
+    }
+
+    public static void updateWordTranslated(Word word, String mean, Activity activity, int position){
+        new AlertDialog.Builder(activity)
+                .setTitle(word.english)
+                .setMessage(mean)
+                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+                        String date = format.format(new Date());
+                        word.date = date;
+                        word.means.get(0).meanWord = mean;
+                        MainActivity.database.updateWord(word);
+                        MainActivity.database.deleteMeans(word.id);
+                        MainActivity.database.addMeans(word.means);
+                        MainActivity.notifyItemChanged(position);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Close", null)
+                .show();
     }
 }

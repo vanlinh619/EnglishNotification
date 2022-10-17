@@ -36,14 +36,13 @@ public class Example extends AsyncTask<String, Void, String> {
         super.onPreExecute();
         alertDialog = new AlertDialog.Builder(context)
                 .setTitle("Looking for examples...")
-                .setNegativeButton("Close", null)
+                .setNegativeButton("Hide", null)
                 .show();
     }
 
     @Override
     protected String doInBackground(String... strings) {
         String word = strings[0];
-        StringBuilder stringBuilder = new StringBuilder();
         try {
             Document document = Jsoup.connect(url + word).get();
             Elements elements = document.getElementsByClass("sentence-item__text");
@@ -52,7 +51,7 @@ public class Example extends AsyncTask<String, Void, String> {
             e.printStackTrace();
             example = false;
         }
-        return stringBuilder.toString();
+        return "";
     }
 
     @Override
