@@ -18,6 +18,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EnglishNotification">
         <activity
+            android:name=".NetworkActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".RememberActivity"
             android:exported="false" />
         <activity

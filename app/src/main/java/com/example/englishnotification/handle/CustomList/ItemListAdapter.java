@@ -29,9 +29,9 @@ import com.example.englishnotification.DialogAddEditWord;
 import com.example.englishnotification.DialogExample;
 import com.example.englishnotification.HandleWordActivity;
 import com.example.englishnotification.MainActivity;
+import com.example.englishnotification.NetworkActivity;
 import com.example.englishnotification.R;
 import com.example.englishnotification.handle.Example;
-import com.example.englishnotification.handle.Translate;
 import com.example.englishnotification.model.Mean;
 import com.example.englishnotification.model.RelationWord;
 import com.example.englishnotification.model.UtilContent;
@@ -55,6 +55,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
     private ItemListAdapter.ViewHolder viewHolder;
     private MainActivity mainActivity;
     private ArrayList<ItemDataExample> listExample;
+    public final static String ENGLISH = "english";
 
     public ItemListAdapter(ArrayList<Word> listWord, MainActivity mainActivity) {
         this.listWord = listWord;
@@ -282,9 +283,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             }
         });
 
-        holder.imGG.setOnClickListener(view -> {
-            Translate translate = new Translate(word, mainActivity, position);
-            translate.execute("");
+        holder.imNetwork.setOnClickListener(view -> {
+            Intent intent = new Intent(mainActivity, NetworkActivity.class);
+            intent.putExtra(ENGLISH, word.english);
+            mainActivity.startActivity(intent);
         });
     }
 
@@ -376,7 +378,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         public ImageView imExample;
         public ImageView imCopy;
 
-        public ImageView imGG;
+        public ImageView imNetwork;
 
         public TextView txForget;
         public TextView txForgetExpand;
@@ -412,7 +414,7 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             imExample = itemView.findViewById(R.id.im_example);
             imCopy = itemView.findViewById(R.id.im_copy);
 
-            imGG = itemView.findViewById(R.id.im_gg);
+            imNetwork = itemView.findViewById(R.id.im_network);
 
             txForget = itemView.findViewById(R.id.tx_forget);
             txForgetExpand = itemView.findViewById(R.id.tx_forget_expand);
