@@ -20,6 +20,11 @@
         android:title="Remember" />
 
     <item
+        android:id="@+id/mn_network"
+        android:icon="@drawable/language"
+        android:title="Network" />
+
+    <item
         android:id="@+id/mn_more"
         android:icon="@drawable/more"
         android:title="More" />

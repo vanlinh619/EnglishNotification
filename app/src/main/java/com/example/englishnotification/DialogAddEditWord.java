@@ -212,7 +212,7 @@ public class DialogAddEditWord extends DialogFragment {
                     }
                     new AlertDialog.Builder(mainActivity)
                             .setTitle(title)
-//                            .setMessage(word.english + " : " + word.vietnamese)
+                            .setMessage(word.english + " : \n" + mainActivity.meansToString(word))
                             .setNegativeButton("Close", listenerClose)
                             .setPositiveButton("Continue", listenerContinue)
                             .show();

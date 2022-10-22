@@ -43,7 +43,7 @@ public class NetworkActivity extends AppCompatActivity {
         webSettings.setJavaScriptEnabled(true);
 
         wvNetWork.addJavascriptInterface(new WebAppInterface(this), "Android");
-
+        wvNetWork.loadUrl(String.format(url, english != null ? english : ""));
 //        wvNetWork.setWebViewClient(new WebViewClient(){
 //            @Override
 //            public void onPageFinished(WebView view, String url) {
@@ -59,8 +59,6 @@ public class NetworkActivity extends AppCompatActivity {
 //                });
 //            }
 //        });
-        wvNetWork.loadUrl(String.format(url, english));
-
     }
 
     private void setView() {

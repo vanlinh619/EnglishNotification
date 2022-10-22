@@ -39,6 +39,8 @@ public class RememberActivity extends AppCompatActivity implements ListChipFragm
         setContentView(R.layout.activity_remember);
         MainActivity.hideSystemBar(this);
 
+        MainActivity.loadAds(this);
+
         setView();
 
         for (Tag tag: MainActivity.tags){

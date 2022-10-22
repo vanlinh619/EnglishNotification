@@ -37,6 +37,8 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
         setContentView(R.layout.activity_option);
         MainActivity.hideSystemBar(this);
 
+        MainActivity.loadAds(this);
+
         setView();
 
         ctType.setOnClickListener(new View.OnClickListener() {

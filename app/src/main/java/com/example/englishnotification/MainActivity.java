@@ -58,6 +58,13 @@ import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.database.Database;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.Word;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
@@ -118,7 +125,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public Config config;
     private static AlertDialog alertDialog;
     public MainActivity mainActivity;
-
+    public final static String adsId = "ca-app-pub-8329878984757230~7045154102";
+    public final static String adsTestId = "ca-app-pub-3940256099942544/1033173712";
+    public final static String TAG = "AAA";
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
@@ -126,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         hideSystemBar(this);
+
+        loadAds(this);
 
         setView();
         mainActivity = this;
@@ -327,6 +338,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         Intent intentRemember = new Intent(MainActivity.this, RememberActivity.class);
                         startActivity(intentRemember);
                         break;
+                    case R.id.mn_network:
+                        Intent intentNetwork = new Intent(MainActivity.this, NetworkActivity.class);
+                        startActivity(intentNetwork);
+                        break;
                     default:
                         nvOption.setVisibility(View.GONE);
                 }
@@ -336,8 +351,37 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
     }
 
+    public static void loadAds(Activity activity) {
+        MobileAds.initialize(activity, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {}
+        });
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        InterstitialAd.load(activity,adsTestId, adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        InterstitialAd mInterstitialAd = interstitialAd;
+                        if (mInterstitialAd != null) {
+                            mInterstitialAd.show(activity);
+                        }
+                        Log.i(TAG, "onAdLoaded");
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        Log.d(TAG, loadAdError.toString());
+                        InterstitialAd mInterstitialAd = null;
+                    }
+                });
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void reloadData(){
+    private void reloadData() {
         listWord = database.getAll();
         means = database.getAllMean();
         types = database.getAllType();
@@ -542,9 +586,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     });
                 }
 //                Add tag
-                if(word.tags != null){
+                if (word.tags != null) {
                     word.tags.forEach(tag -> {
-                        if(!database.existTag(tag)){
+                        if (!database.existTag(tag)) {
                             database.addNewTag(tag);
                         }
                         Tag newTag = database.getTagByName(tag.name);
@@ -650,8 +694,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public static boolean containEqualString(String check, ArrayList<Mean> means) {
         for (Mean mean : means) {
-            if (mean.meanWord.equals(check.toLowerCase())) {
-                return true;
+            String[] ms = mean.meanWord.split(",");
+            for (int i = 0; i < ms.length; i++) {
+                if (ms[i].trim().toLowerCase().equals(check.toLowerCase())) {
+                    return true;
+                }
             }
         }
         return false;
