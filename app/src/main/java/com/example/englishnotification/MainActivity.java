@@ -368,13 +368,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         if (mInterstitialAd != null) {
                             mInterstitialAd.show(activity);
                         }
-                        Log.i(TAG, "onAdLoaded");
+//                        Log.i(TAG, "onAdLoaded");
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         // Handle the error
-                        Log.d(TAG, loadAdError.toString());
+//                        Log.d(TAG, loadAdError.toString());
                         InterstitialAd mInterstitialAd = null;
                     }
                 });
@@ -403,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
                 }
             } catch (Exception e) {
-                Log.d("Exception", e.toString());
+//                Log.d("Exception", e.toString());
             }
         }
     }
