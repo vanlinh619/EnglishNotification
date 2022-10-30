@@ -261,15 +261,16 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         holder.imExample.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Example example = new Example(new Example.ExampleListener() {
-                    @Override
-                    public void translate(Elements elements) {
-                        listExample = new ArrayList<>();
-                        DataLoop dataLoop = new DataLoop();
-                        translateElement(dataLoop, elements, listExample, word.english);
-                    }
-                }, mainActivity);
-                example.execute(word.english);
+//                Example example = new Example(new Example.ExampleListener() {
+//                    @Override
+//                    public void translate(Elements elements) {
+//                        listExample = new ArrayList<>();
+//                        DataLoop dataLoop = new DataLoop();
+//                        translateElement(dataLoop, elements, listExample, word.english);
+//                    }
+//                }, mainActivity);
+//                example.execute(word.english);
+                MainActivity.messageComingSoon(mainActivity);
             }
         });
 
@@ -284,9 +285,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
         });
 
         holder.imNetwork.setOnClickListener(view -> {
-            Intent intent = new Intent(mainActivity, NetworkActivity.class);
-            intent.putExtra(ENGLISH, word.english);
-            mainActivity.startActivity(intent);
+//            Intent intent = new Intent(mainActivity, NetworkActivity.class);
+//            intent.putExtra(ENGLISH, word.english);
+//            mainActivity.startActivity(intent);
+            MainActivity.messageComingSoon(mainActivity);
         });
     }
 
