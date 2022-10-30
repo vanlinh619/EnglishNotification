@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public final static String adsId = "ca-app-pub-8329878984757230~7045154102";
     public final static String adsTestId = "ca-app-pub-3940256099942544/1033173712";
     public final static String TAG = "AAA";
-    public final static String comingSoon = "Coming soon";
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
@@ -340,9 +339,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         startActivity(intentRemember);
                         break;
                     case R.id.mn_network:
-//                        Intent intentNetwork = new Intent(MainActivity.this, NetworkActivity.class);
-//                        startActivity(intentNetwork);
-                        MainActivity.messageComingSoon(MainActivity.this);
+                        Intent intentNetwork = new Intent(MainActivity.this, NetworkActivity.class);
+                        startActivity(intentNetwork);
                         break;
                     default:
                         nvOption.setVisibility(View.GONE);
@@ -380,10 +378,6 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         InterstitialAd mInterstitialAd = null;
                     }
                 });
-    }
-
-    public static void messageComingSoon(Context context){
-        Toast.makeText(context, comingSoon, Toast.LENGTH_LONG).show();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -932,9 +926,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             @Override
             public int compare(Word o1, Word o2) {
                 if (flags == 0) {
-                    return o1.forget > o2.forget ? 1 : o1.forget < o2.forget ? -1 : 0;
+                    return o1.forget >= o2.forget ? 1 : -1;
                 } else {
-                    return o1.forget > o2.forget ? -1 : o1.forget < o2.forget ? 1 : 0;
+                    return o1.forget >= o2.forget ? -1 : 1;
                 }
             }
         });
