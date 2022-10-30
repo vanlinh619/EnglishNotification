@@ -340,9 +340,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         startActivity(intentRemember);
                         break;
                     case R.id.mn_network:
-//                        Intent intentNetwork = new Intent(MainActivity.this, NetworkActivity.class);
-//                        startActivity(intentNetwork);
-                        MainActivity.messageComingSoon(MainActivity.this);
+                        Intent intentNetwork = new Intent(MainActivity.this, NetworkActivity.class);
+                        startActivity(intentNetwork);
+//                        MainActivity.messageComingSoon(MainActivity.this);
                         break;
                     default:
                         nvOption.setVisibility(View.GONE);
@@ -354,32 +354,32 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public static void loadAds(Activity activity) {
-        MobileAds.initialize(activity, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
-        });
-        AdRequest adRequest = new AdRequest.Builder().build();
-
-        InterstitialAd.load(activity,adsTestId, adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        InterstitialAd mInterstitialAd = interstitialAd;
-                        if (mInterstitialAd != null) {
-                            mInterstitialAd.show(activity);
-                        }
-//                        Log.i(TAG, "onAdLoaded");
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-//                        Log.d(TAG, loadAdError.toString());
-                        InterstitialAd mInterstitialAd = null;
-                    }
-                });
+//        MobileAds.initialize(activity, new OnInitializationCompleteListener() {
+//            @Override
+//            public void onInitializationComplete(InitializationStatus initializationStatus) {}
+//        });
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//
+//        InterstitialAd.load(activity,adsTestId, adRequest,
+//                new InterstitialAdLoadCallback() {
+//                    @Override
+//                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+//                        // The mInterstitialAd reference will be null until
+//                        // an ad is loaded.
+//                        InterstitialAd mInterstitialAd = interstitialAd;
+//                        if (mInterstitialAd != null) {
+//                            mInterstitialAd.show(activity);
+//                        }
+////                        Log.i(TAG, "onAdLoaded");
+//                    }
+//
+//                    @Override
+//                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+//                        // Handle the error
+////                        Log.d(TAG, loadAdError.toString());
+//                        InterstitialAd mInterstitialAd = null;
+//                    }
+//                });
     }
 
     public static void messageComingSoon(Context context){
