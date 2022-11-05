@@ -25,6 +25,11 @@
         android:title="Network" />
 
     <item
+        android:id="@+id/mn_microphone"
+        android:icon="@drawable/microphone"
+        android:title="Microphone" />
+
+    <item
         android:id="@+id/mn_more"
         android:icon="@drawable/more"
         android:title="More" />

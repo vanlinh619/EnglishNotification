@@ -182,19 +182,10 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             public void onClick(View v) {
                 holder.imSpeak.setImageResource(R.drawable.volume_blue);
                 holder.imSpeak.setEnabled(false);
-                mainActivity.speak(word.english, word.means);
-                CountDownTimer countDownTimer = new CountDownTimer(2000, 2000) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        holder.imSpeak.setImageResource(R.drawable.volume);
-                        holder.imSpeak.setEnabled(true);
-                    }
-                }.start();
+                mainActivity.speak(word, () -> {
+                    holder.imSpeak.setImageResource(R.drawable.volume);
+                    holder.imSpeak.setEnabled(true);
+                });
             }
         });
 

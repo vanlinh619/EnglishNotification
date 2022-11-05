@@ -16,7 +16,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,6 +26,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -35,8 +35,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -58,13 +56,6 @@ import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.database.Database;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.Word;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
@@ -84,7 +75,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -344,6 +334,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         startActivity(intentNetwork);
 //                        MainActivity.messageComingSoon(MainActivity.this);
                         break;
+                    case R.id.mn_microphone:
+                        repeatSpeak();
+                        break;
                     default:
                         nvOption.setVisibility(View.GONE);
                 }
@@ -352,6 +345,39 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             }
         });
     }
+
+    private class CustomCheckValue {
+        public boolean isRepeat;
+    }
+
+    private void repeatSpeak() {
+        if (listWord.size() == 0) return;
+        CustomCheckValue customCheckValue = new CustomCheckValue();
+        customCheckValue.isRepeat = true;
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Speak random...");
+        dialog.setNeutralButton("Close", (DialogInterface dialogInterface, int i) -> {
+            customCheckValue.isRepeat = false;
+        });
+        dialog.setOnDismissListener((DialogInterface dialogInterface) -> {
+            customCheckValue.isRepeat = false;
+        });
+        dialog.show();
+        repeat(customCheckValue, dialog);
+    }
+
+    private void repeat(CustomCheckValue customCheckValue, AlertDialog.Builder dialog) {
+        Random random = new Random();
+        int index = random.nextInt(listWord.size());
+        Word word = listWord.get(index);
+        speak(word, () -> {
+            if(customCheckValue.isRepeat){
+                dialog.setMessage(meansToString(word));
+                repeat(customCheckValue, dialog);
+            }
+        });
+    }
+
 
     public static void loadAds(Activity activity) {
 //        MobileAds.initialize(activity, new OnInitializationCompleteListener() {
@@ -382,7 +408,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 //                });
     }
 
-    public static void messageComingSoon(Context context){
+    public static void messageComingSoon(Context context) {
         Toast.makeText(context, comingSoon, Toast.LENGTH_LONG).show();
     }
 
@@ -1161,44 +1187,72 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
     }
 
-    public void speak(String english, ArrayList<Mean> means) {
+    public void speak(Word word, FinishSpeakListener finishSpeakListener) {
         textToSpeechEnglish = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
+                    textToSpeechEnglish.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                        @Override
+                        public void onStart(String s) {
+                        }
+
+                        @Override
+                        public void onDone(String s) {
+                            if (word.means == null) {
+                                return;
+                            }
+                            StringBuilder stringBuilder = new StringBuilder();
+                            for (Mean mean : word.means) {
+                                if (!mean.meanWord.equals("")) {
+                                    stringBuilder.append(mean.meanWord + ". ");
+                                }
+                            }
+                            textToSpeechVietnamese = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
+                                @Override
+                                public void onInit(int status) {
+                                    if (status == TextToSpeech.SUCCESS) {
+                                        textToSpeechVietnamese.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                                            @Override
+                                            public void onStart(String s) {
+                                            }
+
+                                            @Override
+                                            public void onDone(String s) {
+                                                finishSpeakListener.finish();
+                                            }
+
+                                            @Override
+                                            public void onError(String s) {
+                                            }
+                                        });
+                                        textToSpeechVietnamese.speak(stringBuilder.toString(), TextToSpeech.QUEUE_ADD, null, word.english);
+                                    }
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(String s) {
+                        }
+                    });
                     textToSpeechEnglish.setLanguage(Locale.ENGLISH);
-                    textToSpeechEnglish.speak(english, TextToSpeech.QUEUE_ADD, null);
+                    textToSpeechEnglish.speak(word.english, TextToSpeech.QUEUE_ADD, null, word.english);
                 }
             }
         });
 
-        CountDownTimer countDownTimer = new CountDownTimer(100, 100) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            @Override
-            public void onFinish() {
-                if (means == null) {
-                    return;
-                }
-                StringBuilder s = new StringBuilder();
-                for (Mean mean : means) {
-                    if (!mean.meanWord.equals("")) {
-                        s.append(mean.meanWord + ". ");
-                    }
-                }
-                textToSpeechVietnamese = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
-                    @Override
-                    public void onInit(int status) {
-                        if (status == TextToSpeech.SUCCESS) {
-                            textToSpeechVietnamese.speak(s.toString(), TextToSpeech.QUEUE_ADD, null);
-                        }
-                    }
-                });
-            }
-        }.start();
+//        CountDownTimer countDownTimer = new CountDownTimer(100, 100) {
+//            @Override
+//            public void onTick(long millisUntilFinished) {
+//
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//
+//            }
+//        }.start();
     }
 
     public View.OnTouchListener deleteText() {
@@ -1278,5 +1332,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         } else {
             super.onBackPressed();
         }
+    }
+
+    public interface FinishSpeakListener {
+        public void finish();
     }
 }
