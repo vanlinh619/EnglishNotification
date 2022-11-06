@@ -7,6 +7,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -23,13 +24,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,6 +37,7 @@ import android.view.WindowInsetsController;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     private NavigationView nvOption;
     private Switch swAutoNotify;
     private SwipeRefreshLayout srRefresh;
+    private RepeatSpeakFragment repeatSpeakFragment;
     private final String fileName = "english.en";
     public static Database database;
     public static ArrayList<Word> listWord, listTmp;
@@ -346,38 +347,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
     }
 
-    private class CustomCheckValue {
-        public boolean isRepeat;
-    }
-
     private void repeatSpeak() {
         if (listWord.size() == 0) return;
-        CustomCheckValue customCheckValue = new CustomCheckValue();
-        customCheckValue.isRepeat = true;
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("Speak random...");
-        dialog.setNeutralButton("Close", (DialogInterface dialogInterface, int i) -> {
-            customCheckValue.isRepeat = false;
-        });
-        dialog.setOnDismissListener((DialogInterface dialogInterface) -> {
-            customCheckValue.isRepeat = false;
-        });
-        dialog.show();
-        repeat(customCheckValue, dialog);
+        repeatSpeakFragment.showView();
     }
-
-    private void repeat(CustomCheckValue customCheckValue, AlertDialog.Builder dialog) {
-        Random random = new Random();
-        int index = random.nextInt(listWord.size());
-        Word word = listWord.get(index);
-        speak(word, () -> {
-            if(customCheckValue.isRepeat){
-                dialog.setMessage(meansToString(word));
-                repeat(customCheckValue, dialog);
-            }
-        });
-    }
-
 
     public static void loadAds(Activity activity) {
 //        MobileAds.initialize(activity, new OnInitializationCompleteListener() {
@@ -805,20 +778,20 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     txForgetFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     sortByName(listWord, 0);
-                    reloadListFilter();
+                    reloadListFilter(listWord);
                     break;
                 case FILTER_2:
                     englishSort = FILTER_3;
                     txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.icon_down, 0);
                     sortByName(listWord, 1);
-                    reloadListFilter();
+                    reloadListFilter(listWord);
                     break;
                 case FILTER_3:
                     englishSort = FILTER_1;
                     txEnglishSort.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                     txEnglishSort.setTextColor(R.color.black);
                     sortList(listWord);
-                    reloadListFilter();
+                    reloadListFilter(listWord);
                     break;
             }
         } else if (flags == NOTIFY_ITEM) {
@@ -838,7 +811,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     txForgetFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     filterByNotify(1);
-                    reloadListFilter();
+                    reloadListFilter(listTmp);
                     break;
                 case FILTER_2:
                     notifyFilter = FILTER_3;
@@ -846,13 +819,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     txNotifyFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     filterByNotify(0);
-                    reloadListFilter();
+                    reloadListFilter(listTmp);
                     break;
                 case FILTER_3:
                     notifyFilter = FILTER_1;
                     txNotifyFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                     refreshlistWord();
-                    reloadListFilter();
+                    reloadListFilter(listWord);
                     break;
             }
         } else if (flags == BOT_ITEM) {
@@ -872,7 +845,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     txForgetFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     filterByBot(1);
-                    reloadListFilter();
+                    reloadListFilter(listTmp);
                     break;
                 case FILTER_2:
                     botFilter = FILTER_3;
@@ -880,13 +853,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     txBotFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     filterByBot(0);
-                    reloadListFilter();
+                    reloadListFilter(listTmp);
                     break;
                 case FILTER_3:
                     botFilter = FILTER_1;
                     txBotFilter.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                     refreshlistWord();
-                    reloadListFilter();
+                    reloadListFilter(listWord);
                     break;
             }
         } else if (flags == FORGET_ITEM) {
@@ -906,7 +879,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     txForgetFilter.setTextColor(R.color.blue);
                     refreshlistWord();
                     sortByForget(listWord, 0);
-                    reloadListFilter();
+                    reloadListFilter(listWord);
                     break;
                 case FILTER_2:
                     forgetFilter = FILTER_3;
@@ -914,7 +887,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     txForgetFilter.setTextColor(R.color.blue);
                     refreshlistWord();
                     sortByForget(listWord, 1);
-                    reloadListFilter();
+                    reloadListFilter(listWord);
                     break;
                 case FILTER_3:
                     forgetFilter = FILTER_1;
@@ -922,7 +895,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                     txForgetFilter.setTextColor(R.color.black);
                     refreshlistWord();
                     sortList(listWord);
-                    reloadListFilter();
+                    reloadListFilter(listWord);
                     break;
             }
         }
@@ -969,9 +942,9 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public void filterByNotify(int flags) {
         for (int i = listWord.size() - 1; i >= 0; i--) {
             Word word = listWord.get(i);
-            if (word.notification != flags) {
+            if (word.notification == flags) {
                 listTmp.add(word);
-                listWord.remove(i);
+//                listWord.remove(i);
             }
         }
     }
@@ -979,7 +952,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void refreshlistWord() {
         if (listTmp != null && listTmp.size() > 0) {
-            listWord.addAll(listTmp);
+//            listWord.addAll(listTmp);
             listTmp.clear();
             sortList(listWord);
         }
@@ -990,7 +963,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
             Word word = listWord.get(i);
             if (word.auto != flags) {
                 listTmp.add(word);
-                listWord.remove(i);
+//                listWord.remove(i);
             }
         }
     }
@@ -1082,8 +1055,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         adapter.notifyItemChanged(position);
     }
 
-    public void reloadListFilter() {
-        adapter.notifyDataSetChanged();
+    public void reloadListFilter(ArrayList<Word> listWord) {
+        adapter = new ItemListAdapter(listWord, MainActivity.this);
+        rcListWord.setAdapter(adapter);
+        rcListWord.setLayoutManager(new LinearLayoutManager(this));
         shrinkButtonSearch();
     }
 
@@ -1103,6 +1078,13 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         imTranslate = findViewById(R.id.im_translate_word);
         srRefresh = findViewById(R.id.sr_refresh);
         txForgetFilter = findViewById(R.id.tx_forget_filter);
+
+        //Frame layout
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        repeatSpeakFragment = new RepeatSpeakFragment();
+        transaction.replace(R.id.fr_repeat_speak, repeatSpeakFragment);
+        transaction.commit();
     }
 
     public void setAutoNotify() {
@@ -1241,18 +1223,6 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                 }
             }
         });
-
-//        CountDownTimer countDownTimer = new CountDownTimer(100, 100) {
-//            @Override
-//            public void onTick(long millisUntilFinished) {
-//
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//
-//            }
-//        }.start();
     }
 
     public View.OnTouchListener deleteText() {
@@ -1336,5 +1306,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public interface FinishSpeakListener {
         public void finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 }

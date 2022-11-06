@@ -177,12 +177,20 @@
             android:background="#8FEAEAEA"
             app:layout_constraintTop_toBottomOf="@+id/ct_header_title" />
 
+        <FrameLayout
+            android:id="@+id/fr_repeat_speak"
+            app:layout_constraintTop_toBottomOf="@+id/ct_header_title"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/sr_refresh"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ct_header_title">
+            app:layout_constraintTop_toBottomOf="@id/fr_repeat_speak">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rc_list_item"
