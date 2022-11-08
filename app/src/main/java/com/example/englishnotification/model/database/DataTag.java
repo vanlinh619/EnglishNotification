@@ -40,10 +40,10 @@ public class DataTag {
 
     public static void addNewTag(Tag tag, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
-        String query = String.format("INSERT INTO %s VALUES(null, '%s');",
-                TABLE_TAG, tag.name);
+        String query = String.format("INSERT INTO %s VALUES(null, ?);",
+                TABLE_TAG);
 
-        db.execSQL(query);
+        db.execSQL(query, new String[]{tag.name});
         db.close();
     }
 
@@ -59,8 +59,8 @@ public class DataTag {
 
     public static Tag getTagByName(String name, Database database){
         SQLiteDatabase db = database.getReadableDatabase();
-        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_TAG, TAG_NAME, name);
-        Cursor cursor = db.rawQuery(query, null);
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_TAG, TAG_NAME);
+        Cursor cursor = db.rawQuery(query, new String[]{name});
         cursor.moveToNext();
         Tag tag = new Tag(cursor.getInt(0), cursor.getString(1));
         db.close();
@@ -69,8 +69,8 @@ public class DataTag {
 
     public static boolean existTag(Tag tag, Database database){
         SQLiteDatabase db = database.getReadableDatabase();
-        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_TAG, TAG_NAME, tag.name);
-        Cursor cursor = db.rawQuery(query, null);
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_TAG, TAG_NAME);
+        Cursor cursor = db.rawQuery(query, new String[]{tag.name});
         if(cursor.moveToNext()){
             db.close();
             return true;
@@ -81,16 +81,15 @@ public class DataTag {
 
     public static void updateTag(Tag tag, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
-        String query = String.format("UPDATE %s SET %s = '%s' WHERE %s = %s", TABLE_TAG, TAG_NAME,
-                tag.name, TAG_ID, tag.id);
-        db.execSQL(query);
+        String query = String.format("UPDATE %s SET %s = ? WHERE %s = ?", TABLE_TAG, TAG_NAME, TAG_ID);
+        db.execSQL(query, new String[]{tag.name, tag.id + ""});
         db.close();
     }
 
     public static boolean foreignExist(int tagId, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
-        String query = String.format("SELECT * FROM %s WHERE %s = %s", DataTagWord.TABLE_TAG_WORD, DataTagWord.TAG_WORD_TAG_ID, tagId);
-        Cursor cursor = db.rawQuery(query, null);
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", DataTagWord.TABLE_TAG_WORD, DataTagWord.TAG_WORD_TAG_ID);
+        Cursor cursor = db.rawQuery(query, new String[]{tagId + ""});
         if(cursor.moveToNext()) {
             return true;
         }

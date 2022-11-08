@@ -26,18 +26,17 @@ public class DataType {
 
     public static void addNewType(Type type, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
-        String query = String.format("INSERT INTO %s VALUES(null, '%s');",
-                TABLE_TYPE, type.name);
+        String query = String.format("INSERT INTO %s VALUES(null, ?);", TABLE_TYPE);
 
-        db.execSQL(query);
+        db.execSQL(query, new String[]{type.name});
         db.close();
     }
 
     public static boolean typeExist(Type type, Database database){
         SQLiteDatabase db = database.getReadableDatabase();
 
-        String getType = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_TYPE, TYPE_NAME, type.name);
-        Cursor cursor = db.rawQuery(getType, null);
+        String getType = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_TYPE, TYPE_NAME);
+        Cursor cursor = db.rawQuery(getType, new String[]{type.name});
         if(cursor.moveToNext()) {
             db.close();
             return true;
@@ -73,9 +72,8 @@ public class DataType {
 
     public static void updateType(Type type, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
-        String query = String.format("UPDATE %s SET %s = '%s' WHERE %s = %s", TABLE_TYPE, TYPE_NAME,
-                type.name, TYPE_ID, type.id);
-        db.execSQL(query);
+        String query = String.format("UPDATE %s SET %s = ? WHERE %s = ?", TABLE_TYPE, TYPE_NAME, TYPE_ID);
+        db.execSQL(query, new String[]{type.name, type.id + ""});
         db.close();
     }
 

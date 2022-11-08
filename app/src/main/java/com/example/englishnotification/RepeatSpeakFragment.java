@@ -2,10 +2,12 @@ package com.example.englishnotification;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -17,9 +19,11 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.englishnotification.model.Word;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class RepeatSpeakFragment extends Fragment {
@@ -31,6 +35,7 @@ public class RepeatSpeakFragment extends Fragment {
     private int imageSound = 0;
     private MainActivity activity;
     private boolean[] isRepeat;
+    private ArrayList<Word> words;
 
     public RepeatSpeakFragment() {
         isRepeat = new boolean[]{true};
@@ -70,7 +75,8 @@ public class RepeatSpeakFragment extends Fragment {
         txMeans = view.findViewById(R.id.tx_vietnamese);
     }
 
-    public void showView(){
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void showView(ArrayList<Word> words){
         parent.setVisibility(View.VISIBLE);
         isRepeat = new boolean[]{true};
         countDownTimer = new CountDownTimer(300, 300) {
@@ -90,13 +96,14 @@ public class RepeatSpeakFragment extends Fragment {
             }
         }.start();
 
-        repeat(isRepeat);
+
+        repeat(isRepeat, words);
     }
 
 
-    private void repeat(boolean[] isRepeat) {
+    private void repeat(boolean[] isRepeat, ArrayList<Word> words) {
         Random random = new Random();
-        int index = random.nextInt(MainActivity.listWord.size());
+        int index = random.nextInt(words.size());
         Word word = MainActivity.listWord.get(index);
         parent.post((() -> {
             txEnglish.setText(word.english);
@@ -104,7 +111,7 @@ public class RepeatSpeakFragment extends Fragment {
         }));
         ((MainActivity) getActivity()).speak(word, () -> {
             if(isRepeat[0]){
-                repeat(isRepeat);
+                repeat(isRepeat, words);
             }
         });
     }

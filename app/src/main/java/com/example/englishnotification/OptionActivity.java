@@ -1,36 +1,53 @@
 package com.example.englishnotification;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.englishnotification.handle.CustomList.SearchAdapter;
 import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Type;
 import com.example.englishnotification.model.UtilContent;
 import com.example.englishnotification.model.Word;
+import com.example.englishnotification.model.database.DataWord;
+import com.example.englishnotification.model.database.Database;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class OptionActivity extends AppCompatActivity implements Serializable {
 
-    private ConstraintLayout ctType, ctTag, ctTagEdit, ctTypeEdit;
-    private ChipGroup cgType, cgTag;
-    private ImageView imTypeDirectional, imTagDirectional, imTagAdd, imTypeAdd, imTagEdit, imTagDelete,
-            imTypeEdit, imTypeDelete, imBack;
-    private EditText edType, edTag;
+    private ConstraintLayout ctType, ctTag, ctTagEdit, ctTypeEdit, ctIgnoreSetup;
+    private ChipGroup cgType, cgTag, cgIgnore;
+    private ImageView imTypeDirectional, imTagDirectional, imIgnoreDirectional, imTagAdd, imTypeAdd, imTagEdit, imTagDelete,
+            imTypeEdit, imTypeDelete, imBack, imIgnoreDelete;
+    private EditText edType, edTag, edIgnore;
+    private RecyclerView rcIgnore;
+    private TextView txIgnore;
+    private ArrayList<Word> choseWordIgnore;
+    private SearchAdapter.HandleLastListener handleLastListener;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +57,8 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
         MainActivity.loadAds(this);
 
         setView();
+
+        choseWordIgnore = new ArrayList<>();
 
         ctType.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,6 +98,22 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
             }
         });
 
+        ctIgnoreSetup.setOnClickListener((view -> {
+            if(cgIgnore.getVisibility() == View.GONE){
+                cgIgnore.setVisibility(View.VISIBLE);
+                imIgnoreDirectional.setVisibility(View.GONE);
+                edIgnore.setVisibility(View.VISIBLE);
+                rcIgnore.setVisibility(View.VISIBLE);
+                txIgnore.setVisibility(View.GONE);
+            } else {
+                cgIgnore.setVisibility(View.GONE);
+                imIgnoreDirectional.setVisibility(View.VISIBLE);
+                edIgnore.setVisibility(View.GONE);
+                rcIgnore.setVisibility(View.GONE);
+                txIgnore.setVisibility(View.VISIBLE);
+            }
+        }));
+
         for (Type type : MainActivity.types) {
             Chip chip = new Chip(this);
             chip.setText(type.name);
@@ -116,6 +151,32 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
             });
             cgTag.addView(chip);
         }
+
+        MainActivity.listWord.forEach(word -> {
+            if(word.game == 0){
+                choseWordIgnore.add(word);
+            }
+        });
+
+        HandleWordActivity.createListRelationWord(choseWordIgnore, imIgnoreDelete, cgIgnore, this);
+
+        handleLastListener = new SearchAdapter.HandleLastListener() {
+            @Override
+            public void removeIgnore(Word word) {
+                word.game = 1;
+                MainActivity.database.updateWord(word);
+                MainActivity.notifyItemChanged(MainActivity.listWord.indexOf(word));
+            }
+
+            @Override
+            public void addIgnore(Word word) {
+                word.game = 0;
+                MainActivity.database.updateWord(word);
+                MainActivity.notifyItemChanged(MainActivity.listWord.indexOf(word));
+            }
+        };
+
+        imIgnoreDelete.setOnClickListener(HandleWordActivity.removeChip(cgIgnore, choseWordIgnore, edIgnore, handleLastListener));
 
         imTypeAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -243,6 +304,37 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
                 finish();
             }
         });
+
+        edIgnore.addTextChangedListener(textWatcher(rcIgnore, imIgnoreDelete, cgIgnore, choseWordIgnore));
+    }
+
+    public TextWatcher textWatcher(RecyclerView recyclerView, ImageView imageDelete, ChipGroup chipGroup, ArrayList<Word> choseWords) {
+        return new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                ArrayList<Word> ls = new ArrayList<>();
+                for (int i = 0; i < MainActivity.listWord.size() && ls.size() < 10; i++) {
+                    Word word = MainActivity.listWord.get(i);
+                    if (word.english.toLowerCase().indexOf(s.toString().toLowerCase()) != -1 && s.toString().length() != 0) {
+                        ls.add(word);
+                    }
+                }
+                SearchAdapter adapter = new SearchAdapter(ls, OptionActivity.this, chipGroup, choseWords, imageDelete);
+                adapter.setHandleLastListener(handleLastListener);
+                recyclerView.setAdapter(adapter);
+                recyclerView.setLayoutManager(new LinearLayoutManager(OptionActivity.this));
+            }
+        };
     }
 
     public void createNewTypeChip(){
@@ -303,5 +395,12 @@ public class OptionActivity extends AppCompatActivity implements Serializable {
         imTagDelete = findViewById(R.id.im_tag_delete);
         imTypeDelete = findViewById(R.id.im_type_delete);
         imBack = findViewById(R.id.im_back);
+        ctIgnoreSetup = findViewById(R.id.ct_item_ignore_setup);
+        cgIgnore = findViewById(R.id.cg_ignore);
+        imIgnoreDirectional = findViewById(R.id.im_ignore_directional);
+        edIgnore = findViewById(R.id.ed_ignore);
+        rcIgnore = findViewById(R.id.rc_ignore);
+        imIgnoreDelete = findViewById(R.id.im_ignore_delete);
+        txIgnore = findViewById(R.id.tx_ignore);
     }
 }

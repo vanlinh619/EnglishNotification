@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         startActivity(intentNetwork);
 //                        MainActivity.messageComingSoon(MainActivity.this);
                         break;
-                    case R.id.mn_microphone:
+                    case R.id.mn_auto_speak:
                         repeatSpeak();
                         break;
                     default:
@@ -347,9 +347,20 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void repeatSpeak() {
         if (listWord.size() == 0) return;
-        repeatSpeakFragment.showView();
+        ArrayList<Word> words = new ArrayList<>();
+        listWord.forEach(word -> {
+            if(word.game == 1){
+                words.add(word);
+            }
+        });
+        if(words.size() == 0) {
+            Toast.makeText(this, "Can't not find word!", Toast.LENGTH_LONG).show();
+            return;
+        }
+        repeatSpeakFragment.showView(words);
     }
 
     public static void loadAds(Activity activity) {

@@ -1,5 +1,6 @@
 package com.example.englishnotification.handle.CustomList;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,14 +24,15 @@ import java.util.ArrayList;
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> {
 
     private ArrayList<Word> words;
-    private HandleWordActivity handleWordActivity;
+    private Context context;
     private ChipGroup chipGroup;
     private ArrayList<Word> choseWords;
     private ImageView imAdd;
+    private HandleLastListener handleLastListener;
 
-    public SearchAdapter(ArrayList<Word> words, HandleWordActivity handleWordActivity, ChipGroup chipGroup, ArrayList<Word> choseWords, ImageView imAdd) {
+    public SearchAdapter(ArrayList<Word> words, Context context, ChipGroup chipGroup, ArrayList<Word> choseWords, ImageView imAdd) {
         this.words = words;
-        this.handleWordActivity = handleWordActivity;
+        this.context = context;
         this.chipGroup = chipGroup;
         this.choseWords = choseWords;
         this.imAdd = imAdd;
@@ -57,7 +59,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             @Override
             public void onClick(View v) {
                 if(choseWords.indexOf(word) == -1){
-                    Chip chip = new Chip(handleWordActivity);
+                    Chip chip = new Chip(context);
                     chip.setText(word.english);
                     chip.setCheckable(true);
                     chip.setOnClickListener(new View.OnClickListener() {
@@ -83,12 +85,18 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                     });
                     chipGroup.addView(chip);
                     choseWords.add(word);
+                    if(handleLastListener != null){
+                        handleLastListener.addIgnore(word);
+                    }
                     //holder.ctSearch.setBackgroundResource(R.color.gray);
                     holder.imCheck.setVisibility(View.VISIBLE);
                 } else {
                     //holder.ctSearch.setBackgroundResource(R.color.white);
                     holder.imCheck.setVisibility(View.GONE);
                     removeChip(word);
+                    if(handleLastListener != null){
+                        handleLastListener.removeIgnore(word);
+                    }
                 }
             }
         });
@@ -123,5 +131,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             ctSearch = itemView.findViewById(R.id.ct_item_search);
             imCheck = itemView.findViewById(R.id.im_check);
         }
+    }
+
+    public void setHandleLastListener(HandleLastListener handleLastListener){
+        this.handleLastListener = handleLastListener;
+    }
+
+    public interface HandleLastListener{
+        public void removeIgnore(Word word);
+        public void addIgnore(Word word);
     }
 }

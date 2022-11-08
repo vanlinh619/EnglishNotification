@@ -130,6 +130,20 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             }
         }
 
+        if(word.tags != null && word.tags.size() > 0){
+            StringHorizontalAdapter stringHorizontalAdapter = new StringHorizontalAdapter(word.tags);
+            holder.rcTagExpand.setAdapter(stringHorizontalAdapter);
+            holder.rcTagExpand.setLayoutManager(new LinearLayoutManager(mainActivity, LinearLayoutManager.HORIZONTAL, false));
+        }
+
+        if(word.game == 1){
+            holder.imIgnore.setVisibility(View.GONE);
+            holder.imIgnoreExpand.setVisibility(View.GONE);
+        } else {
+            holder.imIgnore.setVisibility(View.VISIBLE);
+            holder.imIgnoreExpand.setVisibility(View.VISIBLE);
+        }
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -371,11 +385,13 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
 
         public ImageView imNetwork;
 
+        public ImageView imIgnore, imIgnoreExpand;
+
         public TextView txForget;
         public TextView txForgetExpand;
 
-        public ConstraintLayout ctRelatedExpand, ctSynonymExpand, ctAntonymExpand;
-        public RecyclerView rcRelatedExpand, rcSynonymExpand, rcAntonymExpand;
+        public ConstraintLayout ctRelatedExpand, ctSynonymExpand, ctAntonymExpand, ctTagExpand;
+        public RecyclerView rcRelatedExpand, rcSynonymExpand, rcAntonymExpand, rcTagExpand;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -413,10 +429,15 @@ public class ItemListAdapter extends RecyclerView.Adapter<ItemListAdapter.ViewHo
             ctRelatedExpand = itemView.findViewById(R.id.ct_body_item_expand_related);
             ctSynonymExpand = itemView.findViewById(R.id.ct_body_item_expand_synonym);
             ctAntonymExpand = itemView.findViewById(R.id.ct_body_item_expand_antonym);
+            ctTagExpand = itemView.findViewById(R.id.ct_body_item_expand_tag);
 
             rcRelatedExpand = itemView.findViewById(R.id.rc_item_related_expand);
             rcSynonymExpand = itemView.findViewById(R.id.rc_item_synonym_expand);
             rcAntonymExpand = itemView.findViewById(R.id.rc_item_antonym_expand);
+            rcTagExpand = itemView.findViewById(R.id.rc_item_tag_expand);
+
+            imIgnore = itemView.findViewById(R.id.im_ignore);
+            imIgnoreExpand = itemView.findViewById(R.id.im_ignore_expand);
         }
     }
 

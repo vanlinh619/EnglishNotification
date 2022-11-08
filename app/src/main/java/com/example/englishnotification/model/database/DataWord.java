@@ -71,12 +71,12 @@ public class DataWord {
     public static void updateWord(Word word, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
 
-        String query = String.format("UPDATE %s SET %s = '%s', %s = '%s', %s = %s, %s = %s, " +
-                        "%s = %s, %s = %s WHERE %s = %s",
-                TABLE_WORD, WORD_DATE, word.date, WORD_ENGLISH, word.english, WORD_NOTIFICATION, word.notification,
-                WORD_AUTO, word.auto, WORD_GAME, word.game, WORD_FORGET, word.forget, WORD_ID, word.id);
+        String query = String.format("UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, " +
+                        "%s = ?, %s = ? WHERE %s = ?", TABLE_WORD, WORD_DATE, WORD_ENGLISH, WORD_NOTIFICATION,
+                WORD_AUTO, WORD_GAME, WORD_FORGET, WORD_ID);
 
-        db.execSQL(query);
+        db.execSQL(query, new String[]{word.date, word.english, word.notification + "", word.auto + "",
+                word.game + "", word.forget + "", word.id + ""});
         db.close();
     }
 
@@ -87,11 +87,16 @@ public class DataWord {
 
         SQLiteDatabase db = database.getWritableDatabase();
 
-        String query = String.format("INSERT INTO %s VALUES(null, '%s', '%s', %s, %s, %s, %s);",
-                TABLE_WORD, word.date, word.english, word.notification, word.auto, word.game,
-                word.forget);
+        String query = String.format("INSERT INTO %s VALUES(null, ?, ?, ?, ?, ?, ?);", TABLE_WORD);
+        ArrayList<String> params = new ArrayList<>();
+        params.add(word.date);
+        params.add(word.english);
+        params.add(word.notification + "");
+        params.add(word.auto + "");
+        params.add(word.game + "");
+        params.add(word.forget + "");
 
-        db.execSQL(query);
+        db.execSQL(query, params.toArray());
         db.close();
         return true;
     }
@@ -99,8 +104,8 @@ public class DataWord {
     public static Word getItemEnglish(String english, Database database){
         SQLiteDatabase db = database.getReadableDatabase();
 
-        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_ENGLISH, english);
-        Cursor cursor = db.rawQuery(query, null);
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_WORD, WORD_ENGLISH);
+        Cursor cursor = db.rawQuery(query, new String[]{english});
         Word word = null;
         while (cursor.moveToNext()){
             word = new Word(cursor.getInt(0), cursor.getString(1),

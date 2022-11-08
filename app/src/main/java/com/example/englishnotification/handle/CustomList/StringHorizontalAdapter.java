@@ -9,16 +9,24 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.englishnotification.R;
+import com.example.englishnotification.model.Tag;
 import com.example.englishnotification.model.Word;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class StringHorizontalAdapter extends RecyclerView.Adapter<StringHorizontalAdapter.ViewHolder> {
 
     ArrayList<Word> words;
+    List<Tag> tags;
 
     public StringHorizontalAdapter(ArrayList<Word> words) {
         this.words = words;
+    }
+
+    public StringHorizontalAdapter(List<Tag> tags){
+        this.tags = tags;
     }
 
     @NonNull
@@ -30,14 +38,25 @@ public class StringHorizontalAdapter extends RecyclerView.Adapter<StringHorizont
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Word word = words.get(position);
+        String data = "";
+        if(words != null) {
+            Word word = words.get(position);
+            data = word.english;
+        } else {
+            Tag tag = tags.get(position);
+            data = tag.name;
+        }
 
-        holder.txString.setText(word.english);
+        holder.txString.setText(data);
     }
 
     @Override
     public int getItemCount() {
-        return words.size();
+        if(words != null){
+            return words.size();
+        } else {
+            return tags.size();
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

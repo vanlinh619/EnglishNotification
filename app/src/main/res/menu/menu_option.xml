@@ -25,9 +25,9 @@
         android:title="Network" />
 
     <item
-        android:id="@+id/mn_microphone"
-        android:icon="@drawable/microphone"
-        android:title="Microphone" />
+        android:id="@+id/mn_auto_speak"
+        android:icon="@drawable/voice_recognition"
+        android:title="Auto Speak" />
 
     <item
         android:id="@+id/mn_more"

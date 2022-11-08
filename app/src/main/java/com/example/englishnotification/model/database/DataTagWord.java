@@ -51,9 +51,9 @@ public class DataTagWord {
             for (int i = 0; i < tags.size(); i++){
                 Tag tag = tags.get(i);
                 if(i == 0){
-                    sqlObject.append("  (NULL, %s, %s)");
+                    sqlObject.append("  (NULL, ?, ?)");
                 } else {
-                    sqlObject.append("  ,(NULL, %s, %s)");
+                    sqlObject.append("  ,(NULL, ?, ?)");
                 }
                 paramsObject.add(tag.id + "");
                 paramsObject.add(wordId + "");
@@ -61,7 +61,7 @@ public class DataTagWord {
 
             String query = String.format(sqlObject.toString(), paramsObject.toArray());
 
-            db.execSQL(query);
+            db.execSQL(query, paramsObject.toArray());
             db.close();
         }
     }

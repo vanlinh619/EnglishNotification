@@ -30,19 +30,17 @@ public class DataRelationWord {
 
     public static void addRelationWord(Word word, Word relationWord, int type, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
-        String query = String.format("INSERT INTO %s VALUES(null, %s, %s, %s);",
-                TABLE_WORD_WORD, word.id, relationWord.id, type);
+        String query = String.format("INSERT INTO %s VALUES(null, ?, ?, ?);", TABLE_WORD_WORD);
 
-        db.execSQL(query);
+        db.execSQL(query, new String[]{word.id + "", relationWord.id + "", type + ""});
         db.close();
     }
 
     public static void addRelationWord(RelationWord relationWord, Database database){
         SQLiteDatabase db = database.getWritableDatabase();
-        String query = String.format("INSERT INTO %s VALUES(null, %s, %s, %s);",
-                TABLE_WORD_WORD, relationWord.wordId, relationWord.relationWordId, relationWord.relationType);
+        String query = String.format("INSERT INTO %s VALUES(null, ?, ?, ?);", TABLE_WORD_WORD);
 
-        db.execSQL(query);
+        db.execSQL(query, new String[]{relationWord.wordId + "", relationWord.relationWordId + "", relationWord.relationType + ""});
         db.close();
     }
 
@@ -64,14 +62,14 @@ public class DataRelationWord {
                         "LEFT JOIN %s w ON ww.%s = w.%s " +
                         "LEFT JOIN %s wr ON ww.%s = wr.%s " +
                         "WHERE " +
-                        "((w.%s = '%s' AND wr.%s = '%s') " +
-                        "OR (w.%s = '%s' AND wr.%s = '%s')) " +
-                        "AND ww.%s = %s",
+                        "((w.%s = ? AND wr.%s = ?) " +
+                        "OR (w.%s = ? AND wr.%s = ?)) " +
+                        "AND ww.%s = ?",
                 TABLE_WORD_WORD, DataWord.TABLE_WORD, WORD_WORD_WORD_ID, DataWord.WORD_ID,
                 DataWord.TABLE_WORD, WORD_WORD_WORD_RELATION_ID, DataWord.WORD_ID, DataWord.WORD_ENGLISH,
-                word.english, DataWord.WORD_ENGLISH, relWord.english, DataWord.WORD_ENGLISH,
-                relWord.english, DataWord.WORD_ENGLISH, word.english, WORD_WORD_TYPE_RELATION, relationWord.relationType);
-        Cursor cursor = db.rawQuery(query, null);
+                DataWord.WORD_ENGLISH, DataWord.WORD_ENGLISH, DataWord.WORD_ENGLISH, WORD_WORD_TYPE_RELATION);
+        Cursor cursor = db.rawQuery(query, new String[] {word.english, relWord.english, relWord.english, word.english,
+                relationWord.relationType + ""});
         if(cursor.moveToNext()){
             db.close();
             return true;

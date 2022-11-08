@@ -97,9 +97,9 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                 choseWordRelated.addAll(MainActivity.getWordsByRelations(word, RelationWord.RELATED));
                 choseWordSynonym.addAll(MainActivity.getWordsByRelations(word, RelationWord.SYNONYM));
                 choseWordAntonym.addAll(MainActivity.getWordsByRelations(word, RelationWord.ANTONYM));
-                createListRelationWord(choseWordRelated, imRelated, cgRelated);
-                createListRelationWord(choseWordSynonym, imSynonym, cgSynonym);
-                createListRelationWord(choseWordAntonym, imAntonym, cgAntonym);
+                createListRelationWord(choseWordRelated, imRelated, cgRelated, this);
+                createListRelationWord(choseWordSynonym, imSynonym, cgSynonym, this);
+                createListRelationWord(choseWordAntonym, imAntonym, cgAntonym, this);
 
                 txTitle.setText("Update Word");
                 edEnglish.setText(word.english);
@@ -223,9 +223,9 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         edSynonym.addTextChangedListener(textWatcher(rcSynonym, imSynonym, cgSynonym, choseWordSynonym));
         edAntonym.addTextChangedListener(textWatcher(rcAntonym, imAntonym, cgAntonym, choseWordAntonym));
 
-        imRelated.setOnClickListener(removeChip(cgRelated, choseWordRelated, edRelated));
-        imSynonym.setOnClickListener(removeChip(cgSynonym, choseWordSynonym, edSynonym));
-        imAntonym.setOnClickListener(removeChip(cgAntonym, choseWordAntonym, edAntonym));
+        imRelated.setOnClickListener(removeChip(cgRelated, choseWordRelated, edRelated, null));
+        imSynonym.setOnClickListener(removeChip(cgSynonym, choseWordSynonym, edSynonym, null));
+        imAntonym.setOnClickListener(removeChip(cgAntonym, choseWordAntonym, edAntonym, null));
 
         imBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -258,7 +258,7 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         }
     }
 
-    public View.OnClickListener removeChip(ChipGroup chipGroup, ArrayList<Word> choseWords, EditText editText) {
+    public static View.OnClickListener removeChip(ChipGroup chipGroup, ArrayList<Word> choseWords, EditText editText, SearchAdapter.HandleLastListener handleLastListener) {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -268,6 +268,9 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                         for (Word word : choseWords) {
                             if (word.english.equals(chip.getText().toString())) {
                                 choseWords.remove(word);
+                                if(handleLastListener != null){
+                                    handleLastListener.removeIgnore(word);
+                                }
                                 break;
                             }
                         }
@@ -310,9 +313,9 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
         };
     }
 
-    public void createListRelationWord(ArrayList<Word> wordRelations, ImageView imDelete, ChipGroup cgRelation) {
+    public static void createListRelationWord(ArrayList<Word> wordRelations, ImageView imDelete, ChipGroup cgRelation, Context context) {
         for (Word word : wordRelations) {
-            Chip chip = new Chip(this);
+            Chip chip = new Chip(context);
             chip.setText(word.english);
             chip.setCheckable(true);
             chip.setOnClickListener(new View.OnClickListener() {
@@ -591,8 +594,10 @@ public class HandleWordActivity extends AppCompatActivity implements MeanAdapter
                                 } else {
                                     w = MainActivity.getWordById(relationWord.wordId, MainActivity.listWord);
                                 }
-                                int indexRel = contain(w.relationWords, relationWord);
-                                w.relationWords.remove(indexRel);
+                                if(w != null){
+                                    int indexRel = contain(w.relationWords, relationWord);
+                                    w.relationWords.remove(indexRel);
+                                }
                                 MainActivity.notifyItemChanged(MainActivity.listWord.indexOf(w));
                             }
                             word.relationWords.clear();

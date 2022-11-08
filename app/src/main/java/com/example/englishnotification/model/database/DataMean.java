@@ -40,18 +40,16 @@ public class DataMean {
             for (int i = 0; i < means.size(); i++) {
                 Mean mean = means.get(i);
                 if (i == 0) {
-                    sqlObject.append("  (NULL, %s, '%s', %s)");
+                    sqlObject.append("  (NULL, ?, ?, ?)");
                 } else {
-                    sqlObject.append("  ,(NULL, %s, '%s', %s)");
+                    sqlObject.append("  ,(NULL, ?, ?, ?)");
                 }
                 paramsObject.add(mean.type.id + "");
                 paramsObject.add(mean.meanWord);
                 paramsObject.add(mean.wordId + "");
             }
 
-            String query = String.format(sqlObject.toString(), paramsObject.toArray());
-
-            db.execSQL(query);
+            db.execSQL(sqlObject.toString(), paramsObject.toArray());
             db.close();
         }
     }
@@ -61,14 +59,12 @@ public class DataMean {
         StringBuffer sqlObject = new StringBuffer();
         ArrayList<String> paramsObject = new ArrayList<String>();
         sqlObject.append("INSERT INTO mean VALUES");
-        sqlObject.append("  (NULL, %s, '%s', %s)");
+        sqlObject.append("  (NULL, ?, ?, ?)");
         paramsObject.add(mean.type.id + "");
         paramsObject.add(mean.meanWord);
         paramsObject.add(mean.wordId + "");
 
-        String query = String.format(sqlObject.toString(), paramsObject.toArray());
-
-        db.execSQL(query);
+        db.execSQL(sqlObject.toString(), paramsObject.toArray());
         db.close();
     }
 
@@ -92,9 +88,9 @@ public class DataMean {
     public static void deleteMeans(int wordId, Database database) {
         SQLiteDatabase db = database.getWritableDatabase();
 
-        String query = String.format("DELETE FROM %s WHERE %s = %s", TABLE_MEAN, MEAN_WORD_ID, wordId);
+        String query = String.format("DELETE FROM %s WHERE %s = ?", TABLE_MEAN, MEAN_WORD_ID);
 
-        db.execSQL(query);
+        db.execSQL(query, new String[]{wordId + ""});
         db.close();
     }
 
