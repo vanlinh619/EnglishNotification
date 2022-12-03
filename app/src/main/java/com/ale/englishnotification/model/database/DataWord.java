@@ -186,8 +186,8 @@ public class DataWord {
 
     public static Word getWordByEnglish(String english, Database database) {
         SQLiteDatabase db = database.getReadableDatabase();
-        String query = String.format("SELECT * FROM %s WHERE %s = '%s'", TABLE_WORD, WORD_ENGLISH, english);
-        Cursor cursor = db.rawQuery(query, null);
+        String query = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_WORD, WORD_ENGLISH);
+        Cursor cursor = db.rawQuery(query, new String[]{english});
         if(cursor.moveToNext()){
             Word word = new Word(cursor.getInt(0), cursor.getString(1),
                     cursor.getString(2), cursor.getInt(3), cursor.getInt(4),

@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public MainActivity mainActivity;
     public final static String adsId = "ca-app-pub-8329878984757230~7045154102";
     public final static String adsTestId = "ca-app-pub-3940256099942544/1033173712";
+    public final static String adsShowId = "ca-app-pub-8329878984757230/7747586986";
     public final static String TAG = "AAA";
     public final static String comingSoon = "Coming soon";
 
@@ -379,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         });
         AdRequest adRequest = new AdRequest.Builder().build();
 
-        InterstitialAd.load(activity,adsId, adRequest,
+        InterstitialAd.load(activity,adsShowId, adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
