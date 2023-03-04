@@ -58,10 +58,14 @@ import com.ale.englishnotification.model.database.Database;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
@@ -122,9 +126,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public Config config;
     private static AlertDialog alertDialog;
     public MainActivity mainActivity;
-    public final static String adsId = "ca-app-pub-8329878984757230~7045154102";
+//    public final static String adsId = "ca-app-pub-8329878984757230~7045154102";
     public final static String adsTestId = "ca-app-pub-3940256099942544/1033173712";
-    public final static String adsShowId = "ca-app-pub-8329878984757230/7747586986";
+    public final static String adsShowId = "ca-app-pub-8329878984757230/6326193092";
+    private static RewardedAd mRewardedAd;
     public final static String TAG = "AAA";
     public final static String comingSoon = "Coming soon";
 
@@ -135,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         setContentView(R.layout.activity_main);
         hideSystemBar(this);
 
-        loadAds(this);
+//        loadAds(this);
 
         setView();
         mainActivity = this;
@@ -343,9 +348,11 @@ public class MainActivity extends AppCompatActivity implements Serializable {
                         MainActivity.messageComingSoon(MainActivity.this);
                         break;
                     case R.id.mn_auto_speak:
-                        loadAds(MainActivity.this);
-                        if(!repeatSpeakFragment.isRepeat()[0]){
-                            repeatSpeak();
+//                        loadAds(MainActivity.this);
+                        if (!repeatSpeakFragment.isRepeat()[0]) {
+                            loadAds(MainActivity.this, () -> {
+                                repeatSpeak();
+                            });
                         }
                         break;
                     default:
@@ -362,44 +369,70 @@ public class MainActivity extends AppCompatActivity implements Serializable {
         if (listWord.size() == 0) return;
         ArrayList<Word> words = new ArrayList<>();
         listWord.forEach(word -> {
-            if(word.game == 1){
+            if (word.game == 1) {
                 words.add(word);
             }
         });
-        if(words.size() == 0) {
+        if (words.size() == 0) {
             Toast.makeText(this, "Can't not find word!", Toast.LENGTH_LONG).show();
             return;
         }
         repeatSpeakFragment.showView(words);
     }
 
-    public static void loadAds(Activity activity) {
-        MobileAds.initialize(activity, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {}
-        });
+    public static void loadAds(Activity activity, ActionListener actionListener) {
+//        MobileAds.initialize(activity, new OnInitializationCompleteListener() {
+//            @Override
+//            public void onInitializationComplete(InitializationStatus initializationStatus) {}
+//        });
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//
+//        InterstitialAd.load(activity,adsShowId, adRequest,
+//                new InterstitialAdLoadCallback() {
+//                    @Override
+//                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+//                        // The mInterstitialAd reference will be null until
+//                        // an ad is loaded.
+//                        InterstitialAd mInterstitialAd = interstitialAd;
+//                        if (mInterstitialAd != null) {
+//                            mInterstitialAd.show(activity);
+//                        }
+////                        Log.i(TAG, "onAdLoaded");
+//                    }
+//
+//                    @Override
+//                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+//                        // Handle the error
+////                        Log.d(TAG, loadAdError.toString());
+//                        InterstitialAd mInterstitialAd = null;
+//                    }
+//                });
+
         AdRequest adRequest = new AdRequest.Builder().build();
-
-        InterstitialAd.load(activity,adsShowId, adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        InterstitialAd mInterstitialAd = interstitialAd;
-                        if (mInterstitialAd != null) {
-                            mInterstitialAd.show(activity);
-                        }
-//                        Log.i(TAG, "onAdLoaded");
-                    }
-
+        RewardedAd.load(activity, adsShowId, adRequest, new RewardedAdLoadCallback() {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-//                        Log.d(TAG, loadAdError.toString());
-                        InterstitialAd mInterstitialAd = null;
+                        actionListener.run();
                     }
-                });
+
+                    @Override
+                    public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                        mRewardedAd = rewardedAd;
+                        if (mRewardedAd != null) {
+                            Activity activityContext = activity;
+                            mRewardedAd.show(activityContext, new OnUserEarnedRewardListener() {
+                                @Override
+                                public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                                    // Handle the reward.
+//                                    int rewardAmount = rewardItem.getAmount();
+//                                    String rewardType = rewardItem.getType();
+                                    actionListener.run();
+                                }
+                            });
+                        }
+                    }
+                }
+        );
     }
 
     public static void messageComingSoon(Context context) {
@@ -1327,6 +1360,10 @@ public class MainActivity extends AppCompatActivity implements Serializable {
 
     public interface FinishSpeakListener {
         public void finish();
+    }
+
+    public interface ActionListener {
+        public void run();
     }
 
     @Override
