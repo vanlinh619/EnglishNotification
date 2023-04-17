@@ -85,6 +85,7 @@ import java.util.Locale;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements Serializable {
+    public static final int REQUEST_CODE_NOTIFICATION = 234;
     public static final int ENGLISH_ITEM = 0;
     public static final int NOTIFY_ITEM = 1;
     public static final int BOT_ITEM = 2;
@@ -1108,32 +1109,37 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     }
 
     public void setAutoNotify() {
+        if(!checkNotificationPermission()) return;
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, BotReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, -1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, -1, intent, PendingIntent.FLAG_IMMUTABLE);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (2 * 60 * 60 * 1000), 2 * 60 * 60 * 1000, pendingIntent);
     }
 
     public void destroyAutoNotify() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, BotReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, -1, intent, PendingIntent.FLAG_NO_CREATE);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, -1, intent, PendingIntent.FLAG_IMMUTABLE);
         if (pendingIntent != null && alarmManager != null) {
             alarmManager.cancel(pendingIntent);
         }
     }
 
     public void setRepeatAlarm(Word word) {
+        if(!checkNotificationPermission()) return;
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         Intent intent = new Intent(this, AlarmReceiver.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         Bundle bundle = new Bundle();
         bundle.putString("english", word.english);
         String means = meansToString(word);
         bundle.putString("vietnamese", means);
         bundle.putInt("id", word.id);
         intent.putExtra("bundle", bundle);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, word.id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, word.id, intent, PendingIntent.FLAG_IMMUTABLE);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + (2 * 60 * 60 * 1000), 2 * 60 * 60 * 1000, pendingIntent);
     }
 
@@ -1158,7 +1164,8 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     public void destroyRepeatAlarm(Word word) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, word.id, intent, PendingIntent.FLAG_NO_CREATE);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, word.id, intent, PendingIntent.FLAG_IMMUTABLE);
         if (pendingIntent != null && alarmManager != null) {
             alarmManager.cancel(pendingIntent);
         }
@@ -1331,5 +1338,25 @@ public class MainActivity extends AppCompatActivity implements Serializable {
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    public boolean checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            int notificationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS);
+            if (notificationPermission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQUEST_CODE_NOTIFICATION);
+                return false;
+            }
+            return true;
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == REQUEST_CODE_NOTIFICATION){
+            Toast.makeText(MainActivity.this, "Notice has been allowed!", Toast.LENGTH_LONG).show();
+        }
     }
 }
